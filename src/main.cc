@@ -167,11 +167,11 @@ int main(int argc, char* argv[])
 	}
 	
 	// Calibrating WebCam
-	if (!params.load("c910.xml"))
+	if (!params.load("params/c910.xml"))
 	{
 		// params.calibrate(video, 30, 30, Calibration::CHESSBOARD, cv::Size(7,4)); 	// With chessboard
 		params.calibrate(video, 100, 30);																					// With QRCode
-		params.save("c910.xml");
+		params.save("params/c910.xml");
 	}
 
 	
@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
 			{
 				static unsigned int save_id = 0;
 				std::stringstream path;
-				path << "envmap_" << std::setfill ('0') << std::setw(6) << save_id++ << ".png";
+				path << "env/envmap_" << std::setfill ('0') << std::setw(6) << save_id++ << ".png";
 				std::cout << "- Saving envmap to file '" << path.str() << "' ... " << std::flush;
 				environnement.save(path.str());
 				std::cout << "done" << std::endl;
