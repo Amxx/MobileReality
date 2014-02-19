@@ -150,12 +150,20 @@ void Draw()
 
 
 	
-
+#include "configuration.hh"
 
 
 int main(int argc, char* argv[])
 {	
+	
+	Configuration config;
+	config("-params")	= "params/default.xml";
+	config("-video")	= "-1";
+	
+	for (int i=1; i<argc-1; i+=2) config(argv[i]) = argv[i+1];
+	
 	// Opening WebCam
+	if (config("-video").size()) video.open(atoi(config("-video").c_str()));
 	while (!video.isopen())
 	{
 		int video_idx;
@@ -167,14 +175,13 @@ int main(int argc, char* argv[])
 	}
 	
 	// Calibrating WebCam
-	if (!params.load("params/c910.xml"))
+	if (!params.load(config("-params")))
 	{
-		// params.calibrate(video, 30, 30, Calibration::CHESSBOARD, cv::Size(7,4)); 	// With chessboard
+	//params.calibrate(video, 30, 30, Calibration::CHESSBOARD, cv::Size(7,4)); 	// With chessboard
 		params.calibrate(video, 100, 30);																					// With QRCode
-		params.save("params/c910.xml");
+		params.save(config("-params"));
 	}
 
-	
 	
 	
 	glutInit(&argc, argv);
@@ -205,7 +212,8 @@ int main(int argc, char* argv[])
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_dif);
   glEnable(GL_COLOR_MATERIAL);
 	
-	// glutMainLoop();
+	
+	glutMainLoop();
 	
 	
 	bool run = true;
