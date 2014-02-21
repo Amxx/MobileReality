@@ -13,5 +13,5 @@
 *.a
 
 
-objs/
-Reality
+build/
+install/

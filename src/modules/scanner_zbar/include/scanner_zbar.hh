@@ -15,7 +15,6 @@ namespace scanners
 		public:
 			ZBar();
 			std::vector<ScannedInfos>				scan(IplImage*);
-			std::vector<cv::Matx31f>				pattern(float = 1) const;
 	};
 };
 

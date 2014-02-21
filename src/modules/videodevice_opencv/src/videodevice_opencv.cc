@@ -1,4 +1,12 @@
-#include "opencv_device.hh"
+#include "videodevice_opencv.hh"
+
+
+extern "C" {
+	VideoDevice* maker() { return new videodevices::OpenCV(); }
+}
+
+
+
 
 videodevices::OpenCV::OpenCV() : capture(nullptr)
 {
@@ -12,7 +20,6 @@ bool videodevices::OpenCV::open(int idx)
 	capture = cvCaptureFromCAM(idx);
 	return capture;
 }
-
 void videodevices::OpenCV::close()
 {
 	if (capture) cvReleaseCapture(&capture);
@@ -22,9 +29,20 @@ bool videodevices::OpenCV::isopen()
 {
 	return capture;
 }
-
-IplImage* videodevices::OpenCV::getImage()
+void videodevices::OpenCV::grabFrame()
+{
+	if (capture) cvGrabFrame(capture);
+}
+IplImage* videodevices::OpenCV::getFrame()
 {
 	if (capture) return cvQueryFrame(capture);
 	return nullptr;
 }
+IplImage* videodevices::OpenCV::frame()
+{
+	if (capture) return cvRetrieveFrame(capture);
+	return nullptr;
+}
+
+
+

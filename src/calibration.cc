@@ -9,7 +9,7 @@ static void calcBoardCornerPositions(Size size, float scale, vector<Matx31f>& co
   switch(pattern)
   {
 		case Calibration::QRCODE:
-			corners = scanners::ZBar().pattern(scale);
+			corners = Scanner::pattern(scale);
 			break;
 		
 		case Calibration::CHESSBOARD:
@@ -31,8 +31,8 @@ static void calcBoardCornerPositions(Size size, float scale, vector<Matx31f>& co
 
 // ==================================== Methods ====================================
 
-Calibration::Calibration() {}
-Calibration::Calibration(const string path) { load(path); }
+Calibration::Calibration() : _ready(false) 									{}
+Calibration::Calibration(const string path) : _ready(false)	{ load(path); }
 
 bool Calibration::load(const string path)
 {
@@ -45,7 +45,7 @@ bool Calibration::load(const string path)
 	fs["Root_Mean_Square"] 				>> _rms;
 	fs.release();
 	_A = cv::Matx33f(_tA);
-	return true;
+	return (_ready = true);
 }
 bool Calibration::save(const string path) const
 {	
@@ -68,13 +68,16 @@ bool Calibration::calibrate(VideoDevice& video, double scale, unsigned int nb, C
 	unsigned int frame_nb = 0;
 	while(imagePoints.size() < nb)
 	{
-		IplImage* frame = video.getImage();
+		IplImage* frame = video.getFrame();
 		view = Mat(frame);
 		vector<Matx21f> pointBuf;
 		bool blink = false;
 		
 		switch (pattern)
 		{
+			// TODO
+			
+			/*
 			case QRCODE:
 			{
 				scanners::ZBar zbar;
@@ -85,6 +88,7 @@ bool Calibration::calibrate(VideoDevice& video, double scale, unsigned int nb, C
 				}
 				break;
 			}
+			*/
 			
 			case CHESSBOARD:
 			{
@@ -140,7 +144,7 @@ bool Calibration::calibrate(VideoDevice& video, double scale, unsigned int nb, C
 	
 	vector<Mat>	rvecs, tvecs;
 	_rms = calibrateCamera(objectPoints, imagePoints, _size, _A, _K, rvecs, tvecs);
-	return true;
+	return (_ready = true);
 }
 
 

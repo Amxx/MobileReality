@@ -12,8 +12,6 @@
 #include "videodevice.hh"
 #include "scanner.hh"
 
-#include "zbar_scanner.hh"
-
 class Calibration
 {
 	public:
@@ -23,18 +21,20 @@ class Calibration
 		Calibration();
 		Calibration(const std::string);	
 		bool load(const std::string);
-		bool save(const std::string) const;
+		bool save(const std::string) 				const;
 
 		bool calibrate(VideoDevice&, double, unsigned int = 30, Pattern = QRCODE, cv::Size = cv::Size(2, 2));
 	
-		const cv::Matx33f&	A() { return _A; }
-		const cv::Mat& 			K() { return _K; }
-	
+		const cv::Matx33f&	A()							const	{ return _A; }
+		const cv::Mat& 			K() 						const	{ return _K; }
+		bool								iscalibrated()	const	{ return _ready; }
+		
 	private:
 		cv::Matx33f		_A;
 		cv::Mat				_K;
 		cv::Size			_size;
 		double				_rms;
+		bool					_ready;
 };
 
 #endif

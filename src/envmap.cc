@@ -9,7 +9,6 @@ EnvMap::EnvMap(cv::Size s) :
 {
 }
 
-
 void EnvMap::addFrame(IplImage* frame, Scanner& scanner, Calibration& params)
 {
 	cv::Mat view = cv::Mat(frame);
@@ -65,6 +64,11 @@ void EnvMap::addFrame(IplImage* frame, Scanner& scanner, Calibration& params)
 					_data.at<cv::Vec3f>(i,j) /= _wght.at<int>(i,j);
 	}
 	_current_time++;
+}
+
+void EnvMap::addFrame(Camera& camera, Scanner& scanner)
+{
+	addFrame(camera.frame(), scanner, camera);
 }
 
 const cv::Mat& EnvMap::data()

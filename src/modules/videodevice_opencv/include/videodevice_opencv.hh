@@ -16,10 +16,13 @@ namespace videodevices
 		public:
 			OpenCV();
 			~OpenCV();
+
 			bool			open(int idx = 0);
 			void			close();
 			bool			isopen();
-			IplImage*	getImage();		
+			void			grabFrame();
+			IplImage*	getFrame();
+			IplImage*	frame();
 	};
 };
 

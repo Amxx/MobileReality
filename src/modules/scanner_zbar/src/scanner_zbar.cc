@@ -1,12 +1,18 @@
-#include "zbar_scanner.hh"
-#include <iostream>
+#include "scanner_zbar.hh"
+
+
+extern "C" {
+	Scanner* maker() { return new scanners::ZBar(); }
+}
+
+
+
 
 scanners::ZBar::ZBar():
 	scanner()
 {
 	scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 1);
 }
-
 std::vector<ScannedInfos> scanners::ZBar::scan(IplImage* img)
 {
 	cv::Mat frame(img), frame_grayscale;
@@ -28,15 +34,5 @@ std::vector<ScannedInfos> scanners::ZBar::scan(IplImage* img)
 		symbolinfos.data = symbol->get_data();	
 		results.push_back(symbolinfos);
 	}
-	return results;
-}
-
-std::vector<cv::Matx31f> scanners::ZBar::pattern(float scale) const
-{
-	std::vector<cv::Matx31f> results(4);
-	results[0] = cv::Matx31f(0.0, 	0.0, 		0.0);
-	results[1] = cv::Matx31f(0.0, 	scale,	0.0);
-	results[2] = cv::Matx31f(scale,	scale,	0.0);
-	results[3] = cv::Matx31f(scale,	0.0,		0.0);
 	return results;
 }

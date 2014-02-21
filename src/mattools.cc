@@ -39,6 +39,32 @@ cv::Matx44f parseMatx44f(const std::string& str)
 	return m;
 }
 
+cv::Matx44f parseSymbolToModel(const std::string& str, float scale)
+{
+	cv::Matx44f m;
+	if (sscanf(	str.c_str(),
+							"[ %f, %f, %f; %f, %f, %f; %f, %f, %f ][ %f, %f, %f ]",
+							&m(0,0), &m(0,1), &m(0,2),
+							&m(1,0), &m(1,1), &m(1,2),
+							&m(2,0), &m(2,1), &m(2,2),
+							&m(0,3), &m(1,3), &m(2,3)) != 12)
+		throw std::invalid_argument("Error parsing symbol as 4x4 model matrice");
+	m(0,3) *= scale;
+	m(1,3) *= scale;
+	m(2,3) *= scale;
+	m(3,0) = 0;
+	m(3,1) = 0;
+	m(3,2) = 0;
+	m(3,3) = 1;	
+	return m;
+	
+}
+
+
+
+
+
+
 cv::Matx44f viewFromSymbol(const cv::Matx31f& rvec, const cv::Matx31f& t)
 {
 	cv::Matx33f r;

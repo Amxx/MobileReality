@@ -7,7 +7,10 @@
 cv::Matx33f parseMatx33f(const std::string&);
 cv::Matx44f parseMatx33f_tr(const std::string&, const cv::Matx31f& = cv::Matx31f());
 cv::Matx44f parseMatx44f(const std::string&);
+
+cv::Matx44f parseSymbolToModel(const std::string& str, float scale);
 cv::Matx44f viewFromSymbol(const cv::Matx31f&, const cv::Matx31f&);
+
 cv::Matx44f projectionFromIntrinsic(const cv::Matx33f& A, float w, float h, float near, float far);
 
 #endif

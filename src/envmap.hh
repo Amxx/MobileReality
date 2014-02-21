@@ -1,8 +1,9 @@
 #ifndef ENVMAP_HH
 #define ENVMAP_HH
 
+#include "camera.hh"
 #include "scanner.hh"
-#include "calibration.hh"
+
 #include "mattools.hh"
 
 class EnvMap
@@ -17,6 +18,8 @@ class EnvMap
 	public:
 		EnvMap(cv::Size = cv::Size(640, 480));
 		void 						addFrame(IplImage*, Scanner&, Calibration&);
+		void 						addFrame(Camera&, Scanner&);
+	
 		const cv::Mat&	data();
 		void 						clear();
 		void 						save(const std::string&);
