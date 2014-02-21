@@ -192,9 +192,9 @@ cv::Matx33f ModelView(Camera& camera, Scanner& scanner)
 			catch (...)	{ model = parseMatx33f(symbol.data); 													}
 			symbol.extrinsic(	scanner.pattern(1.0), camera.A(), camera.K() );
 			view = Matx44to33(viewFromSymbol(symbol.rvec, symbol.tvec));
-		} catch (std::exception e) {
+		} catch (const std::exception& e) {
 			std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
-			std::cout << e.what() << std::endl;
+			std::cout << "Exception : " << e.what() << std::endl;
 		}	
 	return camera.orientation().inv() * view * model;
 }
@@ -206,8 +206,7 @@ cv::Matx33f ModelView(Camera& camera, Scanner& scanner)
 
 
 int main(int argc, char* argv[])
-{	
-	
+{		
 	Configuration config;
 	config("-params:front")		= "params/default:front.xml";
 	config("-params:back")		= "params/default:back.xml";
@@ -231,19 +230,19 @@ int main(int argc, char* argv[])
 	
 	
 	cameras[0] = new Camera(devicefront, cv::Matx33f(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0), config("-params:front"));
+	if (config("-video:front:id").size()) cameras[0]->open(atoi(config("-video:front:id").c_str()));
 	cameras[0]->openAndCalibrate(config("-params:front"), *scanner);
 
 	cameras[1] = new Camera(deviceback,  cv::Matx33f(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0), config("-params:back"));
+	if (config("-video:back:id").size()) cameras[1]->open(atoi(config("-video:back:id").c_str()));
 	cameras[1]->openAndCalibrate(config("-params:back"), *scanner);
-		
-	
-	if (config("-scale").size())		scale = atof(config("-scale").c_str());
-	//if (config("-videoidx").size())	cameras[0]->open(atoi(config("-videoidx").c_str()));
 	
 	
 	
+	if (config("-scale").size())
+		scale = atof(config("-scale").c_str());
 	
-	
+
 	
 	
 	
@@ -287,10 +286,11 @@ int main(int argc, char* argv[])
 		cameras[1]->grabFrame();
 		
 		cv::Matx33f modelview = ModelView(*cameras[0], *scanner);
-		
 		environnement.addFrame(*cameras[0], modelview);
 		environnement.addFrame(*cameras[1], modelview);
 		
+		// cv::imshow("Front",	cv::Mat(cameras[0]->frame()));
+		// cv::imshow("Back",	cv::Mat(cameras[1]->frame()));
 		cv::imshow("Environnement", environnement.data());
 		
 		
