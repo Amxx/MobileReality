@@ -1,5 +1,26 @@
 #include "mattools.hh"
 
+cv::Matx33f Matx44to33(const cv::Matx44f& m)
+{
+	return cv::Matx33f(
+		m(0,0),	m(0,1),	m(0,2),
+		m(1,0),	m(1,1),	m(1,2),
+		m(2,0),	m(2,1),	m(2,2)
+	);
+}
+cv::Matx44f Matx33to44(const cv::Matx33f& m)
+{
+	return cv::Matx44f(
+		m(0,0),	m(0,1),	m(0,2),	0.0,
+		m(1,0),	m(1,1),	m(1,2),	0.0,
+		m(2,0),	m(2,1),	m(2,2),	0.0,
+		0.0,		0.0,		0.0,		1.0
+	);
+}
+
+
+
+
 cv::Matx33f parseMatx33f(const std::string& str)
 {
 	cv::Matx33f m;

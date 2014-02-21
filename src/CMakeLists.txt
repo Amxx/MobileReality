@@ -16,7 +16,7 @@ add_executable(Reality
 	main.cc
 	mattools.cc
 	scanner.cc
-	videodevice.cc
+	symbol.cc
 )
 
 

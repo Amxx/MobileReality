@@ -11,10 +11,10 @@ namespace scanners
 	class ZBar : public Scanner
 	{
 		private:
-			zbar::ImageScanner							scanner;
+			zbar::ImageScanner	scanner;
 		public:
 			ZBar();
-			std::vector<ScannedInfos>				scan(IplImage*);
+			std::vector<Symbol>	scan(IplImage*);
 	};
 };
 

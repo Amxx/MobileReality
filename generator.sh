@@ -11,12 +11,12 @@ esac
 # Functions
 function build
 {
-  mkdir -p build
-  cd build
+  mkdir -p build &&
+  cd build &&
   cmake -DCMAKE_INSTALL_PREFIX:PATH=$install_path	\
         $options                                  \
-        ..
-  make install
+        .. &&
+  make install &&
   cd ..
 }
 

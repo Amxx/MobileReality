@@ -1,9 +1,9 @@
 #ifndef CAMERA_HH
 #define CAMERA_HH
 
-
 #include "videodevice.hh"
 #include "calibration.hh"
+#include "scanner.hh"
 
 class Camera : public VideoDevice, public Calibration
 {
@@ -29,13 +29,16 @@ class Camera : public VideoDevice, public Calibration
 		
 
 		// Calibration Methods
-		bool calibrate(double, unsigned int = 30, Pattern = QRCODE, cv::Size = cv::Size(2, 2));
+		bool calibrate(Scanner&, double, unsigned int = 30);
+		bool calibrate(double, unsigned int = 30, Pattern = CHESSBOARD, cv::Size = cv::Size(2, 2));
 
 		
 		// Camera Methods
 		bool 								isready()						const;		
 		const cv::Matx33f&	orientation()				const;
-			
+
+		void								openAndCalibrate(std::string path);
+		void								openAndCalibrate(std::string path, Scanner&);
 	
 };
 

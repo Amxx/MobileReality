@@ -8,10 +8,6 @@ static void calcBoardCornerPositions(Size size, float scale, vector<Matx31f>& co
   corners.clear();
   switch(pattern)
   {
-		case Calibration::QRCODE:
-			corners = Scanner::pattern(scale);
-			break;
-		
 		case Calibration::CHESSBOARD:
 		case Calibration::CIRCLES_GRID:
 			for (int i=0; i<size.height; ++i)
@@ -61,6 +57,51 @@ bool Calibration::save(const string path) const
 }
 
 
+
+
+
+
+bool Calibration::calibrate(VideoDevice& video, Scanner& scanner, double scale, unsigned int nb)
+{
+	vector<vector<Matx21f>> imagePoints;
+	Mat view;
+	unsigned int frame_nb = 0;
+	while(imagePoints.size() < nb)
+	{
+		IplImage* frame = video.getFrame();
+		view = Mat(frame);
+		vector<Matx21f> pointBuf;
+		bool blink = false;
+		
+		for (Symbol& symbol : scanner.scan(frame))
+		{
+			drawChessboardCorners(view, cv::Size(2, 2), Mat(symbol.pts), true);
+			if ((blink = !(frame_nb++ % 10)))	imagePoints.push_back(symbol.pts);
+		}
+		
+		if (blink)
+		{
+			cout << "Calibration " << imagePoints.size() << " / " << nb << endl; 
+			bitwise_not(view, view);
+		}
+		imshow("Calibration", view);
+		if (cv::waitKey(30) == 27) return false;
+	}
+	destroyWindow("Calibration");
+	_size = view.size();
+	vector<Matx31f> pattern_pts = Scanner::pattern(scale);
+	vector<vector<Matx31f>> objectPoints(imagePoints.size(), pattern_pts);	
+	
+	vector<Mat>	rvecs, tvecs;
+	_rms = calibrateCamera(objectPoints, imagePoints, _size, _A, _K, rvecs, tvecs);
+	return (_ready = true);
+
+}
+
+
+
+
+
 bool Calibration::calibrate(VideoDevice& video, double scale, unsigned int nb, Calibration::Pattern pattern, Size size)
 {
 	vector<vector<Matx21f>> imagePoints;
@@ -75,21 +116,6 @@ bool Calibration::calibrate(VideoDevice& video, double scale, unsigned int nb, C
 		
 		switch (pattern)
 		{
-			// TODO
-			
-			/*
-			case QRCODE:
-			{
-				scanners::ZBar zbar;
-				for (ScannedInfos& infos : zbar.scan(frame))
-				{
-					drawChessboardCorners(view, size, Mat(infos.pts), true);
-					if ((blink = !(frame_nb++ % 10)))	imagePoints.push_back(infos.pts);
-				}
-				break;
-			}
-			*/
-			
 			case CHESSBOARD:
 			{
 				if (findChessboardCorners(view, size, pointBuf, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE))

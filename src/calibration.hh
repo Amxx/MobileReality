@@ -15,7 +15,7 @@
 class Calibration
 {
 	public:
-		enum Pattern { QRCODE, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID };
+		enum Pattern { CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID };
 		
 	public:
 		Calibration();
@@ -23,7 +23,9 @@ class Calibration
 		bool load(const std::string);
 		bool save(const std::string) 				const;
 
-		bool calibrate(VideoDevice&, double, unsigned int = 30, Pattern = QRCODE, cv::Size = cv::Size(2, 2));
+	
+		bool calibrate(VideoDevice&, Scanner&, double, unsigned int = 30);
+		bool calibrate(VideoDevice&, double, unsigned int = 30, Pattern = CHESSBOARD, cv::Size = cv::Size(7, 4));
 	
 		const cv::Matx33f&	A()							const	{ return _A; }
 		const cv::Mat& 			K() 						const	{ return _K; }

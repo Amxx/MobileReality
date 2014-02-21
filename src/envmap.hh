@@ -17,9 +17,8 @@ class EnvMap
 	
 	public:
 		EnvMap(cv::Size = cv::Size(640, 480));
-		void 						addFrame(IplImage*, Scanner&, Calibration&);
-		void 						addFrame(Camera&, Scanner&);
-	
+		void 						addFrame(Camera&, cv::Matx33f&);
+		
 		const cv::Mat&	data();
 		void 						clear();
 		void 						save(const std::string&);

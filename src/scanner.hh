@@ -1,27 +1,40 @@
 #ifndef SCANNER_HH
 #define SCANNER_HH
 
+#include <cstdio>
+#include <dlfcn.h>
 #include <vector>
 #include <opencv2/core/core.hpp>
-#include "opencv2/calib3d/calib3d.hpp"
 
-struct ScannedInfos
-{
-	ScannedInfos();	
-	void extrinsic(const std::vector<cv::Matx31f>&, const cv::Matx33f&, const cv::Mat&);
-	std::vector<cv::Matx21f>	pts;
-	cv::Matx31f								rvec;
-	cv::Matx31f								tvec;
-	std::string								data;
-};
+#include "symbol.hh"
 
 class Scanner
 {	
 	public:
-		virtual std::vector<ScannedInfos> scan(IplImage*) = 0;
-		static	Scanner* load(std::string);
+		virtual std::vector<Symbol>				scan(IplImage*) = 0;
 		static	std::vector<cv::Matx31f>	pattern(float = 1);
 };
 
+
+static Scanner* loadScanner(std::string path)
+{
+	typedef Scanner*(*loader_fun_t)();
+	
+	void *handler = dlopen(path.c_str(), RTLD_NOW);
+	if (handler == nullptr)
+	{
+		printf("[ERROR] could not open shared library %s\n", path.c_str());
+		return nullptr;
+	}
+
+	loader_fun_t maker = (loader_fun_t) dlsym(handler, "maker");
+	if (maker == nullptr)
+	{
+		printf("[ERROR] could not find maker symbol for shared library %s\n", path.c_str());
+		return nullptr;
+	}
+		
+	return (maker)();
+}
 
 #endif

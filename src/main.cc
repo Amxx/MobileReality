@@ -17,8 +17,7 @@
 
 
 
-static Camera									*camera;
-static VideoDevice						*device;
+static std::vector<Camera*>		cameras(2);
 static Scanner								*scanner;
 
 
@@ -83,10 +82,10 @@ void keyboard_event(unsigned char key, int x, int y)
 
 void Draw()
 {	
-	assert(camera->isready());
+	assert(cameras[0]->isready());
 
-	camera->grabFrame();
-	std::vector<ScannedInfos> symbols = scanner->scan(camera->frame());
+	cameras[0]->grabFrame();
+	std::vector<Symbol> symbols = scanner->scan(cameras[0]->frame());
 	
 
 
@@ -95,18 +94,18 @@ void Draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 	
 	// IMAGE DE FOND
-	renderImg(camera->frame());
+	renderImg(cameras[0]->frame());
 	
 	
 	
 	// BORDURES DES QRCODES DETECTES
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluOrtho2D(0.0, (GLdouble) camera->frame()->width, (GLdouble)camera->frame()->height, 0.0);
+	gluOrtho2D(0.0, (GLdouble) cameras[0]->frame()->width, (GLdouble)cameras[0]->frame()->height, 0.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
-	for (ScannedInfos& symbol : symbols)
+	for (Symbol& symbol : symbols)
 	{
 		glColor3f(0.5f, 1.0f, 0.5f);
 		glBegin(GL_LINE_LOOP);
@@ -120,16 +119,16 @@ void Draw()
 	static 				cv::Matx44f		view		= cv::Matx44f();
 	static 				cv::Matx44f		model		= cv::Matx44f();
 	static const	cv::Matx44f		toGL		= cv::Matx44f(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0).t();
-	static const	cv::Matx44f		proj		= projectionFromIntrinsic(camera->A(), window_width, window_height, 1.0, 10000.0).t();
+	static const	cv::Matx44f		proj		= projectionFromIntrinsic(cameras[0]->A(), window_width, window_height, 1.0, 10000.0).t();
 	
 	// CALCUL
-	for (ScannedInfos& symbol : symbols)
+	for (Symbol& symbol : symbols)
 		try {
 			// LEGACY MODE FOR CUBE
 			try 				{	model = parseSymbolToModel(symbol.data, scale).t();																}
 			catch (...)	{ model = parseMatx33f_tr(symbol.data, cv::Matx31f(scale/2, scale/2, scale/2)).t(); }
 			
-			symbol.extrinsic(	scanner->pattern(scale), camera->A(), camera->K() );
+			symbol.extrinsic(	scanner->pattern(scale), cameras[0]->A(), cameras[0]->K() );
 			view =	viewFromSymbol(symbol.rvec, symbol.tvec).t();
 			
 			// display	= 10;
@@ -174,54 +173,79 @@ void Draw()
 	glutSwapBuffers();
 }
 
-
-
 	
+
+
+
+
+
+
+
+
+cv::Matx33f ModelView(Camera& camera, Scanner& scanner)
+{
+	cv::Matx33f				view	= cv::Matx33f();
+	cv::Matx33f				model	= cv::Matx33f();
+	for (Symbol& symbol : scanner.scan(camera.frame()))
+		try {
+			try 				{	model = Matx44to33(parseSymbolToModel(symbol.data, 0.0));		}
+			catch (...)	{ model = parseMatx33f(symbol.data); 													}
+			symbol.extrinsic(	scanner.pattern(1.0), camera.A(), camera.K() );
+			view = Matx44to33(viewFromSymbol(symbol.rvec, symbol.tvec));
+		} catch (std::exception e) {
+			std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
+			std::cout << e.what() << std::endl;
+		}	
+	return camera.orientation().inv() * view * model;
+}
+		
+
+
+
+
 
 
 int main(int argc, char* argv[])
 {	
 	
 	Configuration config;
-	config("-params")	= "params/default.xml";
-	config("-video")	= "-1";
+	config("-params:front")		= "params/default:front.xml";
+	config("-params:back")		= "params/default:back.xml";
+	config("-video")					= "install/share/libvideodevice_opencv.so";
+	config("-scanner")				= "install/share/libscanner_zbar.so";
 	
 	for (int i=1; i<argc-1; i+=2)
 		config(argv[i]) = argv[i+1];
 	
 	
-	device	= VideoDevice::load("install/share/libvideodevice_opencv.so"); 
-	scanner	= Scanner::load("install/share/libscanner_zbar.so");
-	if (device == nullptr || scanner == nullptr) return 0;
+
+	VideoDevice *devicefront, *deviceback;	
+	devicefront	= loadVideoDevice(config("-video")); 
+	deviceback	= loadVideoDevice(config("-video")); 
+	if (devicefront == nullptr || deviceback == nullptr) return 0;
+	
+	scanner	= loadScanner(config("-scanner"));
+	if (scanner == nullptr) return 0;
 	
 	
-	camera	= new Camera(device, config("-params"));
 	
 	
-	if (config("-scale").size())
-		scale = atof(config("-scale").c_str());
-	if (config("-video").size())
-		camera->open(atoi(config("-video").c_str()));
+	cameras[0] = new Camera(devicefront, cv::Matx33f(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0), config("-params:front"));
+	cameras[0]->openAndCalibrate(config("-params:front"), *scanner);
+
+	cameras[1] = new Camera(deviceback,  cv::Matx33f(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0), config("-params:back"));
+	cameras[1]->openAndCalibrate(config("-params:back"), *scanner);
+		
+	
+	if (config("-scale").size())		scale = atof(config("-scale").c_str());
+	//if (config("-videoidx").size())	cameras[0]->open(atoi(config("-videoidx").c_str()));
 	
 	
-	// Opening WebCam
-	while (!camera->isopen())
-	{
-		int video_idx;
-		std::cout << "Webcam identifier (-1 for auto) : ";
-		std::cin >> video_idx;
-		std::cout << "Oppening video device ... " << std::flush;
-		camera->open(video_idx);
-		std::cout << "done (" << camera->isopen() << ")" << std::endl;
-	}
 	
-	// Calibrating WebCam
-	if (!camera->iscalibrated())
-	{
-	//camera->calibrate(scale, 3.0, Calibration::CHESSBOARD, cv::Size(7,4));	// With chessboard
-		camera->calibrate(scale, 3.0);																					// With QRCode
-		camera->save(config("-params"));
-	}
+	
+	
+	
+	
 	
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -252,17 +276,23 @@ int main(int argc, char* argv[])
   glEnable(GL_COLOR_MATERIAL);
 	
 	
-	glutMainLoop();
-	/*
+	//glutMainLoop();
+	
 	
 	bool run = true;
 	EnvMap environnement(cv::Size(640, 480));
 	while (run)
 	{
-		camera->grabFrame();
+		cameras[0]->grabFrame();
+		cameras[1]->grabFrame();
 		
-		environnement.addFrame(*camera, *scanner);
+		cv::Matx33f modelview = ModelView(*cameras[0], *scanner);
+		
+		environnement.addFrame(*cameras[0], modelview);
+		environnement.addFrame(*cameras[1], modelview);
+		
 		cv::imshow("Environnement", environnement.data());
+		
 		
 		switch(cv::waitKey(30))
 		{
@@ -282,12 +312,12 @@ int main(int argc, char* argv[])
 		}
 	}
 	
-	*/
+	
 	
 	// Cleanup
 	std::cout << "Closing video device ... " << std::flush;
-	camera->close();
-	std::cout << "done (" << camera->isopen() << ")" << std::endl;
+	cameras[0]->close();
+	std::cout << "done (" << cameras[0]->isopen() << ")" << std::endl;
 
 	return 0;
 }
