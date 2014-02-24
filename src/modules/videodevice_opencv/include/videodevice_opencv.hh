@@ -1,7 +1,7 @@
 #ifndef OPENCV_DEVICE_HH
 #define OPENCV_DEVICE_HH
 
-
+#include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include "videodevice.hh"
 
@@ -24,6 +24,9 @@ namespace videodevices
 			void			grabFrame();
 			IplImage*	getFrame();
 			IplImage*	frame();
+		
+			void lockParameters();
+			void showParameters();
 	};
 };
 

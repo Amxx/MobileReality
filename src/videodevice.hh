@@ -14,6 +14,10 @@ class VideoDevice
 		virtual void				grabFrame() 		= 0;
 		virtual IplImage*		getFrame()			= 0;
 		virtual IplImage*		frame()					= 0;	
+	
+	
+		virtual void				showParameters()	= 0;
+		virtual void				lockParameters()	= 0;
 };
 
 

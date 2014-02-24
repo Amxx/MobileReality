@@ -235,10 +235,11 @@ int main(int argc, char* argv[])
 	if (config("-video:front:id").size()) cameras[0]->open(atoi(config("-video:front:id").c_str()));
 	cameras[0]->openAndCalibrate(config("-params:front"), *scanner);
 
+/*
 	cameras[1] = new Camera(deviceback,  cv::Matx33f(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0), config("-params:back"));
 	if (config("-video:back:id").size()) cameras[1]->open(atoi(config("-video:back:id").c_str()));
 	cameras[1]->openAndCalibrate(config("-params:back"), *scanner);
-	
+*/
 	
 	if (config("-scale").size())			scale = atof(config("-scale").c_str());
 	if (config("-subscale").size())		scale = atof(config("-subscale").c_str());
@@ -281,21 +282,22 @@ int main(int argc, char* argv[])
 	
 	bool run = true;
 	EnvMap environnement(cv::Size(640, 480));
+	
 	while (run)
 	{
-		cameras[0]->grabFrame();
-		cameras[1]->grabFrame();
+		if (cameras[0]) cameras[0]->grabFrame();
+		if (cameras[1]) cameras[1]->grabFrame();
 		
-		cv::Matx33f modelview = ModelView(*cameras[0], *scanner);
+		//cv::Matx33f modelview = ModelView(*cameras[0], *scanner);
 		//environnement.addFrame(*cameras[0], modelview);
-		environnement.addFrame(*cameras[1], modelview);
+		//environnement.addFrame(*cameras[1], modelview);
 		
-		// cv::imshow("Front",	cv::Mat(cameras[0]->frame()));
+		cv::imshow("Front",	cv::Mat(cameras[0]->frame()));
+		
 		// cv::imshow("Back",	cv::Mat(cameras[1]->frame()));
-		cv::imshow("Environnement", environnement.data());
+		// cv::imshow("Environnement", environnement.data());
 		
-		
-		switch(cv::waitKey(30))
+		switch (cv::waitKey(30))
 		{
 			case 27:		run = false;						break;
 			case 'c':		environnement.clear();	break;
@@ -309,7 +311,12 @@ int main(int argc, char* argv[])
 				std::cout << "done" << std::endl;
 				break;
 			}
-			default:														break;
+			
+			case 'a' : cameras[0]->showParameters(); break;
+			case 'z' : cameras[0]->lockParameters(); break;
+			
+			
+			default:																	break;
 		}
 	}
 	

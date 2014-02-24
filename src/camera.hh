@@ -27,6 +27,9 @@ class Camera : public VideoDevice, public Calibration
 		IplImage*						getFrame()				{	return _device->getFrame();	}
 		IplImage*						frame()						{	return _device->frame();		}
 		
+		void								lockParameters()	{	_device->lockParameters();	}
+		void								showParameters()	{	_device->showParameters();	}
+		
 
 		// Calibration Methods
 		bool calibrate(Scanner&, double, unsigned int = 30);

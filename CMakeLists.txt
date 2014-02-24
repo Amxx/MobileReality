@@ -9,8 +9,16 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     message(FATAL_ERROR "If installed, please use -DCMAKE_CXX_COMPILER:FILEPATH=g++-4.7 for example")
   endif()
 endif()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+# =====================================================================
+# =														BUILDING GKIT														=
+# =====================================================================
+add_subdirectory(gKit)
+
+# =====================================================================
+# =																FLAGS																=
+# =====================================================================
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # =====================================================================
 # =							SETTING MODULES LIST AND BUILD OPTIONS								=
@@ -38,7 +46,6 @@ foreach(module ${MODULES})
   endif(${moduleName})
 endforeach(module ${MODULES})
 
-
 # =====================================================================
 # =												BUILDING APPLICATION												=
 # =====================================================================
@@ -47,9 +54,14 @@ add_subdirectory(src)
 
 
 
-install(
-  FILES
-    #include/gridrpc-data.h
-	DESTINATION
-    include/
-)
+
+
+
+
+
+
+
+
+
+
+
