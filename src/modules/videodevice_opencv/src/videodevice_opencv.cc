@@ -8,8 +8,8 @@ extern "C" {
 
 
 
-videodevices::OpenCV::OpenCV() : capture(nullptr)
-{
+videodevices::OpenCV::OpenCV() : VideoCapture()
+{	
 }
 videodevices::OpenCV::~OpenCV()
 {
@@ -17,31 +17,33 @@ videodevices::OpenCV::~OpenCV()
 }
 bool videodevices::OpenCV::open(int idx)
 {
-	capture = cvCaptureFromCAM(idx);
-	return capture;
+	return cv::VideoCapture::open(idx);
 }
 void videodevices::OpenCV::close()
 {
-	if (capture) cvReleaseCapture(&capture);
-	capture = nullptr;
+	cv::VideoCapture::release();
 }
 bool videodevices::OpenCV::isopen()
 {
-	return capture;
+	return cv::VideoCapture::isOpened();
 }
 void videodevices::OpenCV::grabFrame()
 {
-	if (capture) cvGrabFrame(capture);
+	cv::VideoCapture::grab();
 }
 IplImage* videodevices::OpenCV::getFrame()
 {
-	if (capture) return cvQueryFrame(capture);
-	return nullptr;
+	cv::VideoCapture::read(_cvframe);
+	if (_iplframe) delete _iplframe;
+	_iplframe = new IplImage(_cvframe);
+	return _iplframe;
 }
 IplImage* videodevices::OpenCV::frame()
 {
-	if (capture) return cvRetrieveFrame(capture);
-	return nullptr;
+	cv::VideoCapture::retrieve(_cvframe);
+	if (_iplframe) delete _iplframe;
+	_iplframe = new IplImage(_cvframe);
+	return _iplframe;
 }
 
 

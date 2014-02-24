@@ -2,6 +2,7 @@
 #define ZBAR_SCANNER_HH
 
 #include "scanner.hh"
+#include "symbol.hh"
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <zbar.h>

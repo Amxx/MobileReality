@@ -26,7 +26,9 @@ static GLuint                	windowID;
 static int                    window_width      = 640;
 static int                    window_height     = 480;
 
-static float									scale = 3.0;
+static float									scale							= 3.0;
+static float									subscale					= 236.0/300.0;
+
 static float									obj = 6.0;
 static float          			  obj_c[3]          = { 0.482f,  0.627f, 0.357f };
 static float                 	light_spe[4]     	= { 1.000f,  1.000f, 1.000f, 1.000f };
@@ -128,7 +130,7 @@ void Draw()
 			try 				{	model = parseSymbolToModel(symbol.data, scale).t();																}
 			catch (...)	{ model = parseMatx33f_tr(symbol.data, cv::Matx31f(scale/2, scale/2, scale/2)).t(); }
 			
-			symbol.extrinsic(	scanner->pattern(scale), cameras[0]->A(), cameras[0]->K() );
+			symbol.extrinsic(cameras[0]->A(), cameras[0]->K(), Scanner::pattern(scale, subscale));
 			view =	viewFromSymbol(symbol.rvec, symbol.tvec).t();
 			
 			// display	= 10;
@@ -190,7 +192,7 @@ cv::Matx33f ModelView(Camera& camera, Scanner& scanner)
 		try {
 			try 				{	model = Matx44to33(parseSymbolToModel(symbol.data, 0.0));		}
 			catch (...)	{ model = parseMatx33f(symbol.data); 													}
-			symbol.extrinsic(	scanner.pattern(1.0), camera.A(), camera.K() );
+			symbol.extrinsic(camera.A(), camera.K());
 			view = Matx44to33(viewFromSymbol(symbol.rvec, symbol.tvec));
 		} catch (const std::exception& e) {
 			std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
@@ -238,9 +240,8 @@ int main(int argc, char* argv[])
 	cameras[1]->openAndCalibrate(config("-params:back"), *scanner);
 	
 	
-	
-	if (config("-scale").size())
-		scale = atof(config("-scale").c_str());
+	if (config("-scale").size())			scale = atof(config("-scale").c_str());
+	if (config("-subscale").size())		scale = atof(config("-subscale").c_str());
 	
 
 	
@@ -286,7 +287,7 @@ int main(int argc, char* argv[])
 		cameras[1]->grabFrame();
 		
 		cv::Matx33f modelview = ModelView(*cameras[0], *scanner);
-		environnement.addFrame(*cameras[0], modelview);
+		//environnement.addFrame(*cameras[0], modelview);
 		environnement.addFrame(*cameras[1], modelview);
 		
 		// cv::imshow("Front",	cv::Mat(cameras[0]->frame()));
@@ -311,6 +312,7 @@ int main(int argc, char* argv[])
 			default:														break;
 		}
 	}
+	
 	
 	
 	

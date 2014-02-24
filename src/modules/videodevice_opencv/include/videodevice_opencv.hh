@@ -8,10 +8,11 @@
 
 namespace videodevices
 {
-	class OpenCV : public VideoDevice
+	class OpenCV : public VideoDevice, private cv::VideoCapture
 	{
 		private:
-			CvCapture* capture;
+			cv::Mat 	_cvframe;
+			IplImage*	_iplframe;
 		
 		public:
 			OpenCV();

@@ -4,7 +4,7 @@ Symbol::Symbol()
 {
 }
 
-void Symbol::extrinsic(const std::vector<cv::Matx31f>& pattern, const cv::Matx33f& A, const cv::Mat& K)
+void Symbol::extrinsic(const cv::Matx33f& A, const cv::Mat& K, const std::vector<cv::Matx31f>& pattern)
 {
 	cv::Mat R, T;
 	if (pattern.size() == 4)

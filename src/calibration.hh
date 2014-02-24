@@ -11,6 +11,7 @@
 
 #include "videodevice.hh"
 #include "scanner.hh"
+#include "symbol.hh"
 
 class Calibration
 {
