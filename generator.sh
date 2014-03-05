@@ -4,7 +4,7 @@
 case "$HOSTNAME" in
 	Arcteryx)
 		install_path="$PWD/install"
-		options="-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+		options="-DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF"
 		;;
 	*) echo "Your platform is not defined in $0. Using default parameters."
 		install_path="$PWD/install"

@@ -1,0 +1,86 @@
+#include "v4l2uvc.h"
+
+#include <cxcore.h>
+#include <cv.h>
+#include <highgui.h>
+
+struct vdIn *videoIn;
+char videodevice [] = "/dev/video0";
+
+int format = V4L2_PIX_FMT_YUYV;
+int grabmethod = 1;
+int width = 640;
+int height = 480;
+int fps = 30;
+
+unsigned int count = 0;
+time_t tstart, tend;
+float dt;
+
+void
+logTime ( time_t t )
+{
+	printf ( "Time: %d\n", t );
+}
+
+int
+convertFromMJPEG ( IplImage* destination, unsigned char *buf, int size )
+{
+	return 0;
+}
+
+int
+convertFromYV2 ( IplImage* destination, unsigned char *buf, int width, int height )
+{
+	Pyuv422tobgr24 ( buf, destination->imageData, width, height );
+	//~ Pyuv422torgb24 ( buf, destination->imageData, width, height );
+	return 0;
+}
+
+int
+main ( int argc, char** argv )
+{
+	cvNamedWindow ( "test", CV_WINDOW_AUTOSIZE );
+	IplImage* received = cvCreateImage ( cvSize ( width, height ), IPL_DEPTH_8U, 3 );
+	videoIn = (struct vdIn *) calloc ( 1, sizeof ( struct vdIn ) );
+	check_videoIn ( videoIn, (char *) videodevice );
+	if ( init_videoIn ( videoIn, (char *) videodevice, width, height, fps, format, grabmethod, NULL ) >= 0 )
+	{
+		enum_controls ( videoIn->fd );
+		initLut ();
+		time ( & tstart );
+		while ( videoIn->signalquit )
+		{
+			if ( uvcGrab ( videoIn ) < 0 )
+			{
+				printf ( "Error grabbing\n" );
+				break;
+			}
+
+			switch ( format )
+			{
+			case V4L2_PIX_FMT_MJPEG:
+				convertFromMJPEG ( received, videoIn->tmpbuffer, videoIn->buf.bytesused );
+				break;
+			case V4L2_PIX_FMT_YUYV:
+				convertFromYV2 ( received, videoIn->framebuffer, videoIn->width, videoIn->height );
+				break;
+			default:
+				break;
+			}
+			cvShowImage ( "test", received );
+			if ( ( (char) cvWaitKey ( 5 ) ) == 'q' )
+				break;
+
+			count ++;
+			if ( count % 100 == 0 )
+			{
+				time ( & tend );
+				dt = tend - tstart;
+				printf ( "frame count %d, elapsed time : %f, fps : %f\n", count, dt, count / dt );
+			}
+		}
+	}
+	close_v4l2 ( videoIn );
+	free ( videoIn );
+}

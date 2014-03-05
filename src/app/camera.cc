@@ -16,13 +16,13 @@ Camera::Camera(VideoDevice* device , cv::Matx33f orientation, std::string path) 
 
 
 // Calibration Methods
-bool Camera::calibrate(Scanner& scanner, double scale, unsigned int nb)
+bool Camera::intrinsic_calibrate(Scanner& scanner, double scale, unsigned int nb)
 {
-	return Calibration::calibrate(*this, scanner, scale, nb);
+	return Calibration::intrinsic_calibrate(*this, scanner, scale, nb);
 }
-bool Camera::calibrate(double scale, unsigned int nb, Calibration::Pattern pattern, cv::Size size)
+bool Camera::intrinsic_calibrate(double scale, unsigned int nb, Calibration::Pattern pattern, cv::Size size)
 {
-	return Calibration::calibrate(*this, scale, nb, pattern, size);
+	return Calibration::intrinsic_calibrate(*this, scale, nb, pattern, size);
 }
 
 
@@ -60,7 +60,7 @@ void Camera::openAndCalibrate(std::string path)	// With chessboard
 	load(path);
 	if (!iscalibrated())
 	{
-		calibrate(1.0, 30, Calibration::CHESSBOARD, cv::Size(7,4));
+		intrinsic_calibrate(1.0, 30, Calibration::CHESSBOARD, cv::Size(7,4));
 		save(path);
 	}
 }
@@ -82,7 +82,7 @@ void Camera::openAndCalibrate(std::string path, Scanner& scanner) // With QRCode
 	load(path);
 	if (!iscalibrated())
 	{
-		calibrate(scanner, 1.0, 30);
+		intrinsic_calibrate(scanner, 1.0, 30);
 		save(path);
 	}
 }

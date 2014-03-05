@@ -12,16 +12,20 @@ class EnvMap
 		cv::Size	_size;
 		cv::Mat		_time;
 		cv::Mat 	_wght;
-		cv::Mat		_data;
+		cv::Mat		_color;
+		cv::Mat		_lumin;
+	
 		int 			_current_time;
 	
 	public:
 		EnvMap(cv::Size = cv::Size(640, 480));
 		void 						addFrame(Camera&, cv::Matx33f&);
 		
-		const cv::Mat&	data();
+		const cv::Mat&	color() const { return _color; }
+		const cv::Mat&	lumin() const { return _lumin; }
 		void 						clear();
-		void 						save(const std::string&);
+
+		static void 		save(const cv::Mat&, const std::string&);
 	
 };
 

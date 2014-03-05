@@ -2,21 +2,26 @@
 #define OPENCV_DEVICE_HH
 
 #include <iostream>
+#include <linux/videodev2.h>
+#include <sys/ioctl.h>
+#include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include "uvc-release.h"
+
 #include "videodevice.hh"
 
 
 namespace videodevices
 {
-	class OpenCV : public VideoDevice, private cv::VideoCapture
+	class UVC : public VideoDevice
 	{
 		private:
-			cv::Mat 	_cvframe;
-			IplImage*	_iplframe;
+			struct vdIn*	_videoIn;
+			IplImage*			_frame;
 		
 		public:
-			OpenCV();
-			~OpenCV();
+			UVC();
+			~UVC();
 
 			bool			open(int idx = 0);
 			void			close();
@@ -24,11 +29,14 @@ namespace videodevices
 			void			grabFrame();
 			IplImage*	getFrame();
 			IplImage*	frame();
-				
+		
 			int 			getParameter(control);
 			void			setParameter(control, int);
 			void			resetParameter(control);
 			void			showParameters();
+		
+		private:
+			static int V4L2Ctrl(VideoDevice::control);
 	};
 };
 

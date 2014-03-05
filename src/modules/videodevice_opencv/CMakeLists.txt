@@ -2,7 +2,7 @@
 
 include_directories(
 	include
-	${CMAKE_SOURCE_DIR}/src
+	${CMAKE_SOURCE_DIR}/src/app
 )
 
 add_library(videodevice_opencv MODULE

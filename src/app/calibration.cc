@@ -25,33 +25,43 @@ static void calcBoardCornerPositions(Size size, float scale, vector<Matx31f>& co
 	}
 }
 
+
 // ==================================== Methods ====================================
 
-Calibration::Calibration() : _ready(false) 									{}
-Calibration::Calibration(const string path) : _ready(false)	{ load(path); }
+Calibration::Calibration() :
+	_ready(false)
+{
+}
+Calibration::Calibration(const string& path) :
+	_ready(false)
+{
+	load(path);
+}
 
-bool Calibration::load(const string path)
+bool Calibration::load(const string& path)
 {
 	FileStorage fs(path, FileStorage::READ);
 	if (!fs.isOpened()) return false;
-	cv::Mat _tA;
+	Mat _tA;
 	fs["Camera_Matrix"]						>> _tA;
 	fs["Distortion_Coefficients"] >> _K;
-	fs["Image_Size"] >> _size;
+	fs["Image_Size"]							>> _size;
 	fs["Root_Mean_Square"] 				>> _rms;
+	fs["Responce Function"]				>> _response;
 	fs.release();
-	_A = cv::Matx33f(_tA);
+	_A = Matx33f(_tA);
 	return (_ready = true);
 }
-bool Calibration::save(const string path) const
+bool Calibration::save(const string& path) const
 {	
 	FileStorage fs(path, FileStorage::WRITE);
 	if (!fs.isOpened()) return false;
-	cv::Mat _tA(_A);
+	Mat _tA(_A);
 	fs << "Camera_Matrix"						<< _tA;
   fs << "Distortion_Coefficients" << _K;
   fs << "Image_Size"							<< _size;
 	fs << "Root_Mean_Square"				<< _rms;
+	fs << "Responce Function"				<< _response;
   fs.release();
 	return true;
 }
@@ -59,9 +69,11 @@ bool Calibration::save(const string path) const
 
 
 
+/* ================================================================================================== *
+ * =																		INSTRINSIC CALIBRATION																			= *
+ * ================================================================================================== */
 
-
-bool Calibration::calibrate(VideoDevice& video, Scanner& scanner, double scale, unsigned int nb)
+bool Calibration::intrinsic_calibrate(VideoDevice& video, Scanner& scanner, double scale, unsigned int nb)
 {
 	vector<vector<Matx21f>> imagePoints;
 	Mat view;
@@ -75,7 +87,7 @@ bool Calibration::calibrate(VideoDevice& video, Scanner& scanner, double scale, 
 		
 		for (Symbol& symbol : scanner.scan(frame))
 		{
-			drawChessboardCorners(view, cv::Size(2, 2), Mat(symbol.pts), true);
+			drawChessboardCorners(view, Size(2, 2), Mat(symbol.pts), true);
 			if ((blink = !(frame_nb++ % 10)))	imagePoints.push_back(symbol.pts);
 		}
 		
@@ -85,7 +97,7 @@ bool Calibration::calibrate(VideoDevice& video, Scanner& scanner, double scale, 
 			bitwise_not(view, view);
 		}
 		imshow("Calibration", view);
-		if (cv::waitKey(30) == 27) return false;
+		if (waitKey(30) == 27) return false;
 	}
 	destroyWindow("Calibration");
 	_size = view.size();
@@ -98,11 +110,7 @@ bool Calibration::calibrate(VideoDevice& video, Scanner& scanner, double scale, 
 
 }
 
-
-
-
-
-bool Calibration::calibrate(VideoDevice& video, double scale, unsigned int nb, Calibration::Pattern pattern, Size size)
+bool Calibration::intrinsic_calibrate(VideoDevice& video, double scale, unsigned int nb, Calibration::Pattern pattern, Size size)
 {
 	vector<vector<Matx21f>> imagePoints;
 	Mat view;
@@ -159,7 +167,7 @@ bool Calibration::calibrate(VideoDevice& video, double scale, unsigned int nb, C
 			bitwise_not(view, view);
 		}
 		imshow("Calibration", view);
-		if (cv::waitKey(30) == 27) return false;
+		if (waitKey(30) == 27) return false;
 	}
 	destroyWindow("Calibration");
 	_size = view.size();
@@ -173,84 +181,53 @@ bool Calibration::calibrate(VideoDevice& video, double scale, unsigned int nb, C
 	return (_ready = true);
 }
 
+/* ================================================================================================== *
+ * =																				HDR CALIBRATION																					= *
+ * ================================================================================================== */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-float calibration(VideoDevice& video, Scanner& scanner, Mat& A, Mat& K, unsigned int view_nb, bool verbose)
+bool hdr_calibration(VideoDevice& video)
 {
-	IplImage*															frame;
-	Mat 															cvframe;
-	vector<Point3f>							pattern({Point3f(+1., +1., 0.), Point3f(+1., -1., 0.), Point3f(-1., -1., 0.), Point3f(-1., +1., 0.)});
-	vector<vector<Point3f>> objPts;
-	vector<vector<Point2f>> imgPts;
-	
-	unsigned int frame_idx = 0;
-	unsigned int view_cnt	= 0;
+	// ====== WILL BECOME ARGUMENTS ======
+	int nb_exposures;
+	int nb_points;
+	// ===================================
 		
-	while (view_cnt < view_nb)
+	std::vector<float>		input_time(nb_exposures);
+	std::vector<Mat>	input_frame(nb_exposures);
+	for (int i=0; i<nb_exposures; ++i)
 	{
-		frame = video.getImage();		
-		cvframe = Mat(frame);
-		
-		if (!(frame_idx++ % 10))
-		{
-			for (ScannedInfos& symbol : scanner.scan(frame))
-			{
-				if (symbol.pts.size() != 4) continue;
-				objPts.push_back(pattern);
-				imgPts.push_back(symbol.pts);
-				view_cnt++;
-				
-				for (int i = 0; i<4; ++i) line(cvframe, Point(symbol.pts[i].x, symbol.pts[i].y), Point(symbol.pts[(i+1)%4].x, symbol.pts[(i+1)%4].y), Scalar(0, 255, 0), 2, 8, 0);
-				if (verbose) cout << "Calibration : " << view_cnt << "/" << view_nb << endl;
-				
-			}
-		}
-		imshow("Calibration", cvframe);
-		if (waitKey(30) == 27) exit(0);
+		float time = 1; // TODO SET EXPOSURE
+		//camera.setExposure(exposure);
+		input_time[i]		= time;
+		input_frame[i]	= Mat(video.getFrame());
 	}
-		
-	vector<Mat>	rvecs, tvecs;
 	
-	if (verbose)
-		cout << "Computing camera parameters ... " << flush;
-	float error = calibrateCamera(objPts, imgPts, Size(view_cnt, 4), A, K, rvecs, tvecs);
-	if (verbose)
-		cout << "done" << endl
-							<< "Error : " << error << endl
-							<< "A : "	<< cout << A << endl
-							<< "K : "	<< cout << K << endl;
+	//void* calibrate = createCalibrateDebevec();
+	//calibrate->process(input_frame, _response, input_time);
+	
 
-	destroyWindow("Calibration");
-
-	return error;
 }
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+float Calibration::ldrToHdr(const Vec3b& color, float exposure)
+{
+	Vec3f hdr;
+	hdr(0) = _response.at<float>((int) color(0))  - log(exposure);
+	hdr(1) = _response.at<float>((int) color(1))  - log(exposure);
+	hdr(2) = _response.at<float>((int) color(2))  - log(exposure);
+	
+	//TODO COMPUTE VALUE
+	
+	return 0.f;
+}

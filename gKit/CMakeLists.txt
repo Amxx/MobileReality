@@ -115,6 +115,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 # =======================================================
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+set(GKIT_LIBRARY			gKit																CACHE INTERNAL	"gKit Library"			)
+set(GKIT_INCLUDE_DIRS	${CMAKE_CURRENT_SOURCE_DIR}/include	CACHE PATH			"gKit include dir"	)
 
 install(
   TARGETS

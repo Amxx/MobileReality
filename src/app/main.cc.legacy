@@ -11,7 +11,7 @@
 #include "envmap.hh"
 
 // ============ MACROS ============
-#define LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
+#define  LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
 
 
 
@@ -26,10 +26,10 @@ static GLuint                	windowID;
 static int                    window_width      = 640;
 static int                    window_height     = 480;
 
-static float									scale							= 3.0;
+static float									scale							= 6.0;
 static float									subscale					= 236.0/300.0;
 
-static float									obj = 6.0;
+static float									obj 							= 6.0;
 static float          			  obj_c[3]          = { 0.482f,  0.627f, 0.357f };
 static float                 	light_spe[4]     	= { 1.000f,  1.000f, 1.000f, 1.000f };
 static float                 	light_dif[4]      = { 1.000f,  1.000f, 1.000f, 1.000f };
@@ -209,44 +209,52 @@ cv::Matx33f ModelView(Camera& camera, Scanner& scanner)
 
 int main(int argc, char* argv[])
 {		
+	
+	
 	Configuration config;
-	config("-params:front")		= "params/default:front.xml";
-	config("-params:back")		= "params/default:back.xml";
-	config("-video")					= "install/share/libvideodevice_opencv.so";
-	config("-scanner")				= "install/share/libscanner_zbar.so";
+	config("params-front")	= "params/default-front.xml";
+	config("params-back")		= "params/default-back.xml";
+	config("video")					= "install/share/libvideodevice_opencv.so";
+	config("scanner")				= "install/share/libscanner_zbar.so";
 	
-	for (int i=1; i<argc-1; i+=2)
-		config(argv[i]) = argv[i+1];
+	// ============ CONFIG FROM COMMAND LINE ============
+	/* 
+	for (int i=1; i<argc; ++i)
+	{
+		std::string		arg = std::string(argv[i]);
+		size_t 				t		= arg.find("=");
+		config(arg.substr(0, t-1)) = arg.substr(t+1);
+	}
+	config.save("params/config.xml");
+	*/
+	// =============== CONFIG FROM FILE ================
+	std::string path = "params/config.xml";
+	if (argc > 1) path = argv[1];
+	config.load(path);	
+	// =================================================
 	
 	
-
 	VideoDevice *devicefront, *deviceback;	
-	devicefront	= loadVideoDevice(config("-video")); 
-	deviceback	= loadVideoDevice(config("-video")); 
+	devicefront	= loadVideoDevice(config("video")); 
+	deviceback	= loadVideoDevice(config("video")); 
 	if (devicefront == nullptr || deviceback == nullptr) return 0;
 	
-	scanner	= loadScanner(config("-scanner"));
+	scanner	= loadScanner(config("scanner"));
 	if (scanner == nullptr) return 0;
 	
-	
-	
-	
-	cameras[0] = new Camera(devicefront, cv::Matx33f(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0), config("-params:front"));
-	if (config("-video:front:id").size()) cameras[0]->open(atoi(config("-video:front:id").c_str()));
-	cameras[0]->openAndCalibrate(config("-params:front"), *scanner);
+	cameras[0] = new Camera(devicefront, cv::Matx33f(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0), config("params-front"));
+	if (config("video-front-id").size()) cameras[0]->open(atoi(config("video-front-id").c_str()));
+	cameras[0]->openAndCalibrate(config("params-front"), *scanner);
 
-/*
-	cameras[1] = new Camera(deviceback,  cv::Matx33f(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0), config("-params:back"));
-	if (config("-video:back:id").size()) cameras[1]->open(atoi(config("-video:back:id").c_str()));
-	cameras[1]->openAndCalibrate(config("-params:back"), *scanner);
-*/
-	
-	if (config("-scale").size())			scale = atof(config("-scale").c_str());
-	if (config("-subscale").size())		scale = atof(config("-subscale").c_str());
-	
+	// cameras[1] = new Camera(deviceback,  cv::Matx33f(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0), config("params-back"));
+	// if (config("video-back-id").size()) cameras[1]->open(atoi(config("video-back-id").c_str()));
+	// cameras[1]->openAndCalibrate(config("params-back"), *scanner);
 
-	
-	
+
+
+	if (config("scale").size())			scale			= atof(config("scale").c_str());
+	if (config("subscale").size())	subscale	= atof(config("subscale").c_str());
+	if (config("obj-size").size())	obj				= atof(config("obj-size").c_str());
 	
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -283,19 +291,32 @@ int main(int argc, char* argv[])
 	bool run = true;
 	EnvMap environnement(cv::Size(640, 480));
 	
+	
+	//cameras[0]->grabFrame();
+	//static IplImage* fixedframe = cameras[0]->frame();
+	
+	LOGHERE
+	LOGHERE
+	std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+	std::cout << cameras[0]->getParameter(VideoDevice::GAIN) << std::endl;
+	cameras[0]->setParameter(VideoDevice::GAIN, cameras[0]->getParameter(VideoDevice::GAIN));
+	LOGHERE
+	LOGHERE
+	
 	while (run)
 	{
 		if (cameras[0]) cameras[0]->grabFrame();
 		if (cameras[1]) cameras[1]->grabFrame();
 		
-		//cv::Matx33f modelview = ModelView(*cameras[0], *scanner);
-		//environnement.addFrame(*cameras[0], modelview);
-		//environnement.addFrame(*cameras[1], modelview);
+		// cv::Matx33f modelview = ModelView(*cameras[0], *scanner);
+		// environnement.addFrame(*cameras[0], modelview);
+		// environnement.addFrame(*cameras[1], modelview);
 		
+		// cv::imshow("Fixed",	cv::Mat(fixedframe));
 		cv::imshow("Front",	cv::Mat(cameras[0]->frame()));
-		
-		// cv::imshow("Back",	cv::Mat(cameras[1]->frame()));
-		// cv::imshow("Environnement", environnement.data());
+		// cv::imshow("Back",		cv::Mat(cameras[1]->frame()));
+		// cv::imshow("Environnement Color", environnement.color());
+		// cv::imshow("Environnement Lumin", environnement.lumin());
 		
 		switch (cv::waitKey(30))
 		{
@@ -303,21 +324,69 @@ int main(int argc, char* argv[])
 			case 'c':		environnement.clear();	break;
 			case 's':		
 			{
-				static unsigned int save_id = 0;
-				std::stringstream path;
-				path << "env/envmap_" << std::setfill ('0') << std::setw(6) << save_id++ << ".png";
-				std::cout << "- Saving envmap to file '" << path.str() << "' ... " << std::flush;
-				environnement.save(path.str());
+				time_t now = time(0);
+				std::stringstream path_color, path_lumin;
+				path_color << "env/envmap_" << now << ".png";
+				// path_lumin <<	"env/envmap_" << now << ".hdr";
+				
+				std::cout << "- Saving envmap to file '" << path_color.str() << "' ... " << std::flush;
+				
+				EnvMap::save(environnement.color(), path_color.str());
+				// EnvMap::save(environnement.lumin(), path_lumin.str());
+				
 				std::cout << "done" << std::endl;
 				break;
 			}
 			
-			case 'a' : cameras[0]->showParameters(); break;
-			case 'z' : cameras[0]->lockParameters(); break;
 			
+			case 'a':
+				cameras[0]->setParameter(VideoDevice::EXPOSURE, 0);
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
+			case 'z':
+				cameras[0]->setParameter(VideoDevice::EXPOSURE, 31);
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
+			case 'e':
+				cameras[0]->setParameter(VideoDevice::EXPOSURE, 63);
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
+			case 'r':
+				cameras[0]->setParameter(VideoDevice::EXPOSURE, 95);
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
+			case 't':
+				cameras[0]->setParameter(VideoDevice::EXPOSURE, 127);
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
+			case 'y':
+				cameras[0]->setParameter(VideoDevice::EXPOSURE, 159);
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
+			case 'u':
+				cameras[0]->setParameter(VideoDevice::EXPOSURE, 191);
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
+			case 'i':
+				cameras[0]->setParameter(VideoDevice::EXPOSURE, 223);
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
+			case 'o':
+				cameras[0]->setParameter(VideoDevice::EXPOSURE, 255);
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
+			case 'p':
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
+			case 'm':
+				cameras[0]->resetParameter(VideoDevice::EXPOSURE);
+				std::cout << cameras[0]->getParameter(VideoDevice::EXPOSURE) << std::endl;
+				break;
 			
-			default:																	break;
+			default:
+				break;
 		}
+		cv::waitKey(30);
 	}
 	
 	

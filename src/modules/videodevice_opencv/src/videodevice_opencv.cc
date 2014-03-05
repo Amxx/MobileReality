@@ -48,24 +48,28 @@ IplImage* videodevices::OpenCV::frame()
 
 
 
-
-void videodevices::OpenCV::lockParameters()
+int videodevices::OpenCV::getParameter(control)
 {
-	cv::VideoCapture::set(CV_CAP_PROP_BRIGHTNESS,			0.50);
-	cv::VideoCapture::set(CV_CAP_PROP_CONTRAST,				0.00);
-	cv::VideoCapture::set(CV_CAP_PROP_SATURATION,			0.45);
-	cv::VideoCapture::set(CV_CAP_PROP_HUE,						0.50);
-	cv::VideoCapture::set(CV_CAP_PROP_GAIN,						0.50);
-	cv::VideoCapture::set(CV_CAP_PROP_EXPOSURE,				0.00);
+	std::cout << __FILE__ << " : " << __FUNCTION__ << " - Function not yet implemeted in this module" << std::endl;
+	return -1;
+}
+void videodevices::OpenCV::setParameter(control, int)
+{
+	std::cout << __FILE__ << " : " << __FUNCTION__ << " - Function not yet implemeted in this module" << std::endl;
+}
+void videodevices::OpenCV::resetParameter(control)
+{
+	std::cout << __FILE__ << " : " << __FUNCTION__ << " - Function not yet implemeted in this module" << std::endl;
 }
 void videodevices::OpenCV::showParameters()
 {
-	std::cout << "CV_CAP_PROP_BRIGHTNESS :    " << cv::VideoCapture::get(CV_CAP_PROP_BRIGHTNESS)		<< std::endl
-						<< "CV_CAP_PROP_CONTRAST :      " << cv::VideoCapture::get(CV_CAP_PROP_CONTRAST)			<< std::endl
-						<< "CV_CAP_PROP_SATURATION :    " << cv::VideoCapture::get(CV_CAP_PROP_SATURATION)		<< std::endl
-						<< "CV_CAP_PROP_HUE :           " << cv::VideoCapture::get(CV_CAP_PROP_HUE)						<< std::endl
-						<< "CV_CAP_PROP_GAIN :          " << cv::VideoCapture::get(CV_CAP_PROP_GAIN)					<< std::endl
-						<< "CV_CAP_PROP_EXPOSURE :      " << cv::VideoCapture::get(CV_CAP_PROP_EXPOSURE)			<< std::endl;
+	std::cout << __FILE__ << " : " << __FUNCTION__ << " - Function not yet implemeted in this module" << std::endl; 
+	// std::cout << "CV_CAP_PROP_BRIGHTNESS :    " << cv::VideoCapture::get(CV_CAP_PROP_BRIGHTNESS)	<< std::endl
+						// << "CV_CAP_PROP_CONTRAST :      " << cv::VideoCapture::get(CV_CAP_PROP_CONTRAST)		<< std::endl
+						// << "CV_CAP_PROP_SATURATION :    " << cv::VideoCapture::get(CV_CAP_PROP_SATURATION)	<< std::endl
+						// << "CV_CAP_PROP_HUE :           " << cv::VideoCapture::get(CV_CAP_PROP_HUE)					<< std::endl
+						// << "CV_CAP_PROP_GAIN :          " << cv::VideoCapture::get(CV_CAP_PROP_GAIN)				<< std::endl
+						// << "CV_CAP_PROP_EXPOSURE :      " << cv::VideoCapture::get(CV_CAP_PROP_EXPOSURE)		<< std::endl;
 }
 
 
