@@ -21,17 +21,22 @@ bool videodevices::UVC::open(int idx)
 {
 	if (isopen()) return false;
 	
-	unsigned int width	= 640;
-	unsigned int height	= 480;
-	unsigned int fRate	= 30;
+	// =================================
+	// =      P A R A M E T E R S      =
+	// =================================
+			unsigned int width	= 640;
+			unsigned int height	= 480;
+			unsigned int fRate	= 30;
+	// =================================
 	unsigned int format	= V4L2_PIX_FMT_YUYV;
-	
+
+	// =================================
+	// =        TODO : CASE -1         =
+	// =================================
 	char videodevice[32];
 	sprintf(videodevice, "/dev/video%d", idx);
-
 	FILE* fd;
 	fd = fopen(videodevice, "r+");
-	
 	if (!fd)
 	{
 		fprintf(stderr, "WARNING: Can't open device %s.\n", videodevice);
@@ -43,27 +48,28 @@ bool videodevices::UVC::open(int idx)
 	if(init_videoIn(_videoIn, (char*) videodevice, width, height, fRate, format, 1, NULL) < 0 )
 	{
 		fprintf( stderr, "WARNING: camera UVC %d not detected.\n", idx);
-   		delete _videoIn;
-		_videoIn = NULL;
-		return false;
+   	goto error;
 	}
 
 	if (uvcGrab(_videoIn) < 0 || !_videoIn->framebuffer)
 	{
-		 fprintf( stderr, "WARNING: could not get values from camera UVC %d.\n", idx);
-   		delete _videoIn;
-		_videoIn = NULL;
-		 return false;
+		fprintf( stderr, "WARNING: could not get values from camera UVC %d.\n", idx);
+   	goto error;
 	}
 	
 	_frame = cvCreateImage(cvSize(_videoIn->width, _videoIn->height), IPL_DEPTH_8U, 3);
 	if (!_frame)
 	{
 		fprintf( stderr, "ERROR: camera %d : cvCreateImage failed.\n", idx);
-		return -1;
+   	goto error;
 	}
 	
 	return true;
+	
+	error:
+		delete _videoIn;
+		_videoIn = NULL;
+		return false;
 }
 
 void videodevices::UVC::close()
@@ -90,32 +96,33 @@ void videodevices::UVC::grabFrame()
 	
 	for(int i=0; i<_videoIn->height*_videoIn->width/2; ++i)
 	{
-		#define CLIP(X) ( (X) > 255 ? 255 : (X) < 0 ? 0 : X)
+		#define CLIP(min, X, max) ( (X) > max ? max : (X) < min ? min : X)
 		
-		int y0 = _videoIn->framebuffer[4*i + 0];
-		int cb = _videoIn->framebuffer[4*i + 1];
-		int y1 = _videoIn->framebuffer[4*i + 2];
-		int cr = _videoIn->framebuffer[4*i + 3];
+		float y0 = (float) _videoIn->framebuffer[4*i + 0];
+		float cb = (float) _videoIn->framebuffer[4*i + 1];
+		float y1 = (float) _videoIn->framebuffer[4*i + 2];
+		float cr = (float) _videoIn->framebuffer[4*i + 3];
 		
-		float r0 = 1.067*(y0 - 16) + 1.596*(cr - 128);
-		float g0 = 1.067*(y0 - 16) - 0.813*(cr - 128) - 0.392*(cb - 128);
-		float b0 = 1.067*(y0 - 16) + 2.017*(cb - 128);
+		static float YCbCr2RGB[9] = {	+1.067, +0.000, +1.596, \
+																	+1.067, -0.392, -0.813, \
+																	+1.067, +2.017, +0.000 };
+																	
+		float r0 = YCbCr2RGB[0]*(y0-16) + YCbCr2RGB[1]*(cb-128) + YCbCr2RGB[2]*(cr-128);
+		float g0 = YCbCr2RGB[3]*(y0-16) + YCbCr2RGB[4]*(cb-128) + YCbCr2RGB[5]*(cr-128);
+		float b0 = YCbCr2RGB[6]*(y0-16) + YCbCr2RGB[7]*(cb-128) + YCbCr2RGB[8]*(cr-128);
+		float r1 = YCbCr2RGB[0]*(y1-16) + YCbCr2RGB[2]*(cb-128) + YCbCr2RGB[2]*(cr-128);
+		float g1 = YCbCr2RGB[3]*(y1-16) + YCbCr2RGB[4]*(cb-128) + YCbCr2RGB[5]*(cr-128);
+		float b1 = YCbCr2RGB[6]*(y1-16) + YCbCr2RGB[7]*(cb-128) + YCbCr2RGB[8]*(cr-128);
 		
-		float r1 = 1.067*(y1 - 16) + 1.596*(cr - 128);
-		float g1 = 1.067*(y1 - 16) - 0.813*(cr - 128) - 0.392*(cb - 128);
-		float b1 = 1.067*(y1 - 16) + 2.017*(cb - 128);
-			
-		_frame->imageData[6*i + 0] = (char) CLIP(b0); // BLUE
-		_frame->imageData[6*i + 1] = (char) CLIP(g0); // GREEN
-		_frame->imageData[6*i + 2] = (char) CLIP(r0); // RED
-		_frame->imageData[6*i + 3] = (char) CLIP(b1); // BLUE
-		_frame->imageData[6*i + 4] = (char) CLIP(g1); // GREEN
-		_frame->imageData[6*i + 5] = (char) CLIP(r1); // RED
+		_frame->imageData[6*i + 0] = (char) CLIP(0, b0, 255); // BLUE
+		_frame->imageData[6*i + 1] = (char) CLIP(0, g0, 255); // GREEN
+		_frame->imageData[6*i + 2] = (char) CLIP(0, r0, 255); // RED
+		_frame->imageData[6*i + 3] = (char) CLIP(0, b1, 255); // BLUE
+		_frame->imageData[6*i + 4] = (char) CLIP(0, g1, 255); // GREEN
+		_frame->imageData[6*i + 5] = (char) CLIP(0, r1, 255); // RED
 		
 	}
 }
-
-
 
 IplImage* videodevices::UVC::getFrame()
 {

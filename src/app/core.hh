@@ -45,14 +45,14 @@ class Core : public gk::App
 		gk::GLBuffer 						_GLNormals;
 		
 		
-// static GLuint                	cameraImageTextureID;
-// static GLuint                	windowID;
-// static int                    window_width      = 640;
-// static int                    window_height     = 480;
-// static float          			  obj_c[3]          = { 0.482f,  0.627f, 0.357f };
-// static float                 	light_spe[4]     	= { 1.000f,  1.000f, 1.000f, 1.000f };
-// static float                 	light_dif[4]      = { 1.000f,  1.000f, 1.000f, 1.000f };
-// static float                 	light_pos[4]      = { 0.000f, 30.000f, 0.000f, 1.000f };
+// static GLuint            cameraImageTextureID;
+// static GLuint            windowID;
+// static int               window_width      = 640;
+// static int               window_height     = 480;
+// static float          		obj_c[3]          = { 0.482f,  0.627f, 0.357f };
+// static float             light_spe[4]     	= { 1.000f,  1.000f, 1.000f, 1.000f };
+// static float             light_dif[4]      = { 1.000f,  1.000f, 1.000f, 1.000f };
+// static float             light_pos[4]      = { 0.000f, 30.000f, 0.000f, 1.000f };
 
 
 	

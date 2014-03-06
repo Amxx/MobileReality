@@ -29,6 +29,9 @@ namespace videodevices
 			void			setParameter(control, int);
 			void			resetParameter(control);
 			void			showParameters();
+		
+		private:
+			int 			OpenCVCtrl(control c);
 	};
 };
 

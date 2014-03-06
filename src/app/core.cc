@@ -14,12 +14,6 @@ Core::Core(int argc, char* argv[]) :
 	_subscale(236.0/300.0),
 	_objsize(6.0)
 {
-	
-	gk::AppSettings settings;
-	settings.setGLVersion(3,1);
-	// settings.setFullscreen();
-	if(createWindow(800, 600, settings) < 0) closeWindow();
-	
 	// ===============================================================
 	// =   C O N F I G U R A T I O N   I N I T I A L I S A T I O N   =
 	// ===============================================================
@@ -61,7 +55,26 @@ Core::Core(int argc, char* argv[]) :
 	if (_config("video-back-id").size()) _cameras[1]->open(atoi(_config("video-back-id").c_str()));
 	_cameras[1]->openAndCalibrate(_config("params-back"), *_scanner);
 	#endif		
+	
+	
+	_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	_cameras[0]->getParameter(VideoDevice::BRIGHTNESS	));
+	_cameras[0]->setParameter(VideoDevice::GAIN,				_cameras[0]->getParameter(VideoDevice::GAIN				));
+	
+	
+	// ===============================================================
+	// =                   R E A D Y   T O   R U N                   =
+	// ===============================================================
+	
+	gk::AppSettings settings;
+	settings.setGLVersion(3,1);
+	// settings.setFullscreen();
+	if(createWindow(800, 600, settings) < 0) closeWindow();
+	
 }
+
+
+
+
 
 Core::~Core()
 {
@@ -165,14 +178,18 @@ int Core::draw()
 	// present();
 	#endif
 	
-	#ifndef DISABLE_VIEWSCREEN
-	// cv::Matx33f modelview = ModelView(*_cameras[0], *_scanner);
-	// environnement.addFrame(*_cameras[0], modelview);
-	// _envmap.addFrame(*_cameras[1], modelview);
-	cv::imshow("Front",	cv::Mat(_cameras[0]->frame()));
-	cv::imshow("Back",	cv::Mat(_cameras[1]->frame()));
+	#ifndef DISABLE_ENVMAP
+	cv::Matx33f modelview = ModelView(*_cameras[0], *_scanner);
+	// _envmap.addFrame(*_cameras[0], modelview);
+	_envmap.addFrame(*_cameras[1], modelview);
+	#endif
+	
+	#ifndef DISABLE_VIEW
+	cv::imshow("Front",								cv::Mat(_cameras[0]->frame()));
+	// cv::imshow("Back",								cv::Mat(_cameras[1]->frame()));
 	// cv::imshow("Environnement Color", _envmap.color());
 	// cv::imshow("Environnement Lumin", environnement.lumin());
+
 	cv::waitKey(30);
 	#endif
 
@@ -192,7 +209,7 @@ int Core::draw()
 void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 {
 	if (event.state == SDL_PRESSED)
-		switch(event.keysym.sym)
+		switch (event.keysym.sym)
 		{
 			case 'c':		_envmap.clear();	break;
 			case 's':		
@@ -206,11 +223,26 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				break;
 			}
 			
+			// #define			CONTROL			VideoDevice::EXPOSURE
+			#define			CONTROL			VideoDevice::BRIGHTNESS
+			case SDLK_F1:		_cameras[0]->setParameter(CONTROL, 0);		break;
+			case SDLK_F2:		_cameras[0]->setParameter(CONTROL, 25);		break;
+			case SDLK_F3:		_cameras[0]->setParameter(CONTROL, 51);		break;
+			case SDLK_F4:		_cameras[0]->setParameter(CONTROL, 76);		break;
+			case SDLK_F5:		_cameras[0]->setParameter(CONTROL, 102);	break;
+			case SDLK_F6:		_cameras[0]->setParameter(CONTROL, 127);	break;
+			case SDLK_F7:		_cameras[0]->setParameter(CONTROL, 153);	break;
+			case SDLK_F8:		_cameras[0]->setParameter(CONTROL, 178);	break;
+			case SDLK_F9:		_cameras[0]->setParameter(CONTROL, 204);	break;
+			case SDLK_F10:	_cameras[0]->setParameter(CONTROL, 229);	break;
+			case SDLK_F11:	_cameras[0]->setParameter(CONTROL, 255);	break;
+			case 13:				_cameras[0]->resetParameter(CONTROL);			break;
 			
 			case SDLK_ESCAPE:
 				closeWindow();
 				break;
 			default:
+				printf("Key %d unmapped\n", (int) event.keysym.sym);
 				break;
 		}
 }
