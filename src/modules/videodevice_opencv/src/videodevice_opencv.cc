@@ -50,11 +50,14 @@ IplImage* videodevices::OpenCV::frame()
 
 int videodevices::OpenCV::getParameter(control c)
 {
-	return (int) (255.0 * cv::VideoCapture::get(OpenCVCtrl(c)));
+	int c0 = OpenCVCtrl(c);
+	return (c0==-1)?-1:(255.0 * cv::VideoCapture::get(c0));
 }
 void videodevices::OpenCV::setParameter(control c, int v)
 {
-	cv::VideoCapture::set(OpenCVCtrl(c), (double) v / 255.0);
+	int c0 = OpenCVCtrl(c);
+	if (c0==-1) return;
+	cv::VideoCapture::set(c0, (double) v / 255.0);
 }
 void videodevices::OpenCV::resetParameter(control c)
 {
@@ -80,7 +83,13 @@ int videodevices::OpenCV::OpenCVCtrl(control c)
 		case CONTRAST:		return CV_CAP_PROP_CONTRAST;
 		case SATURATION:	return CV_CAP_PROP_SATURATION;
 		case GAIN:				return CV_CAP_PROP_GAIN;
-		default:					return -1;
+		
+		case MODE :				
+			fprintf(stderr, "[WARNING] Auto exposure not supported by opencv module\n");
+			return -1;
+		default:
+			fprintf(stderr, "[WARNING] Unknown control command %d\n", c);
+			return -1;
 	}
 }
 

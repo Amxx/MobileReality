@@ -150,13 +150,15 @@ int videodevices::UVC::V4L2Ctrl(control c)
 {
 	switch(c)
 	{
-		case MODE	:				return V4L2_CID_EXPOSURE_AUTO;
 		case EXPOSURE :		return V4L2_CID_EXPOSURE;
 		case BRIGHTNESS:	return V4L2_CID_BRIGHTNESS;
 		case CONTRAST:		return V4L2_CID_CONTRAST;
 		case SATURATION:	return V4L2_CID_SATURATION;
 		case GAIN:				return V4L2_CID_GAIN;
-		default:					return -1;
+		case MODE	:				return V4L2_CID_EXPOSURE_AUTO;
+		default:
+			fprintf(stderr, "[WARNING] Unknown control command %d\n", c);
+			return -1;
 	}
 }
 			
