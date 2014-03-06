@@ -56,11 +56,15 @@ Core::Core(int argc, char* argv[]) :
 	_cameras[1]->openAndCalibrate(_config("params-back"), *_scanner);
 	#endif		
 	
-	
+	_cameras[0]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
 	_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	_cameras[0]->getParameter(VideoDevice::BRIGHTNESS	));
 	_cameras[0]->setParameter(VideoDevice::GAIN,				_cameras[0]->getParameter(VideoDevice::GAIN				));
-	
 	// _cameras[0]->showParameters();
+	
+	_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
+	_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	_cameras[1]->getParameter(VideoDevice::BRIGHTNESS	));
+	_cameras[1]->setParameter(VideoDevice::GAIN,				_cameras[1]->getParameter(VideoDevice::GAIN				));
+	// _cameras[1]->showParameters();
 	
 	// ===============================================================
 	// =                   R E A D Y   T O   R U N                   =
@@ -95,33 +99,14 @@ int Core::quit()
 	return 1;
 }
 
-
-cv::Matx33f ModelView(Camera& camera, Scanner& scanner)
-{
-	cv::Matx33f				view	= cv::Matx33f();
-	cv::Matx33f				model	= cv::Matx33f();
-	for (Symbol& symbol : scanner.scan(camera.frame()))
-		try {
-			try 				{	model = Matx44to33(parseSymbolToModel(symbol.data, 0.0));		}
-			catch (...)	{ model = parseMatx33f(symbol.data); 													}
-			symbol.extrinsic(camera.A(), camera.K());
-			view = Matx44to33(viewFromSymbol(symbol.rvec, symbol.tvec));
-		} catch (const std::exception& e) {
-			std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
-			std::cout << "Exception : " << e.what() << std::endl;
-		}	
-	return camera.orientation().inv() * view * model;
-}
-
-
 int Core::draw()
 {
 	if (_cameras[0]) _cameras[0]->grabFrame();
 	if (_cameras[1]) _cameras[1]->grabFrame();
 	
 	#ifndef DISABLE_RENDERING
-	glClearColor(0.1, 0.1, 0.1, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+	// glClearColor(0.1, 0.1, 0.1, 1.0);
+	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 	
 	// IMAGE DE FOND
 	// renderImg(cameras[0]->frame());
@@ -176,7 +161,7 @@ int Core::draw()
 	  // } catch (...) {
 			// std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
 		// }
-	present();
+	// present();
 	#endif
 	
 	#ifndef DISABLE_ENVMAP
@@ -222,7 +207,6 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				break;
 			}
 			
-			// #define			CONTROL			VideoDevice::EXPOSURE
 			#define			CONTROL			VideoDevice::BRIGHTNESS
 			case SDLK_F1:		_cameras[0]->setParameter(CONTROL, 0);		break;
 			case SDLK_F2:		_cameras[0]->setParameter(CONTROL, 25);		break;

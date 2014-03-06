@@ -8,8 +8,22 @@
 class VideoDevice
 {
 	public:
-		enum control { EXPOSURE, BRIGHTNESS, CONTRAST, SATURATION, GAIN };
+		enum control
+		{
+			MODE,
+			EXPOSURE,
+			BRIGHTNESS,
+			CONTRAST,
+			SATURATION,
+			GAIN
+		};
+		enum mode
+		{
+			AUTOEXPOSURE		= 0,
+			MANUALEXPOSURE	= 1
+		};
 	
+	public:		
 		virtual bool				open(int = 0)								= 0;
 		virtual void				close()											= 0;
 		virtual bool 				isopen()										= 0;

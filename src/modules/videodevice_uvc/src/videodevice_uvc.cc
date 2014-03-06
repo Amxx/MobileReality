@@ -33,29 +33,25 @@ bool videodevices::UVC::open(int idx)
 	// =================================
 	// =        TODO : CASE -1         =
 	// =================================
-	char videodevice[32];
+	char videodevice[16];
 	sprintf(videodevice, "/dev/video%d", idx);
-
 	_videoIn = new struct vdIn;
 	if(init_videoIn(_videoIn, (char*) videodevice, width, height, fRate, format, 1, NULL) < 0 )
 	{
 		fprintf( stderr, "WARNING: camera UVC %d not detected.\n", idx);
    	goto error;
 	}
-
 	if (uvcGrab(_videoIn) < 0 || !_videoIn->framebuffer)
 	{
 		fprintf( stderr, "WARNING: could not get values from camera UVC %d.\n", idx);
    	goto error;
 	}
-	
 	_frame = cvCreateImage(cvSize(_videoIn->width, _videoIn->height), IPL_DEPTH_8U, 3);
 	if (!_frame)
 	{
 		fprintf( stderr, "ERROR: camera %d : cvCreateImage failed.\n", idx);
    	goto error;
 	}
-	
 	return true;
 	
 error:
@@ -83,7 +79,7 @@ void videodevices::UVC::grabFrame()
 {
 	if (uvcGrab(_videoIn) < 0 || !_videoIn->framebuffer)
 	{
-		 fprintf( stderr, "getRawDataPtr failed.\n");
+		 fprintf(stderr, "getRawDataPtr failed.\n");
 		 return;
 	}
 	
@@ -126,7 +122,6 @@ IplImage* videodevices::UVC::getFrame()
 IplImage* videodevices::UVC::frame()
 {
 	return _frame;
-	
 }
 
 
@@ -140,7 +135,7 @@ void videodevices::UVC::setParameter(control c, int v)
 }
 void videodevices::UVC::resetParameter(control c)
 {
-	v4l2ResetControl(_videoIn,  V4L2Ctrl(c));
+	v4l2ResetControl(_videoIn, V4L2Ctrl(c));
 }
 void videodevices::UVC::showParameters()
 {
@@ -155,6 +150,7 @@ int videodevices::UVC::V4L2Ctrl(control c)
 {
 	switch(c)
 	{
+		case MODE	:				return V4L2_CID_EXPOSURE_AUTO;
 		case EXPOSURE :		return V4L2_CID_EXPOSURE;
 		case BRIGHTNESS:	return V4L2_CID_BRIGHTNESS;
 		case CONTRAST:		return V4L2_CID_CONTRAST;

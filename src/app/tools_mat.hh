@@ -1,5 +1,5 @@
-#ifndef MATRICEOPERATION_HH
-#define MATRICEOPERATION_HH
+#ifndef TOOLS_MAT_HH
+#define TOOLS_MAT_HH
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/calib3d/calib3d.hpp>

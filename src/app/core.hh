@@ -21,7 +21,8 @@
 // =================================
 #include "camera.hh"
 #include "configuration.hh"
-#include "mattools.hh"
+#include "tools.hh"
+#include "tools_mat.hh"
 #include "envmap.hh"
 
 

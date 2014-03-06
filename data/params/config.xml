@@ -7,7 +7,7 @@
 
 <video-front-id>"1"</video-front-id>
 <params-front>data/params/c910.xml</params-front>
-<video-back-id>"0"</video-back-id>
+<video-back-id>"2"</video-back-id>
 <params-back>data/params/logitech.xml</params-back>
 
 

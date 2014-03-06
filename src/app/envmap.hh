@@ -4,7 +4,7 @@
 #include "camera.hh"
 #include "scanner.hh"
 
-#include "mattools.hh"
+#include "tools_mat.hh"
 
 class EnvMap
 {
