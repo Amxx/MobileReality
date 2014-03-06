@@ -35,14 +35,6 @@ bool videodevices::UVC::open(int idx)
 	// =================================
 	char videodevice[32];
 	sprintf(videodevice, "/dev/video%d", idx);
-	FILE* fd;
-	fd = fopen(videodevice, "r+");
-	if (!fd)
-	{
-		fprintf(stderr, "WARNING: Can't open device %s.\n", videodevice);
-		return false;
-	}
-	fclose(fd);
 
 	_videoIn = new struct vdIn;
 	if(init_videoIn(_videoIn, (char*) videodevice, width, height, fRate, format, 1, NULL) < 0 )
@@ -66,10 +58,11 @@ bool videodevices::UVC::open(int idx)
 	
 	return true;
 	
-	error:
-		delete _videoIn;
-		_videoIn = NULL;
-		return false;
+error:
+	delete _videoIn;
+	_videoIn = NULL;
+	return false;
+
 }
 
 void videodevices::UVC::close()
@@ -98,21 +91,22 @@ void videodevices::UVC::grabFrame()
 	{
 		#define CLIP(min, X, max) ( (X) > max ? max : (X) < min ? min : X)
 		
-		float y0 = (float) _videoIn->framebuffer[4*i + 0];
-		float cb = (float) _videoIn->framebuffer[4*i + 1];
-		float y1 = (float) _videoIn->framebuffer[4*i + 2];
-		float cr = (float) _videoIn->framebuffer[4*i + 3];
-		
-		static float YCbCr2RGB[9] = {	+1.067, +0.000, +1.596, \
-																	+1.067, -0.392, -0.813, \
-																	+1.067, +2.017, +0.000 };
+		float y0 = (float) CLIP(16, _videoIn->framebuffer[4*i + 0], 235);	y0 = (255/219)*(y0-16);
+		float cb = (float) CLIP(16, _videoIn->framebuffer[4*i + 1], 240);	cb = (127/112)*(cb-128);
+		float y1 = (float) CLIP(16, _videoIn->framebuffer[4*i + 2], 235);	y1 = (255/219)*(y1-16);
+		float cr = (float) CLIP(16, _videoIn->framebuffer[4*i + 3], 240);	cr = (127/112)*(cr-128);
+
+		static float YCbCr2RGB[9] = {	+1.000, +0.000, +1.402, \
+																	+1.000, -0.344, -0.714, \
+																	+1.000, +1.772, +0.000 };
 																	
-		float r0 = YCbCr2RGB[0]*(y0-16) + YCbCr2RGB[1]*(cb-128) + YCbCr2RGB[2]*(cr-128);
-		float g0 = YCbCr2RGB[3]*(y0-16) + YCbCr2RGB[4]*(cb-128) + YCbCr2RGB[5]*(cr-128);
-		float b0 = YCbCr2RGB[6]*(y0-16) + YCbCr2RGB[7]*(cb-128) + YCbCr2RGB[8]*(cr-128);
-		float r1 = YCbCr2RGB[0]*(y1-16) + YCbCr2RGB[2]*(cb-128) + YCbCr2RGB[2]*(cr-128);
-		float g1 = YCbCr2RGB[3]*(y1-16) + YCbCr2RGB[4]*(cb-128) + YCbCr2RGB[5]*(cr-128);
-		float b1 = YCbCr2RGB[6]*(y1-16) + YCbCr2RGB[7]*(cb-128) + YCbCr2RGB[8]*(cr-128);
+		float r0 = YCbCr2RGB[0]*y0 + YCbCr2RGB[1]*cb + YCbCr2RGB[2]*cr;
+		float g0 = YCbCr2RGB[3]*y0 + YCbCr2RGB[4]*cb + YCbCr2RGB[5]*cr;
+		float b0 = YCbCr2RGB[6]*y0 + YCbCr2RGB[7]*cb + YCbCr2RGB[8]*cr;
+		
+		float r1 = YCbCr2RGB[0]*y1 + YCbCr2RGB[2]*cb + YCbCr2RGB[2]*cr;
+		float g1 = YCbCr2RGB[3]*y1 + YCbCr2RGB[4]*cb + YCbCr2RGB[5]*cr;
+		float b1 = YCbCr2RGB[6]*y1 + YCbCr2RGB[7]*cb + YCbCr2RGB[8]*cr;
 		
 		_frame->imageData[6*i + 0] = (char) CLIP(0, b0, 255); // BLUE
 		_frame->imageData[6*i + 1] = (char) CLIP(0, g0, 255); // GREEN

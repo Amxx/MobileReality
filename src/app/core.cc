@@ -60,6 +60,7 @@ Core::Core(int argc, char* argv[]) :
 	_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	_cameras[0]->getParameter(VideoDevice::BRIGHTNESS	));
 	_cameras[0]->setParameter(VideoDevice::GAIN,				_cameras[0]->getParameter(VideoDevice::GAIN				));
 	
+	// _cameras[0]->showParameters();
 	
 	// ===============================================================
 	// =                   R E A D Y   T O   R U N                   =
@@ -119,8 +120,8 @@ int Core::draw()
 	if (_cameras[1]) _cameras[1]->grabFrame();
 	
 	#ifndef DISABLE_RENDERING
-	// glClearColor(0.1, 0.1, 0.1, 1.0);
-	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 	
 	// IMAGE DE FOND
 	// renderImg(cameras[0]->frame());
@@ -175,7 +176,7 @@ int Core::draw()
 	  // } catch (...) {
 			// std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
 		// }
-	// present();
+	present();
 	#endif
 	
 	#ifndef DISABLE_ENVMAP
@@ -186,13 +187,11 @@ int Core::draw()
 	
 	#ifndef DISABLE_VIEW
 	cv::imshow("Front",								cv::Mat(_cameras[0]->frame()));
-	// cv::imshow("Back",								cv::Mat(_cameras[1]->frame()));
-	// cv::imshow("Environnement Color", _envmap.color());
+	cv::imshow("Back",								cv::Mat(_cameras[1]->frame()));
+	cv::imshow("Environnement Color", _envmap.color());
 	// cv::imshow("Environnement Lumin", environnement.lumin());
-
 	cv::waitKey(30);
 	#endif
-
 	
 	return 1;
 }

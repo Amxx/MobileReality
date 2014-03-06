@@ -13,5 +13,5 @@
 
 
 <scanner>install/share/libscanner_zbar.so</scanner>
-<video>install/share/libvideodevice_opencv.so</video>
+<video>install/share/libvideodevice_uvc.so</video>
 </opencv_storage>
