@@ -207,7 +207,7 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				break;
 			}
 			
-			#define			CONTROL			VideoDevice::BRIGHTNESS
+			#define CONTROL VideoDevice::BRIGHTNESS
 			case SDLK_F1:		_cameras[0]->setParameter(CONTROL, 0);		break;
 			case SDLK_F2:		_cameras[0]->setParameter(CONTROL, 25);		break;
 			case SDLK_F3:		_cameras[0]->setParameter(CONTROL, 51);		break;

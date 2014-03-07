@@ -1,17 +1,15 @@
 <?xml version="1.0"?>
 <opencv_storage>
 
-<scale>"3.0"</scale>
-<subscale>"0.786667"</subscale>
-<obj-size>"3.0"</obj-size>
+	<scale>"3.0"</scale>
+	<subscale>"0.786667"</subscale>
+	<obj-size>"3.0"</obj-size>
 
-<video-front-id>"1"</video-front-id>
-<params-front>data/params/c910.xml</params-front>
-<video-back-id>"0"</video-back-id>
-<params-back>data/params/logitech.xml</params-back>
+	<video-front-id>"1"</video-front-id>
+	<params-front>data/params/c910.xml</params-front>
+	<video-back-id>"0"</video-back-id>
+	<params-back>data/params/logitech.xml</params-back>
 
-
-
-<scanner>install/share/libscanner_zbar.so</scanner>
-<video>install/share/libvideodevice_opencv.so</video>
+	<scanner>install/share/libscanner_zbar.so</scanner>
+	<video>install/share/libvideodevice_uvc.so</video>
 </opencv_storage>

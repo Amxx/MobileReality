@@ -145,7 +145,6 @@ void videodevices::UVC::showParameters()
 
 
 
-
 int videodevices::UVC::V4L2Ctrl(control c)
 {
 	switch(c)
