@@ -4,6 +4,11 @@
 #define  LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
 
 
+// #define DISABLE_CAMERA_0
+// #define DISABLE_CAMERA_1
+#define DISABLE_ENVMAP
+
+
 Core::Core(int argc, char* argv[]) :
 	gk::App(),
 	
@@ -41,37 +46,39 @@ Core::Core(int argc, char* argv[]) :
 	// ===============================================================
 		
 	VideoDevice* videodevice;
+	
 	#ifndef DISABLE_CAMERA_0
-	videodevice = loadVideoDevice(_config("video"));
-	if (videodevice == nullptr) exit(1);
-	_cameras[0] = new Camera(videodevice, cv::Matx33f(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0), _config("params-front"));
-	if (_config("video-front-id").size()) _cameras[0]->open(atoi(_config("video-front-id").c_str()));
-	_cameras[0]->openAndCalibrate(_config("params-front"), *_scanner);
+		videodevice = loadVideoDevice(_config("video"));
+		if (videodevice == nullptr) exit(1);
+		_cameras[0] = new Camera(videodevice, cv::Matx33f(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0), _config("params-front"));
+		if (_config("video-front-id").size()) _cameras[0]->open(atoi(_config("video-front-id").c_str()));
+		_cameras[0]->openAndCalibrate(_config("params-front"), *_scanner);
+	
+		_cameras[0]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
+		_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	_cameras[0]->getParameter(VideoDevice::BRIGHTNESS	));
+		_cameras[0]->setParameter(VideoDevice::GAIN,				_cameras[0]->getParameter(VideoDevice::GAIN				));
+		// _cameras[0]->showParameters();
+	
 	#endif
 	#ifndef DISABLE_CAMERA_1
-	videodevice = loadVideoDevice(_config("video"));
-	if (videodevice == nullptr) exit(1);
-	_cameras[1] = new Camera(videodevice,  cv::Matx33f(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0), _config("params-back"));
-	if (_config("video-back-id").size()) _cameras[1]->open(atoi(_config("video-back-id").c_str()));
-	_cameras[1]->openAndCalibrate(_config("params-back"), *_scanner);
+		videodevice = loadVideoDevice(_config("video"));
+		if (videodevice == nullptr) exit(1);
+		_cameras[1] = new Camera(videodevice,  cv::Matx33f(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0), _config("params-back"));
+		if (_config("video-back-id").size()) _cameras[1]->open(atoi(_config("video-back-id").c_str()));
+		_cameras[1]->openAndCalibrate(_config("params-back"), *_scanner);
+	
+		_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
+		_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	_cameras[1]->getParameter(VideoDevice::BRIGHTNESS	));
+		_cameras[1]->setParameter(VideoDevice::GAIN,				_cameras[1]->getParameter(VideoDevice::GAIN				));
+		// _cameras[1]->showParameters();
 	#endif		
-	
-	_cameras[0]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
-	_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	_cameras[0]->getParameter(VideoDevice::BRIGHTNESS	));
-	_cameras[0]->setParameter(VideoDevice::GAIN,				_cameras[0]->getParameter(VideoDevice::GAIN				));
-	// _cameras[0]->showParameters();
-	
-	_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
-	_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	_cameras[1]->getParameter(VideoDevice::BRIGHTNESS	));
-	_cameras[1]->setParameter(VideoDevice::GAIN,				_cameras[1]->getParameter(VideoDevice::GAIN				));
-	// _cameras[1]->showParameters();
 	
 	// ===============================================================
 	// =                   R E A D Y   T O   R U N                   =
 	// ===============================================================
 	
 	gk::AppSettings settings;
-	settings.setGLVersion(3,1);
+	settings.setGLVersion(3,3);
 	// settings.setFullscreen();
 	if(createWindow(800, 600, settings) < 0) closeWindow();
 	
@@ -105,8 +112,8 @@ int Core::draw()
 	if (_cameras[1]) _cameras[1]->grabFrame();
 	
 	#ifndef DISABLE_RENDERING
-	// glClearColor(0.1, 0.1, 0.1, 1.0);
-	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 	
 	// IMAGE DE FOND
 	// renderImg(cameras[0]->frame());
@@ -161,21 +168,27 @@ int Core::draw()
 	  // } catch (...) {
 			// std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
 		// }
-	// present();
+	present();
 	#endif
 	
 	#ifndef DISABLE_ENVMAP
 	cv::Matx33f modelview = ModelView(*_cameras[0], *_scanner);
-	// _envmap.addFrame(*_cameras[0], modelview);
+	_envmap.addFrame(*_cameras[0], modelview);
 	_envmap.addFrame(*_cameras[1], modelview);
 	#endif
 	
 	#ifndef DISABLE_VIEW
-	cv::imshow("Front",								cv::Mat(_cameras[0]->frame()));
-	cv::imshow("Back",								cv::Mat(_cameras[1]->frame()));
-	cv::imshow("Environnement Color", _envmap.color());
-	// cv::imshow("Environnement Lumin", environnement.lumin());
-	cv::waitKey(30);
+		#ifndef DISABLE_CAMERA_0
+			cv::imshow("Front",								cv::Mat(_cameras[0]->frame()));
+		#endif
+		#ifndef DISABLE_CAMERA_1
+			cv::imshow("Back",								cv::Mat(_cameras[1]->frame()));
+		#endif
+		#ifndef DISABLE_ENVMAP
+			cv::imshow("Environnement Color", _envmap.color());
+			// cv::imshow("Environnement Lumin", environnement.lumin());
+		#endif
+		cv::waitKey(3);
 	#endif
 	
 	return 1;
