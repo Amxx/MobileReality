@@ -104,12 +104,12 @@ void videodevices::UVC::grabFrame()
 		float g1 = YCbCr2RGB[3]*y1 + YCbCr2RGB[4]*cb + YCbCr2RGB[5]*cr;
 		float b1 = YCbCr2RGB[6]*y1 + YCbCr2RGB[7]*cb + YCbCr2RGB[8]*cr;
 		
-		_frame->imageData[6*i + 0] = (char) CLIP(0, b0, 255); // BLUE
-		_frame->imageData[6*i + 1] = (char) CLIP(0, g0, 255); // GREEN
-		_frame->imageData[6*i + 2] = (char) CLIP(0, r0, 255); // RED
-		_frame->imageData[6*i + 3] = (char) CLIP(0, b1, 255); // BLUE
-		_frame->imageData[6*i + 4] = (char) CLIP(0, g1, 255); // GREEN
-		_frame->imageData[6*i + 5] = (char) CLIP(0, r1, 255); // RED
+		_frame->imageData[6*i + 0] = (char) CLIP(0, b0, 255);
+		_frame->imageData[6*i + 1] = (char) CLIP(0, g0, 255);
+		_frame->imageData[6*i + 2] = (char) CLIP(0, r0, 255);
+		_frame->imageData[6*i + 3] = (char) CLIP(0, b1, 255);
+		_frame->imageData[6*i + 4] = (char) CLIP(0, g1, 255);
+		_frame->imageData[6*i + 5] = (char) CLIP(0, r1, 255);
 		
 	}
 }

@@ -6,9 +6,9 @@
 	<obj-size>"3.0"</obj-size>
 
 	<video-front-id>"1"</video-front-id>
-	<params-front>data/params/c910.xml</params-front>
+	<params-front>data/params/logitech.xml</params-front>
 	<video-back-id>"0"</video-back-id>
-	<params-back>data/params/logitech.xml</params-back>
+	<params-back>data/params/c910.xml</params-back>
 
 	<scanner>install/share/libscanner_zbar.so</scanner>
 	<video>install/share/libvideodevice_uvc.so</video>

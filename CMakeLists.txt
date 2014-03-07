@@ -50,7 +50,8 @@ endforeach(module ${MODULES})
 # =												BUILDING APPLICATION												=
 # =====================================================================
 
-add_subdirectory(src)
+add_subdirectory(src/app)
+add_subdirectory(src/shaders)
 
 
 

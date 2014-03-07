@@ -7,8 +7,14 @@
 // =   G K I T   I N C L U D E S   =
 // =================================
 #include "App.h"
+#include "Image.h"
+#include "ImageIO.h"
+#include "ImageManager.h"
+#include "Mesh.h"
+#include "MeshIO.h"
 #include "ProgramManager.h"
 
+#include "GL/GLBasicMesh.h"
 #include "GL/GLBuffer.h"
 #include "GL/GLFramebuffer.h"
 #include "GL/GLQuery.h"
@@ -30,30 +36,30 @@ class Core : public gk::App
 {	
 	private:
 		// Acquisition and environnement processing
-		std::vector<Camera*>		_cameras;
-		Configuration						_config;
-		EnvMap									_envmap;
-		Scanner*								_scanner;
+		std::vector<Camera*>									_cameras;
+		Configuration													_config;
+		EnvMap																_envmap;
+		Scanner*															_scanner;
 		
 		// Real scene description
-		float										_scale;
-		float										_subscale;
-		float										_objsize;
+		float																	_scale;
+		float																	_subscale;
+		float																	_objsize;
 		
 		// Rendering
-		gk::GLProgram*					_GLProgram;
-		gk::GLBuffer*						_GLPositions;
-		gk::GLBuffer 						_GLNormals;
+		std::map<std::string, gk::GLProgram*>	_GLPrograms;
+		std::map<std::string,	gk::GLTexture*>	_GLTextures;
 		
+		gk::GLBasicMesh*											_mesh;
+	
+		// gk::GLBuffer*						_GLPositions;
+		// gk::GLBuffer 						_GLNormals;
+	
 		
-// static GLuint            cameraImageTextureID;
-// static GLuint            windowID;
-// static int               window_width      = 640;
-// static int               window_height     = 480;
-// static float          		obj_c[3]          = { 0.482f,  0.627f, 0.357f };
-// static float             light_spe[4]     	= { 1.000f,  1.000f, 1.000f, 1.000f };
-// static float             light_dif[4]      = { 1.000f,  1.000f, 1.000f, 1.000f };
-// static float             light_pos[4]      = { 0.000f, 30.000f, 0.000f, 1.000f };
+		// static float          		obj_c[3]          = { 0.482f,  0.627f, 0.357f };
+		// static float             light_spe[4]     	= { 1.000f,  1.000f, 1.000f, 1.000f };
+		// static float             light_dif[4]      = { 1.000f,  1.000f, 1.000f, 1.000f };
+		// static float             light_pos[4]      = { 0.000f, 30.000f, 0.000f, 1.000f };
 
 
 	

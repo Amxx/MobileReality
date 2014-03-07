@@ -1,13 +1,27 @@
 #include "core.hh"
 
-// ============ MACROS ============
+// ############################################################################
+// #                                  MACROS                                  #
+// ############################################################################
+
 #define  LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
 
+// ############################################################################
+// #                                  DEFINE                                  #
+// ############################################################################
 
-// #define DISABLE_CAMERA_0
-// #define DISABLE_CAMERA_1
-#define DISABLE_ENVMAP
+// #define 	DISABLE_CAMERA_0
+#define 	DISABLE_CAMERA_1
+#define 	DISABLE_ENVMAP
+#define 	DISABLE_VIEW
+#define 	ROTATE_FRAME
 
+
+#define		CONTROL		VideoDevice::BRIGHTNESS
+			
+// ############################################################################
+// #                                 METHODE                                  #
+// ############################################################################
 
 Core::Core(int argc, char* argv[]) :
 	gk::App(),
@@ -44,49 +58,64 @@ Core::Core(int argc, char* argv[]) :
 	// ===============================================================
 	// =                   L O A D   C A M E R A S                   =
 	// ===============================================================
-		
-	VideoDevice* videodevice;
-	
-	#ifndef DISABLE_CAMERA_0
-		videodevice = loadVideoDevice(_config("video"));
-		if (videodevice == nullptr) exit(1);
-		_cameras[0] = new Camera(videodevice, cv::Matx33f(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0), _config("params-front"));
-		if (_config("video-front-id").size()) _cameras[0]->open(atoi(_config("video-front-id").c_str()));
-		_cameras[0]->openAndCalibrate(_config("params-front"), *_scanner);
-	
-		_cameras[0]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
-		_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	_cameras[0]->getParameter(VideoDevice::BRIGHTNESS	));
-		_cameras[0]->setParameter(VideoDevice::GAIN,				_cameras[0]->getParameter(VideoDevice::GAIN				));
-		// _cameras[0]->showParameters();
-	
+	#if !defined(DISABLE_CAMERA_0) || !defined(DISABLE_CAMERA_1)
+		VideoDevice* videodevice;
+		#ifndef DISABLE_CAMERA_0
+			videodevice = loadVideoDevice(_config("video"));
+			if (videodevice == nullptr) exit(1);
+			_cameras[0] = new Camera(videodevice, cv::Matx33f(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0), _config("params-front"));
+			if (_config("video-front-id").size()) _cameras[0]->open(atoi(_config("video-front-id").c_str()));
+			_cameras[0]->openAndCalibrate(_config("params-front"), *_scanner);
+		#endif
+		#ifndef DISABLE_CAMERA_1
+			videodevice = loadVideoDevice(_config("video"));
+			if (videodevice == nullptr) exit(1);
+			_cameras[1] = new Camera(videodevice,  cv::Matx33f(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0), _config("params-back"));
+			if (_config("video-back-id").size()) _cameras[1]->open(atoi(_config("video-back-id").c_str()));
+			_cameras[1]->openAndCalibrate(_config("params-back"), *_scanner);
+		#endif
 	#endif
-	#ifndef DISABLE_CAMERA_1
-		videodevice = loadVideoDevice(_config("video"));
-		if (videodevice == nullptr) exit(1);
-		_cameras[1] = new Camera(videodevice,  cv::Matx33f(-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0), _config("params-back"));
-		if (_config("video-back-id").size()) _cameras[1]->open(atoi(_config("video-back-id").c_str()));
-		_cameras[1]->openAndCalibrate(_config("params-back"), *_scanner);
 	
-		_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
-		_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	_cameras[1]->getParameter(VideoDevice::BRIGHTNESS	));
-		_cameras[1]->setParameter(VideoDevice::GAIN,				_cameras[1]->getParameter(VideoDevice::GAIN				));
-		// _cameras[1]->showParameters();
-	#endif		
+	// ===============================================================
+	// =                  S E T U P   C A M E R A S                  =
+	// ===============================================================
+	#if !defined(DISABLE_CAMERA_0) || !defined(DISABLE_CAMERA_1)
+		std::cout << "Waiting for camera to set autoexposure ... " << std::flush;
+		sleep(1);
+		std::cout << "done" << std::endl;
 	
+		int brightness, gain;
+	
+		#ifndef DISABLE_CAMERA_0
+			brightness	= _cameras[0]->getParameter(VideoDevice::BRIGHTNESS);
+			gain				= _cameras[0]->getParameter(VideoDevice::GAIN);
+			_cameras[0]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
+			_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:128);
+			_cameras[0]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:16);
+			// _cameras[0]->showParameters();
+		#endif
+		#ifndef DISABLE_CAMERA_1
+			brightness	= _cameras[1]->getParameter(VideoDevice::BRIGHTNESS);
+			gain				= _cameras[1]->getParameter(VideoDevice::GAIN);
+			_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
+			_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:128);
+			_cameras[1]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:16);
+			// _cameras[1]->showParameters();
+		#endif		
+	#endif
+
 	// ===============================================================
 	// =                   R E A D Y   T O   R U N                   =
 	// ===============================================================
 	
 	gk::AppSettings settings;
-	settings.setGLVersion(3,3);
+	settings.setGLVersion(3,1);
 	// settings.setFullscreen();
-	if(createWindow(800, 600, settings) < 0) closeWindow();
+	if(createWindow(640, 480, settings) < 0) closeWindow();
 	
 }
 
-
-
-
+// ############################################################################
 
 Core::~Core()
 {
@@ -95,30 +124,100 @@ Core::~Core()
 			camera->close();
 }
 
+// ############################################################################
+
 int Core::init()
 {
+	
+	glClearColor(0.1, 0.1, 0.1, 1.0);
+	
+	// ===============================================================
+	// =        L O A D   S H A D E R S   A S   P R O G R A M        =
+	// ===============================================================
+	
+	gk::programPath("install/shaders");
+	
+	_GLPrograms["background"] = gk::createProgram("background.glsl");
+	if (_GLPrograms["background"] == gk::GLProgram::null()) return -1;
+	
+	_GLPrograms["rendering"] = gk::createProgram("rendering.glsl");
+	if (_GLPrograms["rendering"] == gk::GLProgram::null()) return -1;
+	
+	glBindAttribLocation(_GLPrograms["rendering"]->name, 0, "position");
+	glBindAttribLocation(_GLPrograms["rendering"]->name, 1, "normal");
+	
+	// ===============================================================
+	// =                C R E A T E   T E X T U R E S                =
+	// ===============================================================
+	
+	_GLTextures["frame0"] = (new gk::GLTexture())->createTexture2D(0, 640, 480);
+	
+	// ===============================================================
+	// =                    C R E A T E   M E S H                    =
+	// ===============================================================
+	
+	gk::Mesh *mesh = gk::MeshIO::readOBJ("bigguy.obj");
+	if (mesh == nullptr) return -1;
+	
+	_mesh = new gk::GLBasicMesh(GL_TRIANGLES, mesh->indices.size());
+	_mesh->createBuffer(0, mesh->positions);
+	_mesh->createBuffer(1, mesh->normals);
+	_mesh->createBuffer(2, mesh->texcoords);
+	_mesh->createIndexBuffer(mesh->indices);
+	
+	delete mesh;
+	
+	
+	
 	return 1;
 }
   
+// ############################################################################
+// ############################################################################
 
 int Core::quit()
 {
 	return 1;
 }
 
+// ############################################################################
+
+
+
+
 int Core::draw()
 {
-	if (_cameras[0]) _cameras[0]->grabFrame();
-	if (_cameras[1]) _cameras[1]->grabFrame();
+	#ifndef DISABLE_CAMERA_0
+		if (_cameras[0]) _cameras[0]->grabFrame();
+	#endif
+	#ifndef DISABLE_CAMERA_1
+		if (_cameras[1]) _cameras[1]->grabFrame();
+	#endif
+
+	std::vector<Symbol> symbols = _scanner->scan(_cameras[0]->frame());	
 	
 	#ifndef DISABLE_RENDERING
-	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 	
-	// IMAGE DE FOND
-	// renderImg(cameras[0]->frame());
+	// ===============================================================
+	// =               B A C K G R O U N D   F R A M E               =
+	// ===============================================================
 	
-	// BORDURES DES QRCODES DETECTES
+	glBindTexture(_GLTextures["frame0"]->target, _GLTextures["frame0"]->name);
+	glTexSubImage2D(_GLTextures["frame0"]->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
+	
+	glUseProgram(_GLPrograms["background"]->name);
+	_GLPrograms["background"]->sampler("frame") = 0;
+	#ifndef ROTATE_FRAME
+		// glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	#else
+		// glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
+	#endif
+	
+	// ===============================================================
+	// =                  Q R C O D E ' S   E D G E                  =
+	// ===============================================================
+	
 	// glMatrixMode(GL_PROJECTION);
 	// glLoadIdentity();
 	// gluOrtho2D(0.0, (GLdouble) cameras[0]->frame()->width, (GLdouble)cameras[0]->frame()->height, 0.0);
@@ -134,22 +233,34 @@ int Core::draw()
 		// glEnd();
 	// }
 	
+	// ===============================================================
+	// =                S C E N E   R E N D E R I N G                =
+	// ===============================================================
 	
-	// static 				int						display	= 0;
-	// static 				cv::Matx44f		view		= cv::Matx44f();
-	// static 				cv::Matx44f		model		= cv::Matx44f();
-	// static const	cv::Matx44f		toGL		= cv::Matx44f(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0).t();
-	// static const	cv::Matx44f		proj		= projectionFromIntrinsic(cameras[0]->A(), window_width, window_height, 1.0, 10000.0).t();
+	static 				int							display	= 0;
+	static const	gk::Transform		proj		= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), windowWidth(), windowHeight(), 1.0, 10000.0));
+	static 				gk::Transform		view		= gk::Transform();
+	static 				gk::Transform		model		= gk::Transform();
+	static const	gk::Transform		toGL		= gk::Transform(gk::Matrix4x4(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0));	//.t()
 	
-	// CALCUL
-	// for (Symbol& symbol : symbols)
-		// try {
+	for (Symbol& symbol : symbols)
+		try {
 			// LEGACY MODE FOR CUBE
-			// try 				{	model = parseSymbolToModel(symbol.data, scale).t();																}
-			// catch (...)	{ model = parseMatx33f_tr(symbol.data, cv::Matx31f(scale/2, scale/2, scale/2)).t(); }
+			try 				{	model = cv2gkit(parseSymbolToModel(symbol.data, _scale));																	}
+			catch (...)	{ model = cv2gkit(parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2)));	}
 			
-			// symbol.extrinsic(cameras[0]->A(), cameras[0]->K(), Scanner::pattern(scale, subscale));
-			// view =	viewFromSymbol(symbol.rvec, symbol.tvec).t();
+			symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
+			view = cv2gkit(viewFromSymbol(symbol.rvec, symbol.tvec));
+			
+			
+			glUseProgram(_GLPrograms["rendering"]->name);
+			
+			_GLPrograms["rendering"]->uniform("scale") 			= 0.1f;
+			_GLPrograms["rendering"]->uniform("mvpMatrix")	= (proj * view * model * toGL).matrix();
+			
+			_mesh->draw();
+			
+			LOGHERE 
 			
 			// glMatrixMode(GL_PROJECTION);
 			// glLoadIdentity();
@@ -165,43 +276,38 @@ int Core::draw()
 			// glEnable(GL_LIGHTING);
 			// glutSolidTeapot(obj);
 			
-	  // } catch (...) {
-			// std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
-		// }
+			
+	  } catch (...) {
+			std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
+		}
+		
 	present();
 	#endif
 	
 	#ifndef DISABLE_ENVMAP
-	cv::Matx33f modelview = ModelView(*_cameras[0], *_scanner);
-	_envmap.addFrame(*_cameras[0], modelview);
-	_envmap.addFrame(*_cameras[1], modelview);
+		cv::Matx33f modelview = ModelView(*_cameras[0], *_scanner);
+		_envmap.addFrame(*_cameras[0], modelview);
+		_envmap.addFrame(*_cameras[1], modelview);
 	#endif
 	
 	#ifndef DISABLE_VIEW
 		#ifndef DISABLE_CAMERA_0
-			cv::imshow("Front",								cv::Mat(_cameras[0]->frame()));
+			cv::imshow("camera 0",								cv::Mat(_cameras[0]->frame()));
 		#endif
 		#ifndef DISABLE_CAMERA_1
-			cv::imshow("Back",								cv::Mat(_cameras[1]->frame()));
+			cv::imshow("camera 1",								cv::Mat(_cameras[1]->frame()));
 		#endif
 		#ifndef DISABLE_ENVMAP
 			cv::imshow("Environnement Color", _envmap.color());
-			// cv::imshow("Environnement Lumin", environnement.lumin());
+			cv::imshow("Environnement Lumin", environnement.lumin());
 		#endif
-		cv::waitKey(3);
+		cv::waitKey(30);
 	#endif
 	
 	return 1;
 }
 
-
-
-
-
-
-
-
-
+// ############################################################################
 
 void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 {
@@ -220,19 +326,54 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				break;
 			}
 			
-			#define CONTROL VideoDevice::BRIGHTNESS
-			case SDLK_F1:		_cameras[0]->setParameter(CONTROL, 0);		break;
-			case SDLK_F2:		_cameras[0]->setParameter(CONTROL, 25);		break;
-			case SDLK_F3:		_cameras[0]->setParameter(CONTROL, 51);		break;
-			case SDLK_F4:		_cameras[0]->setParameter(CONTROL, 76);		break;
-			case SDLK_F5:		_cameras[0]->setParameter(CONTROL, 102);	break;
-			case SDLK_F6:		_cameras[0]->setParameter(CONTROL, 127);	break;
-			case SDLK_F7:		_cameras[0]->setParameter(CONTROL, 153);	break;
-			case SDLK_F8:		_cameras[0]->setParameter(CONTROL, 178);	break;
-			case SDLK_F9:		_cameras[0]->setParameter(CONTROL, 204);	break;
-			case SDLK_F10:	_cameras[0]->setParameter(CONTROL, 229);	break;
-			case SDLK_F11:	_cameras[0]->setParameter(CONTROL, 255);	break;
-			case 13:				_cameras[0]->resetParameter(CONTROL);			break;
+			case SDLK_F1:
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 0);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 0);
+				break;
+			case SDLK_F2:
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 25);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 25);
+				break;
+			case SDLK_F3:
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 51);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 51);
+				break;
+			case SDLK_F4:
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 76);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 76);
+				break;
+			case SDLK_F5:
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 102);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 102);
+				break;
+			case SDLK_F6:
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 127);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 127);
+				break;
+			case SDLK_F7:
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 153);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 153);
+				break;
+			case SDLK_F8:
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 178);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 178);
+				break;
+			case SDLK_F9:
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 204);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 204);
+				break;
+			case SDLK_F10:
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 229);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 229);
+				break;
+			case SDLK_F11:	
+				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 255);
+				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 255);
+				break;
+			case 13:
+				if (_cameras[0]) _cameras[0]->resetParameter(CONTROL);
+				if (_cameras[1]) _cameras[1]->resetParameter(CONTROL);
+				break;
 			
 			case SDLK_ESCAPE:
 				closeWindow();
@@ -242,12 +383,23 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				break;
 		}
 }
+
+// ############################################################################
+
 void Core::processWindowResize(SDL_WindowEvent &event)
 {
 }
+
+// ############################################################################
+
 void Core::processMouseButtonEvent(SDL_MouseButtonEvent &event)
 {
 }
+
+// ############################################################################
+
 void Core::processMouseMotionEvent(SDL_MouseMotionEvent &event)
 {
 }	
+
+
