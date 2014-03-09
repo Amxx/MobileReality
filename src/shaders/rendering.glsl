@@ -20,12 +20,8 @@ out				vec2				vertex_texcoord;
 
 void main()
 {
-
-
 	gl_Position				= (mvpMatrix	* vec4(position, 1.0));
-	
 	light_position		= (mvMatrix		* vec4(0.0, 100.0, 0.0, 1.0)).xyz;
-	
 	vertex_position 	= (mvMatrix		* vec4(position, 1.0)).xyz;
 	vertex_normal			= (mvnMatrix	* vec4(normal, 1.0)).xyz;
 	vertex_texcoord		= texcoord.st;

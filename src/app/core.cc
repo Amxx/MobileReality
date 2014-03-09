@@ -138,7 +138,7 @@ int Core::init()
 	
 	_GLPrograms["background"] = gk::createProgram("background.glsl");
 	if (_GLPrograms["background"] == gk::GLProgram::null()) return -1;
-	
+
 	_GLPrograms["rendering"] = gk::createProgram("rendering.glsl");
 	if (_GLPrograms["rendering"] == gk::GLProgram::null()) return -1;
 	
@@ -211,27 +211,6 @@ int Core::draw()
 	_GLPrograms["background"]->sampler("frame") = 0;
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	
-	
-	// ===============================================================
-	// =                  Q R C O D E ' S   E D G E                  =
-	// ===============================================================
-	
-	// glMatrixMode(GL_PROJECTION);
-	// glLoadIdentity();
-	// gluOrtho2D(0.0, (GLdouble) cameras[0]->frame()->width, (GLdouble)cameras[0]->frame()->height, 0.0);
-	// glMatrixMode(GL_MODELVIEW);
-	// glLoadIdentity();
-	
-	// for (Symbol& symbol : symbols)
-	// {
-		// glColor3f(0.5f, 1.0f, 0.5f);
-		// glBegin(GL_LINE_LOOP);
-		// for (const cv::Matx21f& pt : symbol.pts)
-			// glVertex2f(pt(0), pt(1));
-		// glEnd();
-	// }
-	
-	
 	// ===============================================================
 	// =                S C E N E   R E N D E R I N G                =
 	// ===============================================================
@@ -244,7 +223,6 @@ int Core::draw()
 	static 				gk::Transform		model		= gk::Transform();
 	static const	gk::Transform		toGL		= gk::Transform(gk::Matrix4x4(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0));	//.t()
 	static const	gk::Transform		scale		= gk::Scale(atof(_config("obj-scale").c_str()));
-
 
 	
 	glUseProgram(_GLPrograms["rendering"]->name);
