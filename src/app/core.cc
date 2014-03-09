@@ -1,27 +1,26 @@
 #include "core.hh"
 
-// ############################################################################
-// #                                  MACROS                                  #
-// ############################################################################
+// ############################################################################
+// #                                  MACROS                                  #
+// ############################################################################
 
 #define  LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
 
-// ############################################################################
-// #                                  DEFINE                                  #
-// ############################################################################
+// ############################################################################
+// #                                  DEFINE                                  #
+// ############################################################################
 
 // #define 	DISABLE_CAMERA_0
 #define 	DISABLE_CAMERA_1
 #define 	DISABLE_ENVMAP
 #define 	DISABLE_VIEW
-#define 	ROTATE_FRAME
 
 
 #define		CONTROL		VideoDevice::BRIGHTNESS
 			
-// ############################################################################
-// #                                 METHODE                                  #
-// ############################################################################
+// ############################################################################
+// #                                 METHODE                                  #
+// ############################################################################
 
 Core::Core(int argc, char* argv[]) :
 	gk::App(),
@@ -115,7 +114,7 @@ Core::Core(int argc, char* argv[]) :
 	
 }
 
-// ############################################################################
+// ############################################################################
 
 Core::~Core()
 {
@@ -124,7 +123,7 @@ Core::~Core()
 			camera->close();
 }
 
-// ############################################################################
+// ############################################################################
 
 int Core::init()
 {
@@ -145,6 +144,7 @@ int Core::init()
 	
 	glBindAttribLocation(_GLPrograms["rendering"]->name, 0, "position");
 	glBindAttribLocation(_GLPrograms["rendering"]->name, 1, "normal");
+	glBindAttribLocation(_GLPrograms["rendering"]->name, 1, "texcoord");
 	
 	// ===============================================================
 	// =                C R E A T E   T E X T U R E S                =
@@ -156,6 +156,7 @@ int Core::init()
 	// =                    C R E A T E   M E S H                    =
 	// ===============================================================
 	
+	// gk::Mesh *mesh = gk::MeshIO::readOBJ("cube.obj");
 	gk::Mesh *mesh = gk::MeshIO::readOBJ("bigguy.obj");
 	if (mesh == nullptr) return -1;
 	
@@ -172,15 +173,15 @@ int Core::init()
 	return 1;
 }
   
-// ############################################################################
-// ############################################################################
+// ############################################################################
+// ############################################################################
 
 int Core::quit()
 {
 	return 1;
 }
 
-// ############################################################################
+// ############################################################################
 
 
 
@@ -208,11 +209,8 @@ int Core::draw()
 	
 	glUseProgram(_GLPrograms["background"]->name);
 	_GLPrograms["background"]->sampler("frame") = 0;
-	#ifndef ROTATE_FRAME
-		// glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	#else
-		// glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
-	#endif
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	
 	
 	// ===============================================================
 	// =                  Q R C O D E ' S   E D G E                  =
@@ -233,15 +231,25 @@ int Core::draw()
 		// glEnd();
 	// }
 	
+	
 	// ===============================================================
 	// =                S C E N E   R E N D E R I N G                =
 	// ===============================================================
 	
+	glClear(GL_DEPTH_BUFFER_BIT);	
+
 	static 				int							display	= 0;
 	static const	gk::Transform		proj		= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), windowWidth(), windowHeight(), 1.0, 10000.0));
 	static 				gk::Transform		view		= gk::Transform();
 	static 				gk::Transform		model		= gk::Transform();
 	static const	gk::Transform		toGL		= gk::Transform(gk::Matrix4x4(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0));	//.t()
+	static const	gk::Transform		scale		= gk::Scale(atof(_config("obj-scale").c_str()));
+
+
+	
+	glUseProgram(_GLPrograms["rendering"]->name);
+	_GLPrograms["rendering"]->uniform("obj_color")		= gk::VecColor(0.5, 0.5, 0.5);
+	_GLPrograms["rendering"]->uniform("light_color")	= gk::VecColor(1.0, 0.8, 0.5);
 	
 	for (Symbol& symbol : symbols)
 		try {
@@ -252,31 +260,11 @@ int Core::draw()
 			symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
 			view = cv2gkit(viewFromSymbol(symbol.rvec, symbol.tvec));
 			
-			
-			glUseProgram(_GLPrograms["rendering"]->name);
-			
-			_GLPrograms["rendering"]->uniform("scale") 			= 0.1f;
-			_GLPrograms["rendering"]->uniform("mvpMatrix")	= (proj * view * model * toGL).matrix();
-			
+			_GLPrograms["rendering"]->uniform("mvMatrix")		= (       view * model * scale).matrix();
+			_GLPrograms["rendering"]->uniform("mvnMatrix")	= (       view * model * scale).normalMatrix();
+			_GLPrograms["rendering"]->uniform("mvpMatrix")	= (proj * view * model * scale).matrix();
 			_mesh->draw();
-			
-			LOGHERE 
-			
-			// glMatrixMode(GL_PROJECTION);
-			// glLoadIdentity();
-			// glMultMatrixf(&proj(0,0));
-		
-			// glMatrixMode(GL_MODELVIEW);
-			// glLoadIdentity();
-			// glMultMatrixf(&view(0, 0));
-			// glMultMatrixf(&model(0, 0));
-			// glMultMatrixf(&toGL(0, 0));
-		
-			// glColor3f(obj_c[0], obj_c[1], obj_c[2]);
-			// glEnable(GL_LIGHTING);
-			// glutSolidTeapot(obj);
-			
-			
+
 	  } catch (...) {
 			std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
 		}
@@ -307,7 +295,7 @@ int Core::draw()
 	return 1;
 }
 
-// ############################################################################
+// ############################################################################
 
 void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 {
@@ -384,19 +372,19 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 		}
 }
 
-// ############################################################################
+// ############################################################################
 
 void Core::processWindowResize(SDL_WindowEvent &event)
 {
 }
 
-// ############################################################################
+// ############################################################################
 
 void Core::processMouseButtonEvent(SDL_MouseButtonEvent &event)
 {
 }
 
-// ############################################################################
+// ############################################################################
 
 void Core::processMouseMotionEvent(SDL_MouseMotionEvent &event)
 {

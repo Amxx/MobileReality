@@ -49,17 +49,20 @@ void renderImg(IplImage* img)
   glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_RECTANGLE_ARB);
+	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluOrtho2D(0.0, (GLdouble)img->width, 0.0, (GLdouble)img->height);	
+	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
   glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+	
 	if(img->nChannels == 3)
 	  glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, img->width, img->height, 0, GL_BGR, GL_UNSIGNED_BYTE, img->imageData);
 	else if(img->nChannels == 4)
 		glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, img->width, img->height, 0, GL_BGRA, GL_UNSIGNED_BYTE, img->imageData);
-  glBegin(GL_QUADS);
+	glBegin(GL_QUADS);  
 		glTexCoord2i(0,          img->height);  glVertex2i(0,             0);
 		glTexCoord2i(img->width, img->height);  glVertex2i(window_width,  0);
 		glTexCoord2i(img->width, 0);            glVertex2i(window_width,  window_height);

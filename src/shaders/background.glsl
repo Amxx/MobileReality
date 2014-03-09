@@ -1,15 +1,13 @@
-#version 330
+#version 140
 
 #ifdef VERTEX_SHADER
+uniform		int					offset;
 out				vec2				texcoords;
 
 void main()
 {
-	vec4 pos[8] 		= vec4[8](vec4(-1.0, -1.0, +0.0, +1.0), vec4(+1.0, -1.0, +0.0, +1.0), vec4(-1.0, +1.0, +0.0, +1.0), vec4(+1.0, +1.0, +0.0, +1.0),
-														vec4(-1.0, -1.0, +0.0, +1.0), vec4(+1.0, -1.0, +0.0, +1.0), vec4(-1.0, +1.0, +0.0, +1.0), vec4(+1.0, +1.0, +0.0, +1.0));
-														
-	vec2 coords[8]	= vec2[8](vec2(0.0, 0.0), vec2(1.0, 0.0), vec2(0.0, 1.0), vec2(1.0, 1.0),
-														vec2(1.0, 1.0), vec2(0.0, 1.0), vec2(1.0, 0.0), vec2(0.0, 0.0));
+	vec4 pos[4] 		= vec4[4](vec4(-1.0, -1.0, +0.0, +1.0), vec4(+1.0, -1.0, +0.0, +1.0), vec4(-1.0, +1.0, +0.0, +1.0), vec4(+1.0, +1.0, +0.0, +1.0));
+	vec2 coords[4]	= vec2[4](vec2(0.0, 1.0),								vec2(1.0, 1.0),								vec2(0.0, 0.0),								vec2(1.0, 0.0)							);
 	
 	gl_Position = pos[gl_VertexID];
 	texcoords		= coords[gl_VertexID];
