@@ -13,11 +13,13 @@
 // #define 	DISABLE_CAMERA_0
 // #define 	DISABLE_CAMERA_1
 // #define 	DISABLE_ENVMAP
+// #define	DUAL_ACQUISITION
 #define 	DISABLE_VIEW
 
 
-#define		CONTROL		VideoDevice::BRIGHTNESS
-			
+#define		CONTROL					VideoDevice::BRIGHTNESS
+#define 	ENVMAP_SIZE			cv::Size(128, 128)
+
 // ############################################################################
 // #                                 METHODE                                  #
 // ############################################################################
@@ -26,7 +28,7 @@ Core::Core(int argc, char* argv[]) :
 	gk::App(),
 	
 	_cameras(2),
-	_envmap(cv::Size(640, 480)),
+	_envmap(ENVMAP_SIZE),
 	
 	_scale(6.0),
 	_subscale(236.0/300.0),
@@ -36,6 +38,8 @@ Core::Core(int argc, char* argv[]) :
 	// =   C O N F I G U R A T I O N   I N I T I A L I S A T I O N   =
 	// ===============================================================
 		
+	_config("obj")					= "cube.obj";
+
 	_config("params-front")	= "params/default-front.xml";
 	_config("params-back")	= "params/default-back.xml";
 	_config("video")				= "install/share/libvideodevice_uvc.so";
@@ -151,14 +155,13 @@ int Core::init()
 	// ===============================================================
 	
 	_GLTextures["frame0"] = (new gk::GLTexture())->createTexture2D(0, 640, 480);
-	_GLTextures["envmap"] = (new gk::GLTexture())->createTexture2D(1, 640, 480);
+	_GLTextures["envmap"] = (new gk::GLTexture())->createTexture2D(1, ENVMAP_SIZE.width, ENVMAP_SIZE.height);
 	
 	// ===============================================================
 	// =                    C R E A T E   M E S H                    =
 	// ===============================================================
 	
-	gk::Mesh *mesh = gk::MeshIO::readOBJ("cube.obj");
-	// gk::Mesh *mesh = gk::MeshIO::readOBJ("bigguy.obj");
+	gk::Mesh *mesh = gk::MeshIO::readOBJ(_config("obj"));
 	if (mesh == nullptr) return -1;
 	
 	_mesh = new gk::GLBasicMesh(GL_TRIANGLES, mesh->indices.size());
@@ -175,7 +178,6 @@ int Core::init()
 }
   
 // ############################################################################
-// ############################################################################
 
 int Core::quit()
 {
@@ -184,90 +186,99 @@ int Core::quit()
 
 // ############################################################################
 
-
-
-
 int Core::draw()
 {
+	// ===============================================================
+	// =                 G R A B I N G   I M A G E S                 =
+	// ===============================================================
 	#ifndef DISABLE_CAMERA_0
 		if (_cameras[0]) _cameras[0]->grabFrame();
 	#endif
 	#ifndef DISABLE_CAMERA_1
 		if (_cameras[1]) _cameras[1]->grabFrame();
 	#endif
-
 	
+	// ===============================================================
+	// =                R E A D I N G   S Y M B O L S                =
+	// ===============================================================
+	std::vector<Symbol> symbols = _scanner->scan(_cameras[0]->frame());	
+
+	// ===============================================================
+	// =                B U I L D I N G   E N V M A P                =
+	// ===============================================================
 	#ifndef DISABLE_ENVMAP
 		cv::Matx33f modelview = ModelView(*_cameras[0], *_scanner);
-		// _envmap.addFrame(*_cameras[0], modelview);
 		_envmap.addFrame(*_cameras[1], modelview);
+		#ifdef DUAL_ACQUISITION
+			_envmap.addFrame(*_cameras[0], modelview);
+		#endif
 	#endif
-
 	
+	// ===============================================================
+	// =                S C E N E   R E N D E R I N G                =
+	// ===============================================================
 	#ifndef DISABLE_RENDERING
-	std::vector<Symbol> symbols = _scanner->scan(_cameras[0]->frame());	
+		glBindTexture(_GLTextures["frame0"]->target, _GLTextures["frame0"]->name);
+		glTexSubImage2D(_GLTextures["frame0"]->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
 	
-	glBindTexture(_GLTextures["frame0"]->target, _GLTextures["frame0"]->name);
-	glTexSubImage2D(_GLTextures["frame0"]->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
-	
-	glBindTexture(_GLTextures["envmap"]->target, _GLTextures["envmap"]->name);
-	glTexSubImage2D(_GLTextures["envmap"]->target, 0, 0, 0, _envmap.color().size().width, _envmap.color().size().height, GL_BGR, GL_FLOAT, _envmap.color().ptr());
+		glBindTexture(_GLTextures["envmap"]->target, _GLTextures["envmap"]->name);
+		glTexSubImage2D(_GLTextures["envmap"]->target, 0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap.color().ptr());
 	
 	
 	// ===============================================================
 	// =               B A C K G R O U N D   F R A M E               =
 	// ===============================================================
-	glClear(GL_DEPTH_BUFFER_BIT);	
-		
-	glUseProgram(_GLPrograms["background"]->name);
-	_GLPrograms["background"]->sampler("frame") 			= 0;
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glClear(GL_DEPTH_BUFFER_BIT);	
+			
+		glUseProgram(_GLPrograms["background"]->name);
+		_GLPrograms["background"]->sampler("frame") 			= 0;
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	
 	// ===============================================================
 	// =                S C E N E   R E N D E R I N G                =
 	// ===============================================================
-	glClear(GL_DEPTH_BUFFER_BIT);	
+		glClear(GL_DEPTH_BUFFER_BIT);	
 
-	static const	gk::Transform		proj		= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), windowWidth(), windowHeight(), 1.0, 10000.0));
-	static 				gk::Transform		view		= gk::Transform();
-	static 				gk::Transform		model		= gk::Transform();
-	static const	gk::Transform		scale		= gk::Scale(atof(_config("obj-scale").c_str()));
-	static const	gk::Transform		toGL		= gk::Transform(gk::Matrix4x4(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0));	//.t()
+		static const	gk::Transform		proj		= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), windowWidth(), windowHeight(), 1.0, 10000.0));
+		static 				gk::Transform		view		= gk::Transform();
+		static 				gk::Transform		model		= gk::Transform();
+		static const	gk::Transform		scale		= gk::Scale(atof(_config("obj-scale").c_str()));
+		static const	gk::Transform		toGL		= gk::Transform(gk::Matrix4x4(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0));	//.t()
 
-	glUseProgram(_GLPrograms["rendering"]->name);
-	_GLPrograms["rendering"]->uniform("obj_color")		= gk::VecColor(0.5, 0.5, 0.5);
-	_GLPrograms["rendering"]->uniform("light_color")	= gk::VecColor(1.0, 0.8, 0.5);
-	_GLPrograms["rendering"]->sampler("envmap")				= 1;
+		glUseProgram(_GLPrograms["rendering"]->name);
+		_GLPrograms["rendering"]->uniform("obj_color")		= gk::VecColor(0.0, 0.5, 0.0);
+		_GLPrograms["rendering"]->sampler("envmap")				= 1;
 	
-	for (Symbol& symbol : symbols)
-		try {
-			// LEGACY MODE FOR CUBE
-			try 				{	model = cv2gkit(parseSymbolToModel(symbol.data, _scale));																	}
-			catch (...)	{ model = cv2gkit(parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2)));	}
+		for (Symbol& symbol : symbols)
+			try {
+				// LEGACY MODE FOR CUBE
+				try 				{	model = cv2gkit(parseSymbolToModel(symbol.data, _scale));																	}
+				catch (...)	{ model = cv2gkit(parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2)));	}
 			
-			symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
-			view = cv2gkit(viewFromSymbol(symbol.rvec, symbol.tvec));
+				symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
+				view = cv2gkit(viewFromSymbol(symbol.rvec, symbol.tvec));
 			
+				gk::Transform mv	=	view * model * scale * toGL;
+				gk::Transform mvp = proj * mv;
 			
-			gk::Transform mv	=	view * model * scale * toGL;
-			gk::Transform mvp = proj * mv;
+				_GLPrograms["rendering"]->uniform("mvMatrix")			= mv.matrix();
+				_GLPrograms["rendering"]->uniform("mvnMatrix")		= mv.normalMatrix();
+				_GLPrograms["rendering"]->uniform("mvnMatrixInv")	= mv.inverse().normalMatrix();
 			
-			
-			_GLPrograms["rendering"]->uniform("mvMatrix")			= mv.matrix();
-			_GLPrograms["rendering"]->uniform("mvnMatrix")		= mv.normalMatrix();
-			_GLPrograms["rendering"]->uniform("mvnMatrixInv")	= mv.inverse().normalMatrix();
-			
-			_GLPrograms["rendering"]->uniform("mvpMatrix")		= mvp.matrix();
-			_mesh->draw();
+				_GLPrograms["rendering"]->uniform("mvpMatrix")		= mvp.matrix();
+				_mesh->draw();
 
-	  } catch (...) {
-			std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
-		}
+			} catch (...) {
+				std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
+			}
 		
-	present();
+		present();
 	#endif
 		
 	
+	// ===============================================================
+	// =                  F R A M E   D I S P L A Y                  =
+	// ===============================================================
 	#ifndef DISABLE_VIEW
 		#ifndef DISABLE_CAMERA_0
 			cv::imshow("camera 0",								cv::Mat(_cameras[0]->frame()));
@@ -292,18 +303,40 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 	if (event.state == SDL_PRESSED)
 		switch (event.keysym.sym)
 		{
-			case 'c':		_envmap.clear();	break;
+			case 'c':
+			{
+				_envmap.clear();
+				break;
+			}
 			case 's':		
 			{
 				time_t now = time(0);
 				std::stringstream path_color;
-				path_color << "env/envmap_" << now << ".png";
-				std::cout << "- Saving envmap to file '" << path_color.str() << "' ... " << std::flush;
+				path_color << "data/env/envmap_" << now << ".png";
+				std::cout << "writing color envmap '" << path_color.str() << "' ... " << std::flush;
 				EnvMap::save(_envmap.color(), path_color.str());				
 				std::cout << "done" << std::endl;
 				break;
 			}
 			
+			case SDLK_F6:
+			{
+				time_t now = time(0);
+				std::stringstream path;
+				path << "data/view/screenshot_" << now << ".png";
+				gk::writeFramebuffer(path.str());
+				break;
+			}
+			
+			case SDLK_F5:
+				gk::reloadPrograms();
+				break;
+			
+			case SDLK_ESCAPE:
+				closeWindow();
+				break;
+			
+			/*
 			case SDLK_F1:
 				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 0);
 				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 0);
@@ -352,10 +385,9 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				if (_cameras[0]) _cameras[0]->resetParameter(CONTROL);
 				if (_cameras[1]) _cameras[1]->resetParameter(CONTROL);
 				break;
+			*/
 			
-			case SDLK_ESCAPE:
-				closeWindow();
-				break;
+			
 			default:
 				printf("Key %d unmapped\n", (int) event.keysym.sym);
 				break;

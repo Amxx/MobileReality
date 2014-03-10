@@ -3,7 +3,14 @@
 
 	<scale>"3.0"</scale>
 	<subscale>"0.786667"</subscale>
-	<obj-scale>"3.0"</obj-scale>
+
+<!--
+	<obj>"bigguy.obj"</obj>
+	<obj-scale>"0.25"</obj-scale>
+-->
+	<obj>"cube.obj"</obj>
+	<obj-scale>"3.00"</obj-scale>
+
 
 	<video-front-id>"1"</video-front-id>
 	<params-front>data/params/c910.xml</params-front>
