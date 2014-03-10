@@ -3,12 +3,12 @@
 
 	<scale>"3.0"</scale>
 	<subscale>"0.786667"</subscale>
-	<obj-scale>"0.25"</obj-scale>
+	<obj-scale>"3.0"</obj-scale>
 
 	<video-front-id>"1"</video-front-id>
 	<params-front>data/params/c910.xml</params-front>
 	
-	<video-back-id>"0"</video-back-id>
+	<video-back-id>"2"</video-back-id>
 	<params-back>data/params/logitech.xml</params-back>
 
 	<scanner>install/share/libscanner_zbar.so</scanner>

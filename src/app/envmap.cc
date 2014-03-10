@@ -55,7 +55,7 @@ void EnvMap::addFrame(Camera& camera, cv::Matx33f& modelview)
 			if (_time.at<int>(i,j) == _current_time)
 			{
 				_color.at<cv::Vec3f>(i,j)	/= _wght.at<int>(i,j);
-				_lumin.at<float>(i,j) 			/= _wght.at<int>(i,j);
+				_lumin.at<float>(i,j) 		/= _wght.at<int>(i,j);
 			}
 	
 	_current_time++;
