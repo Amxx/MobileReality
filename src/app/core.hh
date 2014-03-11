@@ -44,24 +44,14 @@ class Core : public gk::App
 		// Real scene description
 		float																	_scale;
 		float																	_subscale;
-		float																	_objsize;
 		
+		// Object
+		gk::GLBasicMesh*											_mesh;
+
 		// Rendering
 		std::map<std::string, gk::GLProgram*>	_GLPrograms;
 		std::map<std::string,	gk::GLTexture*>	_GLTextures;
 		
-		gk::GLBasicMesh*											_mesh;
-	
-		// gk::GLBuffer*						_GLPositions;
-		// gk::GLBuffer 						_GLNormals;
-	
-		
-		// static float          		obj_c[3]          = { 0.482f,  0.627f, 0.357f };
-		// static float             light_spe[4]     	= { 1.000f,  1.000f, 1.000f, 1.000f };
-		// static float             light_dif[4]      = { 1.000f,  1.000f, 1.000f, 1.000f };
-		// static float             light_pos[4]      = { 0.000f, 30.000f, 0.000f, 1.000f };
-
-
 	
 	public:
     Core(int = 0, char*[] = nullptr);

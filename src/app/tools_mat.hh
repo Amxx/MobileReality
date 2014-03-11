@@ -20,6 +20,7 @@ cv::Matx44f 		viewFromSymbol(const cv::Matx31f&, const cv::Matx31f&);
 
 cv::Matx44f 		projectionFromIntrinsic(const cv::Matx33f& A, float w, float h, float near, float far);
 
+gk::Transform		cv2gkit(const cv::Matx33f&);
 gk::Transform		cv2gkit(const cv::Matx44f&);
 
 #endif

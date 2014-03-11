@@ -141,6 +141,15 @@ cv::Matx44f projectionFromIntrinsic(const cv::Matx33f& A, float w, float h, floa
 
 
 
+
+gk::Transform cv2gkit(const cv::Matx33f& m)
+{
+	return gk::Transform(gk::Matrix4x4(	m(0, 0), m(0, 1), m(0, 2), 0.0,
+																			m(1, 0), m(1, 1), m(1, 2), 0.0,
+																			m(2, 0), m(2, 1), m(2, 2), 0.0,
+																			0.0,     0.0,     0.0,     1.0));
+}
+
 gk::Transform cv2gkit(const cv::Matx44f& m)
 {
 	return gk::Transform(gk::Matrix4x4(	m(0, 0), m(0, 1), m(0, 2), m(0, 3),

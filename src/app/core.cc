@@ -12,13 +12,23 @@
 
 // #define 	DISABLE_CAMERA_0
 // #define 	DISABLE_CAMERA_1
+
 // #define 	DISABLE_ENVMAP
 // #define	DUAL_ACQUISITION
+
+// #define	DISABLE_RENDERING
+
 #define 	DISABLE_VIEW
 
 
-#define		CONTROL					VideoDevice::BRIGHTNESS
-#define 	ENVMAP_SIZE			cv::Size(128, 128)
+
+#define		CONTROL							VideoDevice::BRIGHTNESS
+#define 	ENVMAP_SIZE					cv::Size(256, 256)
+
+#define		DEFAULT_BRIGHTNESS	128
+#define		DEFAULT_GAIN				16
+
+
 
 // ############################################################################
 // #                                 METHODE                                  #
@@ -31,8 +41,7 @@ Core::Core(int argc, char* argv[]) :
 	_envmap(ENVMAP_SIZE),
 	
 	_scale(6.0),
-	_subscale(236.0/300.0),
-	_objsize(6.0)
+	_subscale(236.0/300.0)
 {
 	// ===============================================================
 	// =   C O N F I G U R A T I O N   I N I T I A L I S A T I O N   =
@@ -49,7 +58,6 @@ Core::Core(int argc, char* argv[]) :
 
 	if (_config("scale").size())		_scale		= atof(_config("scale").c_str());
 	if (_config("subscale").size())	_subscale = atof(_config("subscale").c_str());
-	if (_config("obj-size").size())	_objsize	= atof(_config("obj-size").c_str());
 	
 	// ===============================================================
 	// =                   L O A D   S C A N N E R                   =
@@ -93,16 +101,16 @@ Core::Core(int argc, char* argv[]) :
 			brightness	= _cameras[0]->getParameter(VideoDevice::BRIGHTNESS);
 			gain				= _cameras[0]->getParameter(VideoDevice::GAIN);
 			_cameras[0]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
-			_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:128);
-			_cameras[0]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:16);
+			_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:DEFAULT_BRIGHTNESS);
+			_cameras[0]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:DEFAULT_GAIN);
 			// _cameras[0]->showParameters();
 		#endif
 		#ifndef DISABLE_CAMERA_1
 			brightness	= _cameras[1]->getParameter(VideoDevice::BRIGHTNESS);
 			gain				= _cameras[1]->getParameter(VideoDevice::GAIN);
 			_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
-			_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:128);
-			_cameras[1]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:16);
+			_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:DEFAULT_BRIGHTNESS);
+			_cameras[1]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:DEFAULT_GAIN);
 			// _cameras[1]->showParameters();
 		#endif		
 	#endif
@@ -155,7 +163,7 @@ int Core::init()
 	// ===============================================================
 	
 	_GLTextures["frame0"] = (new gk::GLTexture())->createTexture2D(0, 640, 480);
-	_GLTextures["envmap"] = (new gk::GLTexture())->createTexture2D(1, ENVMAP_SIZE.width, ENVMAP_SIZE.height);
+	_GLTextures["envmap"] = (new gk::GLTexture())->createTextureCube(1, ENVMAP_SIZE.width, ENVMAP_SIZE.height);
 	
 	// ===============================================================
 	// =                    C R E A T E   M E S H                    =
@@ -169,7 +177,6 @@ int Core::init()
 	_mesh->createBuffer(1, mesh->normals);
 	_mesh->createBuffer(2, mesh->texcoords);
 	_mesh->createIndexBuffer(mesh->indices);
-	
 	delete mesh;
 	
 	
@@ -199,96 +206,104 @@ int Core::draw()
 	#endif
 	
 	// ===============================================================
-	// =                R E A D I N G   S Y M B O L S                =
-	// ===============================================================
-	std::vector<Symbol> symbols = _scanner->scan(_cameras[0]->frame());	
-
-	// ===============================================================
-	// =                B U I L D I N G   E N V M A P                =
-	// ===============================================================
-	#ifndef DISABLE_ENVMAP
-		cv::Matx33f modelview = ModelView(*_cameras[0], *_scanner);
-		_envmap.addFrame(*_cameras[1], modelview);
-		#ifdef DUAL_ACQUISITION
-			_envmap.addFrame(*_cameras[0], modelview);
-		#endif
-	#endif
-	
-	// ===============================================================
-	// =                S C E N E   R E N D E R I N G                =
-	// ===============================================================
-	#ifndef DISABLE_RENDERING
-		glBindTexture(_GLTextures["frame0"]->target, _GLTextures["frame0"]->name);
-		glTexSubImage2D(_GLTextures["frame0"]->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
-	
-		glBindTexture(_GLTextures["envmap"]->target, _GLTextures["envmap"]->name);
-		glTexSubImage2D(_GLTextures["envmap"]->target, 0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap.color().ptr());
-	
-	
-	// ===============================================================
 	// =               B A C K G R O U N D   F R A M E               =
 	// ===============================================================
 		glClear(GL_DEPTH_BUFFER_BIT);	
-			
+		
+		glBindTexture(_GLTextures["frame0"]->target, _GLTextures["frame0"]->name);
+		glTexSubImage2D(_GLTextures["frame0"]->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
+				
 		glUseProgram(_GLPrograms["background"]->name);
 		_GLPrograms["background"]->sampler("frame") 			= 0;
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	
 	// ===============================================================
-	// =                S C E N E   R E N D E R I N G                =
+	// =                R E A D I N G   S Y M B O L S                =
 	// ===============================================================
-		glClear(GL_DEPTH_BUFFER_BIT);	
-
-		static const	gk::Transform		proj		= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), windowWidth(), windowHeight(), 1.0, 10000.0));
-		static 				gk::Transform		view		= gk::Transform();
-		static 				gk::Transform		model		= gk::Transform();
-		static const	gk::Transform		scale		= gk::Scale(atof(_config("obj-scale").c_str()));
-		static const	gk::Transform		toGL		= gk::Transform(gk::Matrix4x4(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0));	//.t()
-
-		glUseProgram(_GLPrograms["rendering"]->name);
-		_GLPrograms["rendering"]->uniform("obj_color")		= gk::VecColor(0.0, 0.5, 0.0);
-		_GLPrograms["rendering"]->sampler("envmap")				= 1;
+	std::vector<Symbol> symbols = _scanner->scan(_cameras[0]->frame());	
+	if (!symbols.empty())
+	{
 	
+	// ===============================================================
+	// =                    P O S I T I O N I N G                    =
+	// ===============================================================
+		cv::Matx44f model, view;	// View (bloc camera)
+		
 		for (Symbol& symbol : symbols)
 			try {
 				// LEGACY MODE FOR CUBE
-				try 				{	model = cv2gkit(parseSymbolToModel(symbol.data, _scale));																	}
-				catch (...)	{ model = cv2gkit(parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2)));	}
+				try 				{	model = parseSymbolToModel(symbol.data, _scale);																	}
+				catch (...)	{ model = parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2));	}
 			
 				symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
-				view = cv2gkit(viewFromSymbol(symbol.rvec, symbol.tvec));
-			
-				gk::Transform mv	=	view * model * scale * toGL;
-				gk::Transform mvp = proj * mv;
-			
-				_GLPrograms["rendering"]->uniform("mvMatrix")			= mv.matrix();
-				_GLPrograms["rendering"]->uniform("mvnMatrix")		= mv.normalMatrix();
-				_GLPrograms["rendering"]->uniform("mvnMatrixInv")	= mv.inverse().normalMatrix();
-			
-				_GLPrograms["rendering"]->uniform("mvpMatrix")		= mvp.matrix();
-				_mesh->draw();
-
+				view = Matx33to44(_cameras[0]->orientation().inv()) * viewFromSymbol(symbol.rvec, symbol.tvec);
+				break;
 			} catch (...) {
 				std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
 			}
-		
-		present();
+			
+	// ===============================================================
+	// =                B U I L D I N G   E N V M A P                =
+	// ===============================================================
+	#ifndef DISABLE_ENVMAP
+		_envmap.addFrame(*_cameras[1], Matx44to33(view * model));
+		#ifdef DUAL_ACQUISITION
+			_envmap.addFrame(*_cameras[0], view * model);
+		#endif
 	#endif
 		
+	// ===============================================================
+	// =                S C E N E   R E N D E R I N G                =
+	// ===============================================================
+	#ifndef DISABLE_RENDERING
+		glClear(GL_DEPTH_BUFFER_BIT);	
+
+		glBindTexture(_GLTextures["envmap"]->target, _GLTextures["envmap"]->name);
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[0]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_X);
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[1]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_NEGATIVE_X);
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[2]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_Y);
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[3]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y);
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[4]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_Z);
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[5]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z);
+		
+		static const	gk::Transform		proj			= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), windowWidth(), windowHeight(), 1.0, 10000.0));
+		static const	gk::Transform		scale			= gk::Scale(atof(_config("obj-scale").c_str()));
+		static const	gk::Transform		toGL			= gk::Transform(gk::Matrix4x4(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0));	//.t()
+
+		gk::Transform mv	=	cv2gkit(_cameras[0]->orientation()) * cv2gkit(view * model) * scale * toGL;	// Point de vue de _cameras[0]
+		gk::Transform mvp = proj * mv;																													// Projection de _cameras[0]
+
+		glUseProgram(_GLPrograms["rendering"]->name);
+		// _GLPrograms["rendering"]->uniform("obj_color")		= gk::VecColor(0.7, 1.0, 0.7);
+		_GLPrograms["rendering"]->uniform("mvMatrix")			= mv.matrix();
+		_GLPrograms["rendering"]->uniform("mvnMatrix")		= mv.normalMatrix();
+		_GLPrograms["rendering"]->uniform("mvnMatrixInv")	= mv.inverse().normalMatrix();
+		_GLPrograms["rendering"]->uniform("mvpMatrix")		= mvp.matrix();
+		_GLPrograms["rendering"]->sampler("envmap")				= 1;
+		_mesh->draw();
+					
+	#endif
+		
+	}
+	present();
 	
 	// ===============================================================
 	// =                  F R A M E   D I S P L A Y                  =
 	// ===============================================================
 	#ifndef DISABLE_VIEW
 		#ifndef DISABLE_CAMERA_0
-			cv::imshow("camera 0",								cv::Mat(_cameras[0]->frame()));
+			// cv::imshow("camera 0",								cv::Mat(_cameras[0]->frame()));
 		#endif
 		#ifndef DISABLE_CAMERA_1
-			cv::imshow("camera 1",								cv::Mat(_cameras[1]->frame()));
+			// cv::imshow("camera 1",								cv::Mat(_cameras[1]->frame()));
 		#endif
 		#ifndef DISABLE_ENVMAP
-			cv::imshow("Environnement Color", _envmap.color());
-			cv::imshow("Environnement Lumin", _envmap.lumin());
+			cv::imshow("Envmap 1 : +X", _envmap.color(0));
+			cv::imshow("Envmap 2 : -X", _envmap.color(1));
+			cv::imshow("Envmap 3 : +Y", _envmap.color(2));
+			cv::imshow("Envmap 4 : -Y", _envmap.color(3));
+			cv::imshow("Envmap 5 : +Z", _envmap.color(4));
+			cv::imshow("Envmap 6 : -Z", _envmap.color(5));
 		#endif
 		cv::waitKey(30);
 	#endif
@@ -310,12 +325,12 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 			}
 			case 's':		
 			{
-				time_t now = time(0);
-				std::stringstream path_color;
-				path_color << "data/env/envmap_" << now << ".png";
-				std::cout << "writing color envmap '" << path_color.str() << "' ... " << std::flush;
-				EnvMap::save(_envmap.color(), path_color.str());				
-				std::cout << "done" << std::endl;
+				// time_t now = time(0);
+				// std::stringstream path_color;
+				// path_color << "data/env/envmap_" << now << ".png";
+				// std::cout << "writing color envmap '" << path_color.str() << "' ... " << std::flush;
+				// EnvMap::save(_envmap.color(), path_color.str());				
+				// std::cout << "done" << std::endl;
 				break;
 			}
 			
@@ -336,56 +351,25 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				closeWindow();
 				break;
 			
-			/*
-			case SDLK_F1:
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 0);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 0);
+			
+			case SDLK_UP:
+				#ifndef DISABLE_CAMERA_0	
+					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, std::min(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) + 10, 255));
+				#endif
+				#ifndef DISABLE_CAMERA_1
+					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, std::min(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) + 10, 255));
+				#endif
 				break;
-			case SDLK_F2:
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 25);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 25);
-				break;
-			case SDLK_F3:
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 51);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 51);
-				break;
-			case SDLK_F4:
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 76);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 76);
-				break;
-			case SDLK_F5:
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 102);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 102);
-				break;
-			case SDLK_F6:
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 127);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 127);
-				break;
-			case SDLK_F7:
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 153);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 153);
-				break;
-			case SDLK_F8:
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 178);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 178);
-				break;
-			case SDLK_F9:
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 204);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 204);
-				break;
-			case SDLK_F10:
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 229);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 229);
-				break;
-			case SDLK_F11:	
-				if (_cameras[0]) _cameras[0]->setParameter(CONTROL, 255);
-				if (_cameras[1]) _cameras[1]->setParameter(CONTROL, 255);
-				break;
-			case 13:
-				if (_cameras[0]) _cameras[0]->resetParameter(CONTROL);
-				if (_cameras[1]) _cameras[1]->resetParameter(CONTROL);
-				break;
-			*/
+			case SDLK_DOWN:
+				#ifndef DISABLE_CAMERA_0
+					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, std::max(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) - 10, 0));
+				#endif
+				#ifndef DISABLE_CAMERA_1
+					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, std::max(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) - 10, 0));
+				#endif
+				break;			
+			
+			
 			
 			
 			default:
