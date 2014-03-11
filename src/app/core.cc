@@ -41,7 +41,9 @@ Core::Core(int argc, char* argv[]) :
 	_envmap(ENVMAP_SIZE),
 	
 	_scale(6.0),
-	_subscale(236.0/300.0)
+	_subscale(236.0/300.0),
+	
+	_buildenvmap(true)
 {
 	// ===============================================================
 	// =   C O N F I G U R A T I O N   I N I T I A L I S A T I O N   =
@@ -221,35 +223,38 @@ int Core::draw()
 	// =                R E A D I N G   S Y M B O L S                =
 	// ===============================================================
 	std::vector<Symbol> symbols = _scanner->scan(_cameras[0]->frame());	
-	if (!symbols.empty())
-	{
-	
+		
 	// ===============================================================
 	// =                    P O S I T I O N I N G                    =
 	// ===============================================================
-		cv::Matx44f model, view;	// View (bloc camera)
+	cv::Matx44f model, view;	// View (bloc camera)
 		
-		for (Symbol& symbol : symbols)
-			try {
-				// LEGACY MODE FOR CUBE
-				try 				{	model = parseSymbolToModel(symbol.data, _scale);																	}
-				catch (...)	{ model = parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2));	}
-			
-				symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
-				view = Matx33to44(_cameras[0]->orientation().inv()) * viewFromSymbol(symbol.rvec, symbol.tvec);
-				break;
-			} catch (...) {
-				std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
-			}
-			
+	for (Symbol& symbol : symbols)
+		try {
+			// LEGACY MODE FOR CUBE
+			try 				{	model = parseSymbolToModel(symbol.data, _scale);																	}
+			catch (...)	{ model = parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2));	}
+		
+			symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
+			view = Matx33to44(_cameras[0]->orientation().inv()) * viewFromSymbol(symbol.rvec, symbol.tvec);
+			break;
+		} catch (...) {
+			std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
+		}
+	
+	if (!isNull(view) && !isNull(model))
+	{		
 	// ===============================================================
 	// =                B U I L D I N G   E N V M A P                =
 	// ===============================================================
 	#ifndef DISABLE_ENVMAP
-		_envmap.addFrame(*_cameras[1], Matx44to33(view * model));
-		#ifdef DUAL_ACQUISITION
-			_envmap.addFrame(*_cameras[0], view * model);
-		#endif
+		if (_buildenvmap)
+		{
+			_envmap.addFrame(*_cameras[1], Matx44to33(view * model));
+			#ifdef DUAL_ACQUISITION
+				_envmap.addFrame(*_cameras[0], view * model);
+			#endif
+		}
 	#endif
 		
 	// ===============================================================
@@ -259,12 +264,13 @@ int Core::draw()
 		glClear(GL_DEPTH_BUFFER_BIT);	
 
 		glBindTexture(_GLTextures["envmap"]->target, _GLTextures["envmap"]->name);
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[0]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_X);
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[1]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_NEGATIVE_X);
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[2]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_Y);
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[3]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y);
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[4]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_Z);
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[5]->ptr());		glGenerateMipmap(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z);
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[0]->ptr());
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[1]->ptr());
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[2]->ptr());
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[3]->ptr());
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[4]->ptr());
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[5]->ptr());
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		
 		static const	gk::Transform		proj			= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), windowWidth(), windowHeight(), 1.0, 10000.0));
 		static const	gk::Transform		scale			= gk::Scale(atof(_config("obj-scale").c_str()));
@@ -354,23 +360,42 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 			
 			case SDLK_UP:
 				#ifndef DISABLE_CAMERA_0	
-					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, std::min(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) + 10, 255));
+					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, std::min(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) + 8, 255));
 				#endif
 				#ifndef DISABLE_CAMERA_1
-					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, std::min(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) + 10, 255));
+					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, std::min(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) + 8, 255));
 				#endif
 				break;
 			case SDLK_DOWN:
 				#ifndef DISABLE_CAMERA_0
-					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, std::max(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) - 10, 0));
+					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, std::max(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) - 8, 0));
 				#endif
 				#ifndef DISABLE_CAMERA_1
-					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, std::max(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) - 10, 0));
+					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, std::max(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) - 8, 0));
 				#endif
-				break;			
+				break;
+			case SDLK_RIGHT:
+				#ifndef DISABLE_CAMERA_0	
+					_cameras[0]->setParameter(VideoDevice::GAIN, std::min(_cameras[0]->getParameter(VideoDevice::GAIN) + 8, 255));
+				#endif
+				#ifndef DISABLE_CAMERA_1
+					_cameras[1]->setParameter(VideoDevice::GAIN, std::min(_cameras[1]->getParameter(VideoDevice::GAIN) + 8, 255));
+				#endif
+				break;
+			case SDLK_LEFT:
+				#ifndef DISABLE_CAMERA_0
+					_cameras[0]->setParameter(VideoDevice::GAIN, std::max(_cameras[0]->getParameter(VideoDevice::GAIN) - 8, 255));
+				#endif
+				#ifndef DISABLE_CAMERA_1
+					_cameras[1]->setParameter(VideoDevice::GAIN, std::max(_cameras[1]->getParameter(VideoDevice::GAIN) - 8, 255));
+				#endif
+				break;		
 			
 			
-			
+			case 'b':
+				_buildenvmap = !_buildenvmap;
+				std::cout << "build envmap : " << std::string(_buildenvmap?"on":"off") << std::endl;
+				break;
 			
 			default:
 				printf("Key %d unmapped\n", (int) event.keysym.sym);

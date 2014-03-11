@@ -20,9 +20,9 @@ out				vec3				cubeposition;
 
 void main()
 {
-	gl_Position				= (mvpMatrix	* vec4(position, 1.0));	
-	vertex_incident 	= (mvMatrix		* vec4(position, 1.0)).xyz;
-	vertex_normal			= (mvnMatrix	*	vec4(normal,   1.0)).xyz;
+	gl_Position				= (mvpMatrix				* vec4(position, 1.0));	
+	vertex_incident 	= (mvMatrix					* vec4(position, 1.0)).xyz;
+	vertex_normal			= (mat3(mvnMatrix)	*	normal).xyz;
 	
 	cubeposition = position;
 }
@@ -49,6 +49,7 @@ void main()
 	
 	//fragment_color 	=	vec4(r, 1.0);
 	//fragment_color 	=	texture(envmap, r);
+	
 	fragment_color 	=	texture(envmap, normalize(cubeposition));
 	
 }
