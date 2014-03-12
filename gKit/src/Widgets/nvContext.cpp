@@ -1,5 +1,6 @@
 
 #include <cassert>
+#include <cstdio>
 #include <cmath>
 #include <ctime>
 #include <cstring>
@@ -16,6 +17,7 @@ UIContext::UIContext( UIFont *font, UIPainter *painter )
     m_painter(painter),
     m_font(font),
     m_nbKeys(0),
+    m_fileBuffer(NULL),
     m_focusCaretPos(-1),
     m_twoStepFocus(false)
 {
@@ -53,11 +55,26 @@ void UIContext::mouseMotion(int x, int y) {
 
 void UIContext::keyboard(unsigned int k, int x, int y) {
     setCursor(x, y);
-    assert(m_nbKeys < 32);
-    //~ printf("nvwidgets(%p)::key buffer %d\n", this, m_nbKeys);
-    m_keyBuffer[m_nbKeys] = k;
+    assert(m_nbKeys < 1024);
+    m_keyBuffer[m_nbKeys]= k;
     m_nbKeys++;
 }
+
+void UIContext::text(const char *string, int x, int y) {
+    setCursor(x, y);
+    for(unsigned int i= 0; string[i] != 0; i++) {
+        assert(m_nbKeys < 1024);
+        m_keyBuffer[m_nbKeys]= string[i];
+        m_nbKeys++;
+    }
+}
+
+void UIContext::file( const char *file, int x, int y ) {
+    setCursor(x, y);
+    if(m_fileBuffer != NULL) free(m_fileBuffer);
+    m_fileBuffer= strdup(file);
+}
+
 
 void UIContext::reshape(int w, int h) {
     m_window.x = 0;
@@ -321,6 +338,14 @@ void UIContext::doGraph( const Rect& r, const int *values, const int n )
     m_painter->drawGraph(rect, values, n, rg);
 }
 
+void UIContext::doTimebar( const Rect& r, const char *text, const float start, const float stop )
+{
+    Rect rt;
+    Rect rb;
+    Rect rect= placeRect(m_painter->getTimebarRect(r, m_font->getTextRect(text), rt, start, stop, rb));
+    m_painter->drawTimebar(rect, text, rt, start, stop, rb);
+}
+
 bool UIContext::doButton(const Rect & r, const char * text, bool * state, int style) {
     Rect rt;
     Rect rect = placeRect(m_painter->getButtonRect(r, m_font->getTextRect(text), rt));
@@ -563,11 +588,19 @@ bool UIContext::doLineEdit(const Rect & r, char *text, int maxTextLength, int *n
                 m_mouseButton[0].cursor = m_focusPoint;
             }
         }
-
+        
+        // if drop file is buffered, replace text
+        if(hover && m_fileBuffer && m_fileBuffer[0] != 0) {
+            m_focusCaretPos= 0;
+            strncpy(text, m_fileBuffer, maxTextLength -1);
+            text[maxTextLength -1]= 0;
+            m_fileBuffer[0]= 0;
+            result= true;
+        }
+        
         // Eval caret pos on every click hover
         if ( hover && m_mouseButton[0].state & ButtonFlags_Begin )
-            m_focusCaretPos = m_font->getPickedCharNb(text, 
-                Point( m_currentCursor.x - rt.x - rect.x, m_currentCursor.y - rt.y - rect.y));
+            m_focusCaretPos = m_font->getPickedCharNb(text, Point( m_currentCursor.x - rt.x - rect.x, m_currentCursor.y - rt.y - rect.y));
         
         // If keys are buffered, apply input to the edited text
         if ( m_nbKeys ) {
@@ -581,69 +614,50 @@ bool UIContext::doLineEdit(const Rect & r, char *text, int maxTextLength, int *n
             while (nbKeys) {
                 // filter for special keys
                 // Enter, quit edition
-                //~ if ( m_keyBuffer[keyNb] == '\r' ) {
                 if ( m_keyBuffer[keyNb] == Key_Enter ) {
                     nbKeys = 1;
                     m_twoStepFocus = false;
                     m_focusCaretPos = -1;
                 }
-                
-                // Special keys
-                else if ( m_keyBuffer[keyNb] >= Key_F1 ) {
-                    switch (m_keyBuffer[keyNb]) {
-                    case Key_Left : {
-                            // move cursor left one char
-                            if (m_focusCaretPos > 0)
-                                m_focusCaretPos--;
-                        }
-                        break;
-                    case Key_Right : {
-                            // move cursor right one char
-                            if (m_focusCaretPos < textLength)
-                                m_focusCaretPos++;
-                        }
-                        break;
-                    case Key_Home : {
-                            m_focusCaretPos = 0;
-                        }
-                        break;
-                    case Key_End : {
-                            m_focusCaretPos = textLength;
-                        }
-                        break;
-                    case Key_Insert : {
-                        }
-                        break;
-                    default : {
-                            // strange key pressed...
+                else if( m_keyBuffer[keyNb] > Key_Enter)
+                {
+                    // Special keys
+                    if( m_keyBuffer[keyNb] == Key_Left ) {
+                        // move cursor left one char
+                        if (m_focusCaretPos > 0)
                             m_focusCaretPos--;
-                        }
-                        break;
                     }
-                }
-                // Delete, move the chars >= carret back 1, carret stay in place
-                //~ else if ( m_keyBuffer[keyNb] == 127 ) {
-                else if ( m_keyBuffer[keyNb] == Key_Delete) {
-                    if (m_focusCaretPos < textLength) {
-                        memmove( text + m_focusCaretPos, text + m_focusCaretPos + 1, textLength - m_focusCaretPos);
-                        textLength--;
+                    else if( m_keyBuffer[keyNb] == Key_Right ) {
+                        // move cursor right one char
+                        if (m_focusCaretPos < textLength)
+                            m_focusCaretPos++;
                     }
-                }
-                // Backspace, move the chars > carret back 1, carret move back 1
-                //~ else if ( m_keyBuffer[keyNb] == '\b' ) {
-                else if ( m_keyBuffer[keyNb] == Key_Backspace) {
-                    if (m_focusCaretPos > 0) {
+                    else if( m_keyBuffer[keyNb] == Key_Home ) {
+                        m_focusCaretPos = 0;
+                    }
+                    else if( m_keyBuffer[keyNb] == Key_End ) {
+                        m_focusCaretPos = textLength;
+                    }
+                    // Delete, move the chars >= carret back 1, carret stay in place
+                    else if ( m_keyBuffer[keyNb] == Key_Delete ) {
                         if (m_focusCaretPos < textLength) {
-                            memmove( text + m_focusCaretPos - 1, text + m_focusCaretPos, textLength - m_focusCaretPos);
+                            memmove( text + m_focusCaretPos, text + m_focusCaretPos + 1, textLength - m_focusCaretPos);
+                            textLength--;
                         }
-                        m_focusCaretPos--;
-                        textLength--;
                     }
-                }
-                
-                //~ else if ( m_keyBuffer[keyNb] == '\t' ) {
-                else if ( m_keyBuffer[keyNb] == Key_Tab ) {
-                    // nothing
+                    // Backspace, move the chars > carret back 1, carret move back 1
+                    else if ( m_keyBuffer[keyNb] == Key_Backspace) {
+                        if (m_focusCaretPos > 0) {
+                            if (m_focusCaretPos < textLength) {
+                                memmove( text + m_focusCaretPos - 1, text + m_focusCaretPos, textLength - m_focusCaretPos);
+                            }
+                            m_focusCaretPos--;
+                            textLength--;
+                        }
+                    }
+                    else if ( m_keyBuffer[keyNb] == Key_Tab ) {
+                        // nothing
+                    }
                 }
                 // Regular char, append it to the edited string
                 else if ( textLength < maxTextLength) {
@@ -654,18 +668,21 @@ bool UIContext::doLineEdit(const Rect & r, char *text, int maxTextLength, int *n
                     m_focusCaretPos++;
                     textLength++;
                 }
+                
                 keyNb++;
                 nbKeys--;
             }
-            text[textLength] = '\0';
-            *nbCharsReturned = textLength;
-            result = true;
+            
+            text[textLength]= '\0';
+            if(nbCharsReturned) *nbCharsReturned= textLength;
+            result= true;
         }
-        carretPos = m_focusCaretPos;
+        
+        carretPos= m_focusCaretPos;
     }
     
     m_painter->drawLineEdit(rect, text, rt, m_font->getTextLineWidthAt(text, carretPos), focus, hover, style);
-
+    
     return result;
 }
 

@@ -2,8 +2,6 @@
 #ifndef _IMAGE_H
 #define _IMAGE_H
 
-#include <cassert>
-#include <cstring>
 
 #include "Vec.h"
 #include "IOResource.h"
@@ -26,26 +24,42 @@ protected:
             case UNSIGNED_BYTE: 
             {
                 unsigned char *p= (unsigned char *) (data + offset);
-                p[0]= color.r * 255.f;
-                if(channels > 1)
-                    p[1]= color.g * 255.f;
-                if(channels > 2)
-                    p[2]= color.b * 255.f;
-                if(channels > 3)
-                    p[3]= color.a * 255.f;
+                switch(channels)        // un seul test au lieu de 3, devrait etre plus rapide
+                {
+                    case 4: p[3]= color.a * 255.f;
+                    case 3: p[2]= color.b * 255.f;
+                    case 2: p[1]= color.g * 255.f;
+                    case 1: p[0]= color.r * 255.f;      
+                        break;
+                    default:
+                        assert(0 && "invalid image channel count");
+                }
+                
+                //~ p[0]= color.r * 255.f;
+                //~ if(channels > 1) p[1]= color.g * 255.f;
+                //~ if(channels > 2) p[2]= color.b * 255.f;
+                //~ if(channels > 3) p[3]= color.a * 255.f;
             }
             break;
             
             case FLOAT:
             {
                 float *p= (float *) (data + offset);
-                p[0]= color.r;
-                if(channels > 1)
-                    p[1]= color.g;
-                if(channels > 2)
-                    p[2]= color.b;
-                if(channels > 3)
-                    p[3]= color.a;
+                switch(channels)
+                {
+                    case 4: p[3]= color.a;
+                    case 3: p[2]= color.b;
+                    case 2: p[1]= color.g;
+                    case 1: p[0]= color.r;
+                        break;
+                    default:
+                        assert(0 && "invalid image channel count");
+                }
+                
+                //~ p[0]= color.r;
+                //~ if(channels > 1) p[1]= color.g;
+                //~ if(channels > 2) p[2]= color.b;
+                //~ if(channels > 3) p[3]= color.a;
             }
             break;
             
@@ -63,26 +77,43 @@ protected:
             case UNSIGNED_BYTE:
             {
                 unsigned char *p= (unsigned char *) (data + offset);
-                color.r= (float) p[0] / 255.f;
-                if(channels > 1)
-                    color.g= (float) p[1] / 255.f;
-                if(channels > 2)
-                    color.b= (float) p[2] / 255.f;
-                if(channels > 3)
-                    color.a= (float) p[3] / 255.f;
+                switch(channels)        // un seul test au lieu de 3, devrait etre plus rapide
+                {
+                    case 4: color.a= (float) p[3] / 255.f;
+                    case 3: color.b= (float) p[2] / 255.f;
+                    case 2: color.g= (float) p[1] / 255.f;
+                    case 1: color.r= (float) p[0] / 255.f;
+                        break;
+                    default:
+                        assert(0 && "invalid image channel count");
+                }
+                
+                //~ color.r= (float) p[0] / 255.f;
+                //~ if(channels > 1) color.g= (float) p[1] / 255.f;
+                //~ if(channels > 2) color.b= (float) p[2] / 255.f;
+                //~ if(channels > 3) color.a= (float) p[3] / 255.f;
             }
             break;
             
             case FLOAT:
             {
                 float *p= (float *) (data + offset);
-                color.r= (float) p[0];
-                if(channels > 1)
-                    color.g= (float) p[1];
-                if(channels > 2)
-                    color.b= (float) p[2];
-                if(channels > 3)
-                    color.a= (float) p[3];
+                switch(channels)
+                {
+                    case 4: color.a= (float) p[3];
+                    case 3: color.b= (float) p[2];
+                    case 2: color.g= (float) p[1];
+                    case 1: color.r= (float) p[0];
+                        break;
+                    default:
+                        assert(0 && "invalid image channel count");
+                }
+                
+                //~ float *p= (float *) (data + offset);
+                //~ color.r= (float) p[0];
+                //~ if(channels > 1) color.g= (float) p[1];
+                //~ if(channels > 2) color.b= (float) p[2];
+                //~ if(channels > 3) color.a= (float) p[3];
             }
             break;
             
@@ -102,9 +133,11 @@ public:
     int pixel_sizeof;
     unsigned char *data;
     bool reference_data;
+    //! \todo ajouter TextureFormat format ...
 
     enum {
-        UNSIGNED_BYTE= 0,
+        // undef= 0,
+        UNSIGNED_BYTE= 1,
         FLOAT
     };
     
@@ -125,88 +158,19 @@ public:
     //! destructeur.
     ~Image( )
     {
-        if(reference_data == false)
-            delete [] data;
+        release();
     }
     
     //! construction d'une image de dimension wxh. 
-    Image *create( const int _w, const int _h, const int _channels, const unsigned int _type, void *_data= NULL )
-    {
-        width= _w;
-        height= _h;
-        depth= 1;
-        channels= _channels;
-        type= _type;
-        released= false;
-        
-        switch(type)
-        {
-            case UNSIGNED_BYTE: pixel_sizeof= sizeof(unsigned char); break;
-            case FLOAT: pixel_sizeof= sizeof(float); break;
-            default:
-                assert(0 && "invalid image type");
-        }
-        
-        int length= width * height * pixel_sizeof * channels;
-        data= new unsigned char[length];
-        if(_data != NULL)
-            memcpy(data, _data, length);
-        
-        return this;
-    }
+    Image *create( const int _w, const int _h, const int _channels, const unsigned int _type, const unsigned int _length= 0, void *_data= NULL );
     
     //! construction d'une image de dimension wxhxd. 
-    Image *create( const int _w, const int _h, const int _d, const int _channels, const unsigned int _type, void *_data= NULL )
-    {
-        width= _w;
-        height= _h;
-        depth= _d;
-        channels= _channels;
-        type= _type;
-        released= false;
-        
-        switch(type)
-        {
-            case UNSIGNED_BYTE: pixel_sizeof= sizeof(unsigned char); break;
-            case FLOAT: pixel_sizeof= sizeof(float); break;
-            default:
-                assert(0 && "invalid image type");
-        }
-        
-        int length= width * height * depth * pixel_sizeof * channels;
-        data= new unsigned char[length];
-        if(_data != NULL)
-            memcpy(data, _data, length);
-        
-        return this;
-    }
+    //~ Image *create( const int _w, const int _h, const int _d, const int _channels, const unsigned int _type, const unsigned int _length= 0, void *_data= NULL );
     
-    Image *reference( Image *image, const unsigned int offset= 0u )
-    {
-        if(image == NULL)
-            return this;
-        
-        width= image->width;
-        height= image->height;
-        depth= image->depth;
-        channels= image->channels;
-        type= image->type;
-        pixel_sizeof= image->pixel_sizeof;
-        data= image->data + offset;
-        reference_data= true;
-        released= false;
-        
-        return this;
-    }
+    Image *reference( Image *image, const unsigned int offset= 0u, const int width= 0, const int height= 0, const int depth= 0 );
     
     //! destruction des donnees de l'image / de la ressource.
-    void release( )
-    {
-        if(reference_data == false)
-            delete [] data;
-        data= NULL;
-        released= true;
-    }
+    void release( );
     
     //! adressage lineaire d'un pixel (x,y).
     unsigned int offset( const unsigned int x, const unsigned int y ) const
@@ -258,6 +222,10 @@ Image *createImage( const int w, const int h, const int channels= 4, const unsig
 {
     return (new Image())->create(w, h, channels, type);
 }
+
+//! fonction utilitaire : simplifie la creation d'une image de couleur constante.
+Image *createImage( const int w, const int h, const VecColor& color, const int channels= 4, const unsigned int type= Image::FLOAT );
+
 
 }       // namespace
 

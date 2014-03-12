@@ -72,7 +72,7 @@ Rect UIPainter::getGraphRect( const Rect& r, const int *values, const int n, Rec
         rg.w = rect.w - 2 * rg.x;
     }
     if (rect.h == 0) {
-        rg.h = 48;
+        rg.h = 64;
         rect.h = rg.h + 2 * rg.y;
     } else {
         rg.h = rect.h - 2 * rg.y;
@@ -86,6 +86,38 @@ void UIPainter::drawGraph( const Rect& r, const int *values, const int n, const 
     drawFrame( r, Point( rg.x, rg.y ), false, false, false );
     
 }
+
+Rect UIPainter::getTimebarRect( const Rect& r, const Rect& text, Rect& rt, const float start, const float stop, Rect& rb )
+{
+    Rect rect= r;
+    if (rect.w == 0)
+        rect.w = getAutoWidth() + text.w + 3 * getWidgetMargin();
+    if (rect.h == 0)
+        rect.h = text.h;
+    
+    rt.x= getWidgetMargin();
+    rt.y= getWidgetMargin();
+    rt.w= text.w,
+    rt.h= text.h;
+    float w= rect.w - text.w - 3 * getWidgetMargin();
+    //~ rb.x= 2 * getWidgetMargin() + text.w + start * w;
+    rb.x= 2 * getWidgetMargin() + text.w;
+    rb.y= getWidgetMargin();
+    //~ rb.w= std::max(2.f, (stop - start) * w);
+    rb.w= w;
+    rb.h= text.h;
+    
+    return rect;
+}
+
+void UIPainter::drawTimebar( const Rect& r, const char *text, const Rect& rt, const float start, const float stop, const Rect& rb )
+{
+    drawText( Rect(r.x + rt.x, r.y + rt.y, rt.w, rt.h), text );
+
+    drawRect( Rect(r.x + rb.x, r.y + rb.y, rb.w, rb.h), cBase, cOutline );
+    drawRect( Rect(r.x + rb.x + start * rb.w, r.y + rb.y, std::max(2.f, (stop - start) * rb.w), rb.h - 4), cOutline, cOutline );
+}
+
 
 Rect UIPainter::getLabelRect(const Rect& r, const Rect& text, Rect& rt ) const
 {
@@ -305,7 +337,8 @@ Rect UIPainter::getComboRect(const Rect& r, int numOptions, const Rect& options,
     rd.y = rt.y;
 
     if (rect.w == 0) {
-        rt= options;
+        //~ rt= options;
+        rt.w= options.w;
         rect.w = rt.w + 2 * rt.x;
 
         //Add room for drop down button

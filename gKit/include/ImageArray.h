@@ -43,28 +43,12 @@ public:
     }
     
     //! verifie que toutes les images ont les memes dimensions.
-    int validate( int& width, int& height )
-    {
-        if(images.empty())
-            return -1;
-        
-        int w= images[0]->width;
-        int h= images[0]->height;
-        for(unsigned int i= 1; i < images.size(); i++)
-            if(images[i]->width != w || images[i]->height != h)
-                return -1;
-        
-        width= w;
-        height= h;
-        return 0;
-    }
+    int validate( int& width, int& height );
     
     //! renvoie la ieme image de l'ensemble. ou NULL si elle n'existe pas.
     const Image *operator[] ( const unsigned int index ) const
     {
-        if(index >= (unsigned int) images.size())
-            return NULL;
-        
+        if(index >= (unsigned int) images.size()) return NULL;
         return images[index];
     }
     
@@ -73,6 +57,48 @@ public:
     {
         assert(index < (unsigned int) images.size());
         return images[index];
+    }
+};
+
+
+class ImageLevels
+{
+    ImageLevels( const ImageLevels& );
+    ImageLevels& operator= ( const ImageLevels& );
+    
+public:
+    std::vector<Image *> levels;
+    int width;
+    int height;
+    unsigned long int length;
+    unsigned char *data;
+    
+    ImageLevels( ) : levels(), width(0), height(0), length(0), data(NULL) {}
+    
+    ~ImageLevels( )
+    {
+        for(unsigned int i= 0; i < levels.size(); i++)
+            delete levels[i];
+    }
+    
+    ImageLevels *create( const int w, const int h, const int _channels, const unsigned int _type );
+    
+    ImageLevels *create( Image *image );
+    
+    //! renvoie la ieme image de l'ensemble. ou NULL si elle n'existe pas.
+    const Image *operator[] ( const unsigned int index ) const
+    {
+        if(index >= (unsigned int) levels.size())
+            return NULL;
+        
+        return levels[index];
+    }
+    
+    //! renvoie la ieme image de l'ensemble. ou NULL si elle n'existe pas.
+    Image *& operator[] ( const unsigned int index )
+    {
+        assert(index < (unsigned int) levels.size());
+        return levels[index];
     }
 };
 

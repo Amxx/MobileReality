@@ -433,10 +433,11 @@ int GLProgram::resources( )
                 glGetProgramResourceiv(name, GL_SHADER_STORAGE_BLOCK, i, 1, prop, 1, NULL, &vcount);
             }
         
-            GLint variables[vcount];
+            // GLint variables[vcount];
+			std::vector<GLint> variables(vcount);
             {
                 GLenum prop[]= { GL_ACTIVE_VARIABLES };
-                glGetProgramResourceiv(name, GL_SHADER_STORAGE_BLOCK, i, 1, prop, vcount, NULL, variables);
+                glGetProgramResourceiv(name, GL_SHADER_STORAGE_BLOCK, i, 1, prop, vcount, NULL, &variables.front());
             }
             
             GLchar vname[128]= { 0 };

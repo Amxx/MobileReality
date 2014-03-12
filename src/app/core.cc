@@ -10,24 +10,26 @@
 // #                                  DEFINE                                  #
 // ############################################################################
 
+// =========== CAMERA OPTIONS (OTHER OPTIONS MAY SUFFER FROM THIS) ============
 // #define 	DISABLE_CAMERA_0
 // #define 	DISABLE_CAMERA_1
+#define		DEFAULT_BRIGHTNESS	128																								// NEEDED
+#define		DEFAULT_GAIN				16																								// NEEDED
 
+// =========== ENVMAP OPTIONS (OTHER OPTIONS MAY SUFFER FROM THIS) ============
 // #define 	DISABLE_ENVMAP
 // #define	DUAL_ACQUISITION
+#define 	ENVMAP_SIZE					cv::Size(256, 256)																// NEEDED
 
+// =========== RENDERING OPTIONS ============
 // #define	DISABLE_RENDERING
 
+// ============== VIEW OPTIONS ==============
 #define 	DISABLE_VIEW
 
-
-
-#define		CONTROL							VideoDevice::BRIGHTNESS
-#define 	ENVMAP_SIZE					cv::Size(256, 256)
-
-#define		DEFAULT_BRIGHTNESS	128
-#define		DEFAULT_GAIN				16
-
+// ============= OTHERS OPTIONS =============
+// #define		VERBOSE
+#define		CONTROL							VideoDevice::BRIGHTNESS														// NEEDED
 
 
 // ############################################################################
@@ -105,7 +107,13 @@ Core::Core(int argc, char* argv[]) :
 			_cameras[0]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
 			_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:DEFAULT_BRIGHTNESS);
 			_cameras[0]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:DEFAULT_GAIN);
-			// _cameras[0]->showParameters();
+			#ifdef VERBOSE
+				std::cout << "============ CAMERA 0 ============" << std::endl;
+				std::cout << "BRIGHTNESS : " << brightness				<< std::endl;
+				std::cout << "GAIN       : " << gain							<< std::endl;
+				std::cout << "==================================" << std::endl;
+				// _cameras[0]->showParameters();
+			#endif
 		#endif
 		#ifndef DISABLE_CAMERA_1
 			brightness	= _cameras[1]->getParameter(VideoDevice::BRIGHTNESS);
@@ -113,7 +121,13 @@ Core::Core(int argc, char* argv[]) :
 			_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
 			_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:DEFAULT_BRIGHTNESS);
 			_cameras[1]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:DEFAULT_GAIN);
-			// _cameras[1]->showParameters();
+			#ifdef VERBOSE
+				std::cout << "============ CAMERA 1 ============" << std::endl;
+				std::cout << "BRIGHTNESS : " << brightness				<< std::endl;
+				std::cout << "GAIN       : " << gain							<< std::endl;
+				std::cout << "==================================" << std::endl;
+				// _cameras[1]->showParameters();
+			#endif
 		#endif		
 	#endif
 
@@ -343,7 +357,15 @@ int Core::draw()
 	return 1;
 }
 
+
+
+
+
 // ############################################################################
+
+
+
+
 
 void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 {
@@ -390,41 +412,89 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				break;
 			
 			
-			case SDLK_UP:
-				#ifndef DISABLE_CAMERA_0	
-					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, std::min(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) + 8, 255));
-				#endif
-				#ifndef DISABLE_CAMERA_1
-					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, std::min(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) + 8, 255));
-				#endif
-				break;
-			case SDLK_DOWN:
-				#ifndef DISABLE_CAMERA_0
-					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, std::max(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) - 8, 0));
-				#endif
-				#ifndef DISABLE_CAMERA_1
-					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, std::max(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) - 8, 0));
-				#endif
-				break;
+			
+			
 			case SDLK_RIGHT:
+			{
+				int brightness;
 				#ifndef DISABLE_CAMERA_0	
-					_cameras[0]->setParameter(VideoDevice::GAIN, std::min(_cameras[0]->getParameter(VideoDevice::GAIN) + 8, 255));
+					brightness = std::min(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) + 8, 255);
+					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, brightness);
+					#ifdef VERBOSE 
+						printf("[CAMERA %d] brightness set to %d\n", 0, brightness);
+					#endif
 				#endif
 				#ifndef DISABLE_CAMERA_1
-					_cameras[1]->setParameter(VideoDevice::GAIN, std::min(_cameras[1]->getParameter(VideoDevice::GAIN) + 8, 255));
+					brightness = std::min(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) + 8, 255);
+					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, brightness);
+					#ifdef VERBOSE 
+						printf("[CAMERA %d] brightness set to %d\n", 1, brightness);
+					#endif
 				#endif
 				break;
+			}
 			case SDLK_LEFT:
-				#ifndef DISABLE_CAMERA_0
-					_cameras[0]->setParameter(VideoDevice::GAIN, std::max(_cameras[0]->getParameter(VideoDevice::GAIN) - 8, 255));
+			{
+				int brightness;
+				#ifndef DISABLE_CAMERA_0	
+					brightness = std::max(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) - 8, 0);
+					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, brightness);
+					#ifdef VERBOSE 
+						printf("[CAMERA %d] brightness set to %d\n", 0, brightness);
+					#endif
 				#endif
 				#ifndef DISABLE_CAMERA_1
-					_cameras[1]->setParameter(VideoDevice::GAIN, std::max(_cameras[1]->getParameter(VideoDevice::GAIN) - 8, 255));
+					brightness = std::max(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) - 8, 0);
+					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, brightness);
+					#ifdef VERBOSE 
+						printf("[CAMERA %d] brightness set to %d\n", 1, brightness);
+					#endif
 				#endif
-				break;		
+				break;
+			}
+			case SDLK_UP:
+			{
+				int gain;
+				#ifndef DISABLE_CAMERA_0	
+					gain = std::min(_cameras[0]->getParameter(VideoDevice::GAIN) + 8, 255);
+					_cameras[0]->setParameter(VideoDevice::GAIN, gain);
+					#ifdef VERBOSE 
+						printf("[CAMERA %d] gain set to %d\n", 0, gain);
+					#endif
+				#endif
+				#ifndef DISABLE_CAMERA_0	
+					gain = std::min(_cameras[1]->getParameter(VideoDevice::GAIN) + 8, 255);
+					_cameras[1]->setParameter(VideoDevice::GAIN, gain);
+					#ifdef VERBOSE 
+						printf("[CAMERA %d] gain set to %d\n", 1, gain);
+					#endif
+				#endif
+				break;
+			}
+			case SDLK_DOWN:
+			{
+				int gain;
+				#ifndef DISABLE_CAMERA_0	
+					gain = std::max(_cameras[0]->getParameter(VideoDevice::GAIN) - 8, 0);
+					_cameras[0]->setParameter(VideoDevice::GAIN, gain);
+					#ifdef VERBOSE 
+						printf("[CAMERA %d] gain set to %d\n", 0, gain);
+					#endif
+				#endif
+				#ifndef DISABLE_CAMERA_0	
+					gain = std::max(_cameras[1]->getParameter(VideoDevice::GAIN) - 8, 0);
+					_cameras[1]->setParameter(VideoDevice::GAIN, gain);
+					#ifdef VERBOSE 
+						printf("[CAMERA %d] gain set to %d\n", 1, gain);
+					#endif
+				#endif
+				break;
+			}
 			
 			default:
-				printf("Key %d unmapped\n", (int) event.keysym.sym);
+				#ifdef VERBOSE			
+					printf("Key %d unmapped\n", (int) event.keysym.sym);
+				#endif
 				break;
 		}
 }

@@ -55,16 +55,12 @@ GLBasicMesh& GLBasicMesh::createIndexBuffer( const GLenum item_type,
             index_sizeof= 4;
             break;
         default:
+            ERROR("invalid index buffer format, basic mesh %d\n", vao->name);
             index_sizeof= 0;
     }
     
     index_buffer= gk::createBuffer(GL_ELEMENT_ARRAY_BUFFER, length, data, usage);
     return *this;
-}
-
-GLBasicMesh& GLBasicMesh::createIndexBuffer( const std::vector<unsigned int>& data, const GLenum usage )
-{
-    return createIndexBuffer(GL_UNSIGNED_INT, data.size() * sizeof(unsigned int), &data.front(), usage);
 }
 
 int GLBasicMesh::drawGroup( const unsigned int begin, const unsigned int end )

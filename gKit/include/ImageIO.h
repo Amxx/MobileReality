@@ -10,12 +10,14 @@ namespace gk {
 class Image;
 class ImageArray;
 
+
 //! chargement / enregistrement d'une image, d'un ensemble de d'images. version "bas niveau" sans cache, ni gestion memoire.
 namespace ImageIO {
 
+
 //! charge une image.
     //! \todo renvoyer Image::null() en cas d'echec
-Image *readImage( const std::string& filename );
+Image *readImage( const std::string& filename, const int _channels= 0, const unsigned int _type= 0 );
 
 //! charge une sequence d'images numerotees de 1 a n et construit un ImageArray.
 /*! exemple :

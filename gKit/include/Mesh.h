@@ -16,11 +16,18 @@ namespace gk {
 struct MeshMaterial
 {
     std::string name;                   //!< nom de la matiere.
+    
+    std::string ambient_texture;        //!< nom de l'image a charger.
     std::string diffuse_texture;        //!< nom de l'image a charger.
     std::string specular_texture;       //!< nom de l'image a charger.
+    
+    VecColor ambient_color;             //!< couleur diffuse.
     VecColor diffuse_color;             //!< couleur diffuse.
     VecColor specular_color;            //!< couleur speculaire.
+    
     VecColor emission;                  //!< energie emise par une source de lumiere.
+    
+    float ka;                           //!< influence du comportement ambiant.
     float kd;                           //!< influence du comportement diffus.
     float ks;                           //!< influence du comportement speculaire.
     float ns;                           //!< comportement speculaire, ks * cos**ns
@@ -30,18 +37,18 @@ struct MeshMaterial
     MeshMaterial( )
         :
         name("default"),
-        diffuse_texture(), specular_texture(),
-        diffuse_color(0.8f, 0.8f, 0.8f), specular_color(0.0f, 0.0f, 0.0f), emission(0.0f, 0.0f, 0.0f, 0.0f),
-        kd(1.0f), ks(0.0f)
+        ambient_texture(), diffuse_texture(), specular_texture(),
+        ambient_color(0.f, 0.f, 0.f, 1.f), diffuse_color(.8f, .8f, .8f, 1.f), specular_color(.0f, .0f, .0f, 1.f), emission(.0f, .0f, .0f, 1.f),
+        ka(.0f), kd(1.f), ks(.0f)
     {}
     
     //! construction d'une matiere nommee.
     MeshMaterial( const char *_name )
         :
         name(_name),
-        diffuse_texture(), specular_texture(),
-        diffuse_color(), specular_color(), emission(),
-        kd(0.0f), ks(0.0f)
+        ambient_texture(), diffuse_texture(), specular_texture(),
+        ambient_color(), diffuse_color(), specular_color(), emission(),
+        ka(.0f), kd(.0f), ks(.0f)
     {}
 };
 
@@ -54,8 +61,10 @@ struct MeshGroup
     unsigned int end;
     
     MeshGroup( ) : material(), begin(0), end(0) {}
-    MeshGroup( const MeshMaterial&  _material, const unsigned int _begin ) : material(_material), begin(_begin), end(_begin) {}
+    MeshGroup( const MeshMaterial&  _material, const unsigned int _begin, const unsigned int _end= 0 )
+        : material(_material), begin(_begin), end(std::max(_begin, _end)) {}
 };
+
 
 //! representation d'un ensemble de triangles eventuellement associes a des matieres.
 struct Mesh
@@ -71,11 +80,14 @@ struct Mesh
     std::vector<MeshGroup> groups;      //!< groupes de faces associes a une matiere.
     std::vector<int> materials;         //!< groupes / matieres des triangles.
     
+    BBox box;                           //!< englobant des sommets.
+    
     //! constructeur.
     Mesh( )
         :
+        filename(),
         positions(), texcoords(), normals(),
-        indices(), groups()
+        indices(), groups(), materials()
     {}
     
     //! renvoie le nombre de triangles du maillage.
@@ -96,18 +108,15 @@ struct Mesh
     //! renvoie un triangle.
     Triangle triangle( const unsigned int id ) const
     {
-        assert(id < indices.size() / 3u);
+        assert(3u*id < indices.size());
         
         Point a, b, c;
         unsigned int ia= indices[3u*id];
-        if(ia < positions.size())
-            a= Point(positions[ia]);
         unsigned int ib= indices[3u*id +1u];
-        if(ib < positions.size())
-            b= Point(positions[ib]);
         unsigned int ic= indices[3u*id +2u];
-        if(ic < positions.size())
-            c= Point(positions[ic]);
+        if(ia < positions.size()) a= Point(positions[ia]);
+        if(ib < positions.size()) b= Point(positions[ib]);
+        if(ic < positions.size()) c= Point(positions[ic]);
         
         return Triangle( a, b, c, id );
     }
@@ -115,18 +124,15 @@ struct Mesh
     //! renvoie un pn triangle. (position + normale par sommet).
     PNTriangle pntriangle( const unsigned int id ) const
     { 
-        assert(id < indices.size() / 3u);
+        assert(3u * id < indices.size());
         
         Normal a, b, c;
         unsigned int ia= indices[3u*id];
-        if(ia < normals.size())
-            a= Normal(normals[ia]);
         unsigned int ib= indices[3u*id +1u];
-        if(ib < normals.size())
-            b= Normal(normals[ib]);
         unsigned int ic= indices[3u*id +2u];
-        if(ic < normals.size())
-            c= Normal(normals[ic]);
+        if(ia < normals.size()) a= Normal(normals[ia]);
+        if(ib < normals.size()) b= Normal(normals[ib]);
+        if(ic < normals.size()) c= Normal(normals[ic]);
         
         Triangle abc= triangle(id);
         return PNTriangle(abc, a, b, c);
@@ -135,18 +141,15 @@ struct Mesh
     //! renvoie un ptn triangle. (position + texcoord + normale par sommet).
     PTNTriangle ptntriangle( const unsigned int id ) const
     { 
-        assert(id < indices.size() / 3u);
+        assert(3u * id < indices.size());
         
         Point a, b, c;
         unsigned int ia= indices[3u*id];
-        if(ia < texcoords.size())
-            a= Point(texcoords[ia]);
         unsigned int ib= indices[3u*id +1u];
-        if(ib < texcoords.size())
-            b= Point(texcoords[ib]);
         unsigned int ic= indices[3u*id +2u];
-        if(ic < texcoords.size())
-            c= Point(texcoords[ic]);
+        if(ia < texcoords.size()) a= Point(texcoords[ia]);
+        if(ib < texcoords.size()) b= Point(texcoords[ib]);
+        if(ic < texcoords.size()) c= Point(texcoords[ic]);
         
         PNTriangle abc= pntriangle(id);
         return PTNTriangle(abc, a, b, c);

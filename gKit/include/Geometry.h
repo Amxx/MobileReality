@@ -577,22 +577,22 @@ public:
     }
     
     //! renvoie le centre de la boite.
-    const Point getCenter( ) const
+    const Point center( ) const
     {
         return (pMin + pMax) * .5f;
     }
     
     //! renvoie le centre de la boite, sur un axe particulier.
-    float getCenter( const int axis ) const
+    float center( const int axis ) const
     {
         return (pMin[axis] + pMax[axis]) * .5f;
     }
     
-    //! renvoie le centre de la boite
-    void getCenter( Point& center ) const
-    {
-        center= getCenter();
-    }
+    //~ //! renvoie le centre de la boite
+    //~ void getCenter( Point& center ) const
+    //~ {
+        //~ center= getCenter();
+    //~ }
     
     //! renvoie le volume de l'aabox.
     float Volume( ) const

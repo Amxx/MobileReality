@@ -7,6 +7,8 @@
 
 namespace gk {
 
+TextureFormat TextureBGRA= TextureFormat( GL_RGBA8, GL_BGRA_EXT, GL_UNSIGNED_BYTE );
+    
 TextureFormat TextureRGBA= TextureFormat( GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE );
 TextureFormat TextureRGB16F= TextureFormat( GL_RGB16F, GL_RGB, GL_FLOAT );
 TextureFormat TextureRGBA16F= TextureFormat( GL_RGBA16F, GL_RGBA, GL_FLOAT );
@@ -31,6 +33,8 @@ TextureFormat TextureR32I= TextureFormat( GL_R32I, GL_RED_INTEGER, GL_INT );
 
 TextureFormat TextureRGBA_MS4= TextureFormat( GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 4 );
 TextureFormat TextureDepth_MS4= TextureFormat( GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, 4 );
+TextureFormat TextureRGBA_MS8= TextureFormat( GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 8 );
+TextureFormat TextureDepth_MS8= TextureFormat( GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, 8 );
 
 
 GLTexture *GLTexture::createTexture2D( const int _unit, 
@@ -42,6 +46,14 @@ GLTexture *GLTexture::createTexture2D( const int _unit,
         if(name == 0)
             return this;
         
+    #if 0
+        //! BIG \todo initialiser proprement les filtres et le nombre de mipmaps a la creation des textures...
+        glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, 0);
+        glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    #endif
+
         // initialise la texture a 0
         // alloue un buffer assez gros pour tous les formats
         std::vector<unsigned int> zeros(width * height * 4, 0);
@@ -213,7 +225,7 @@ GLTexture *GLTexture::createTextureCube( const int _unit, ImageArray *array, con
             case Image::FLOAT: data_type= GL_FLOAT; break;
             default: assert(0 && "invalid image format");
         }
-
+        
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, 
             format.internal, width, height, 0,
             data_format, data_type, array->images[face]->data);
@@ -300,6 +312,7 @@ Image *GLTexture::image( const int _unit, const GLenum _target, const int _level
         case GL_DEPTH_COMPONENT:
         case GL_DEPTH_COMPONENT24:
         case GL_DEPTH_COMPONENT32:
+        case GL_DEPTH_COMPONENT32F:
             channels= 1;
             glchannels= GL_RED;
             break;
@@ -377,6 +390,7 @@ Image *GLTexture::image( const int _unit, const GLenum _target, const int _level
         case GL_DEPTH_COMPONENT:
         case GL_DEPTH_COMPONENT24:
         case GL_DEPTH_COMPONENT32:
+        case GL_DEPTH_COMPONENT32F:
             type= Image::FLOAT;
             gltype= GL_FLOAT;
             break;
@@ -385,12 +399,22 @@ Image *GLTexture::image( const int _unit, const GLenum _target, const int _level
             assert(0 && "invalid texture format");
     }
     
-    Image *image= (new Image())->create(width, height, depth, channels, type);
+    Image *image= (new Image())->create(std::max(1, width / (1<< _level)), std::max(1, height / (1<< _level)), std::max(1, depth / (1<< _level)), channels, type);
     if(image == NULL)
         return NULL;
     
     glActiveTexture(GL_TEXTURE0 + _unit);
     glBindTexture(target, name);
+    
+    #ifndef NDEBUG
+    {
+        GLint w= 0; glGetTexLevelParameteriv(target, _level, GL_TEXTURE_WIDTH, &w);
+        GLint h= 0; glGetTexLevelParameteriv(target, _level, GL_TEXTURE_HEIGHT, &h);
+        if(w != image->width || h != image->height)
+            ERROR("GetTexImage: wrong dimensions %dx%d, level %d, %dx%d\n", image->width, image->height, _level, w, h);
+    }
+    #endif
+    
     glGetTexImage(_target, _level, glchannels, gltype, image->data);
     
     return image;

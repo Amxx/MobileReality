@@ -63,20 +63,24 @@ protected:
     std::vector<parameter> m_uniform_buffers;
     
 public:
-    std::vector<GLuint> shaders;
+    std::vector<GLuint> shaders;        //!< shaders compiles et linkes dans le program.
+    unsigned int version;               //!< si les shaders peuvent etre compiles differement (avec des #define, par exemple), permet d'identifier une combinaison particuliere.
+    bool errors;                        //!< derniere compilation reussie ou non.
     
     //! constructeur par defaut.
     GLProgram( )
         :
         GLResource(),
-        shaders(SHADERTYPE_LAST, 0) 
+        shaders(SHADERTYPE_LAST, 0),
+        version(0), errors(false)
     {}
     
     //! constructuer d'un programme nomme, cf khr_debug.
     GLProgram( const std::string& _label )
         :
         GLResource(_label),
-        shaders(SHADERTYPE_LAST, 0)
+        shaders(SHADERTYPE_LAST, 0),
+        version(0), errors(false)
     {}
     
     //! creation d'un shader program opengl.
@@ -133,24 +137,44 @@ public:
         return m_images[image.index].name.c_str();
     }
     
+    //! renvoie le ieme uniform.
+    ProgramAttribute attribute( const unsigned int id ) const 
+    {
+        return ProgramAttribute( this, m_attributes[id].location, m_attributes[id].index, 
+            m_attributes[id].size, m_attributes[id].type, m_attributes[id].flags );
+    }
+    //! renvoie le ieme uniform.
+    ProgramUniform uniform( const unsigned int id ) const 
+    {
+        return ProgramUniform( this, m_uniforms[id].location, m_uniforms[id].index, 
+            m_uniforms[id].size, m_uniforms[id].type, m_uniforms[id].flags );
+    }
+    //! renvoie le ieme sampler.
+    ProgramSampler sampler( const unsigned int id ) const 
+    {
+        return ProgramSampler( this, m_samplers[id].location, m_samplers[id].index,
+            m_samplers[id].size, m_samplers[id].type, m_samplers[id].flags );
+    }
+    
     //! recherche un attribut.
     ProgramAttribute attribute( const char *name ) const;
-    
     //! recherche un uniform.
     ProgramUniform uniform( const char *name ) const;
     //! recherche un smapler.
     ProgramUniform sampler( const char *name ) const;
     //! recherche une image.
     ProgramUniform image( const char *name ) const;
+    
     //~ ProgramUniform subroutineUniform( const char *name );
-
+    
     //! recherche un uniform buffer.
     ProgramBuffer uniformBuffer( const char *name ) const;
     //! recherche un shader storage buffer.
     ProgramBuffer storageBuffer( const char *name ) const;
-    //~ ProgramBuffer atomicBuffer( const char *name );
     
+    //~ ProgramBuffer atomicBuffer( const char *name );
     //~ ProgramIndex subroutine( const char *name );
+    
     //! recherche un varying a enregistrer dans un buffer / feedback. cf glTransformFeedback.
     ProgramFeedback feedback( const char *name ) const;
     

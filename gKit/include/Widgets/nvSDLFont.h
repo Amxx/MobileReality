@@ -16,9 +16,9 @@ class SdlFont : public UIFont
     int init_cache( TTF_Font *font );
     
 public:
-    SdlFont( const char *filename= "verdana.ttf", const int size= 14 );
+    //~ SdlFont( const char *filename= "verdana.ttf", const int size= 14 );
     //~ SdlFont( const char *filename= "ubuntu.ttf", const int size= 16 );
-    //~ SdlFont( const char *filename= "liberation.ttf", const int size= 16 );
+    SdlFont( const char *filename= "droid.ttf", const int size= 14 );
     ~SdlFont( );
     
     int init( );

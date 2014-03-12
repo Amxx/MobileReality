@@ -58,8 +58,8 @@ typedef TVec3<float> Vec3;
 struct VecColor
 {
     //! constructeur.
-    VecColor( const float _x = 0.f, const float _y = 0.f, const float _z = 0.f, const float _w= 0.f ) :  r( _x ), g( _y ), b( _z ), a( _w ) {}
-    //! construit un vecteur a partir de 3 floats en memoire.
+    VecColor( const float _x = 0.f, const float _y = 0.f, const float _z = 0.f, const float _w= 1.f ) :  r( _x ), g( _y ), b( _z ), a( _w ) {}
+    //! construit un vecteur a partir de 4 floats en memoire.
     explicit VecColor( const float * p ) { assert(p != NULL); r= p[0]; g= p[1]; b= p[2]; a= p[3]; }
     //! comparaison de 2 vecteurs.
     bool operator==( const VecColor &v ) const { return (r == v.r && g == v.g && b == v.b && a == v.a); }

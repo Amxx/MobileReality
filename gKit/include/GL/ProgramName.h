@@ -135,13 +135,6 @@ typedef ProgramName ProgramBuffer;
 //! modifier la valeur d'un sampler du shader program actif : index de l'unite de texture.
 int setSamplerUniform( const ProgramSampler& sampler, const int unit );
 
-class GLTexture;
-class GLSampler;
-//! activer une texture et l'associer a un sampler du shader program actif.
-int setTexture( const ProgramSampler& sampler_uniform, GLTexture *texture, GLSampler *texture_sampler= NULL );
-//! desactiver une texture activee par setTexture().
-int resetTexture(const ProgramSampler& sampler_uniform, GLTexture *texture );
-
 }
 
 #endif

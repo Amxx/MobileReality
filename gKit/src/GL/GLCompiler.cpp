@@ -179,14 +179,16 @@ GLProgram *GLCompiler::reload( )
             MESSAGE("%s shader ", GLProgram::labels[i]);
             sources[i].reload();
             
+        #if 0
             // verifie que le source modifie n'inclut pas un nouveau type de shader
             for(unsigned int s= i+1; s < GLProgram::SHADERTYPE_LAST; s++)
-                if(sources[s].source.empty() && sources[i].source.find(stages[s]) != std::string::npos)
+                if(sources[i].source.find(stages[s]) != std::string::npos)
                 {
                     MESSAGE("%s shader ", GLProgram::labels[s]);
                     sources[s]= SourceSection(sources[i].file, sources[i].source);
                     sources[s].define(stages[s]);
                 }
+        #endif
             
             update= true;
         }
@@ -359,9 +361,11 @@ GLProgram *GLCompiler::make( )
         // cree le shader
         GLuint shader= program->shaders[i];
         if(shader == 0)
+        {
             shader= glCreateShader(GLProgram::types[i]);
-        glAttachShader(program->name, shader);
-        program->shaders[i]= shader;
+            glAttachShader(program->name, shader);
+            program->shaders[i]= shader;
+        }
         
         // compile le shader
         glShaderSource(shader, 5, strings, NULL);
@@ -376,11 +380,12 @@ GLProgram *GLCompiler::make( )
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
             if(length > 0)
             {
-                char log[length +1];
-                glGetShaderInfoLog(shader, sizeof(log), NULL, log);
+                char *log= new char[length +1];
+                glGetShaderInfoLog(shader, length, NULL, log);
                 ERROR("error compiling %s shader:\n", GLProgram::labels[i]);
                 printErrors(log, common, sources[i], version);
                 ERROR("shader defines:\n%s\n", sources[i].definitions.c_str());
+                delete [] log;
             }
             else
                 MESSAGE("error compiling %s shader: no log. failed.\n", GLProgram::labels[i]);
@@ -392,7 +397,7 @@ GLProgram *GLCompiler::make( )
             glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &length);
             if(length > 0)
             {
-                char log[length +1];
+                char log[4096];
                 glGetShaderSource(shader, sizeof(log), NULL, log);
                 DEBUGLOG("shader:\n%s\n", log);
             }
@@ -405,6 +410,7 @@ GLProgram *GLCompiler::make( )
     if(errors == true)
     {
         program->resources();
+        program->errors= true;
         return program;
     }
     
@@ -418,13 +424,15 @@ GLProgram *GLCompiler::make( )
         glGetProgramiv(program->name, GL_INFO_LOG_LENGTH, &length);
         if(length > 0)
         {
-            char log[length +1];
-            glGetProgramInfoLog(program->name, sizeof(log), NULL, log);
+            char *log= new char[length +1];
+            glGetProgramInfoLog(program->name, length, NULL, log);
             MESSAGE("error linking program:\n%s\nfailed.\n", log);
+            delete [] log;
         }
         else
             MESSAGE("error linking program: no log. failed.\n");
         
+        program->errors= true;
         return program;
     }
     
@@ -537,6 +545,8 @@ GLProgram *GLCompiler::make( )
     #endif
     
     program->resources();
+    program->errors= false;
+    
     MESSAGE("done.\n");
     return program;
 }

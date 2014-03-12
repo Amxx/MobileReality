@@ -11,7 +11,7 @@
 namespace gk {
 
 namespace gl {
-    template< typename T > inline GLenum type( ) {  assert(0 && "gl::type<T>( ): not defined"); return 0; }
+    template< typename T > inline GLenum type( ) { assert(0 && "gl::type<T>( ): not defined"); return 0; }
     
     template< > inline GLenum type<char>( ) {  return GL_BYTE; }
     template< > inline GLenum type<unsigned char>( ) {  return GL_UNSIGNED_BYTE; }
@@ -49,7 +49,7 @@ public:
     
     // creation d'un buffer d'attribut de sommet.
     GLBasicMesh& createBuffer( const int index, const int item_size, const GLenum item_type, 
-        const unsigned int length, const void *data, const GLenum usage= GL_STATIC_DRAW );
+        const unsigned int length, const void *data= NULL, const GLenum usage= GL_STATIC_DRAW );
     
     template < typename T > GLBasicMesh& createBuffer( const int index, 
         const std::vector< TVec2<T> >& data, const GLenum usage= GL_STATIC_DRAW )
@@ -69,10 +69,38 @@ public:
         return createBuffer(index, 4, gl::type<T>(), data.size() * sizeof(TVec4<T>), &data.front(), usage);
     }
     
+    
     GLBasicMesh& createIndexBuffer( const GLenum item_type, 
         const unsigned int length, const void *data, const GLenum usage= GL_STATIC_DRAW );
     
-    GLBasicMesh& createIndexBuffer( const std::vector<unsigned int>& data, const GLenum usage= GL_STATIC_DRAW );
+    template < typename T > GLBasicMesh& createIndexBuffer( 
+        const std::vector<T>& data, const GLenum usage= GL_STATIC_DRAW )
+    {
+        return createIndexBuffer(gl::type<T>(), data.size() * sizeof(T), &data.front(), usage);
+    }
+    
+    GLBasicMesh& bindBuffer( const int index, const int item_size, const GLenum item_type, GLBuffer *buffer )
+    {
+        if(index < 0 || buffer == NULL || buffer->length == 0)
+            return *this;
+        
+        if(index >= (int) buffers.size())
+            buffers.resize(index +1, GLBuffer::null());
+        buffers[index]= buffer;
+
+    #ifndef NDEBUG
+        {
+            GLint current;
+            glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current);
+            if((GLuint) current != vao->name)
+                ERROR("invalid vertex array %d, basic mesh %d\n", current, vao->name);
+        }
+    #endif
+        
+        glVertexAttribPointer(index, item_size, item_type, GL_FALSE, 0, NULL);
+        glEnableVertexAttribArray(index);
+        return *this;
+    }
     
     int draw( );
     int draw( const int base ); // base vertex

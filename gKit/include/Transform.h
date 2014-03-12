@@ -178,6 +178,7 @@ public:
     inline void inverse( const Point &p, Point &pt ) const;
 
     //! renvoie le point homogene transforme.
+    inline HPoint inverse( const HPoint &p ) const;
     inline void inverse( const Point &p, HPoint &pt ) const;
     
     inline Vector inverse( const Vector &v ) const;
@@ -417,6 +418,21 @@ void Transform::inverse( const Point &p, Point &pt ) const
     assert( wt != 0 );
     if( wt != 1.f ) 
         pt /= wt;
+}
+
+inline 
+HPoint Transform::inverse( const HPoint &p ) const
+{
+    const float x = p.x;
+    const float y = p.y;
+    const float z = p.z;
+    const float w = p.w;
+    
+    return HPoint(
+        mInv.m[0][0] * x + mInv.m[0][1] * y + mInv.m[0][2] * z + w * mInv.m[0][3],
+        mInv.m[1][0] * x + mInv.m[1][1] * y + mInv.m[1][2] * z + w * mInv.m[1][3],
+        mInv.m[2][0] * x + mInv.m[2][1] * y + mInv.m[2][2] * z + w * mInv.m[2][3],
+        mInv.m[3][0] * x + mInv.m[3][1] * y + mInv.m[3][2] * z + w * mInv.m[3][3]);
 }
 
 inline 

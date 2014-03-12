@@ -7,7 +7,7 @@
 namespace gk {
 
 //! camera type inspection d'objet.
-/*! \code
+/*! \code utilisation :
     int x, y;
     unsigned int button= SDL_GetRelativeMouseState(&x, &y);
     printf("mouse %d %d %u (%d %d %d)\n", x,y, button, button & SDL_BUTTON(1), button & SDL_BUTTON(2), button & SDL_BUTTON(3));
@@ -31,7 +31,7 @@ struct Orbiter
     //! deplace la camera en fonction de mouvements relatifs de la souris.
     void move( const float x, const float y ) { position.x-= position.z * x; position.y+= position.z * y;}
     //! approche/recule la camera en fonction de mouvements relatifs de la souris.
-    void move( const float z ) { position.z-= position.z * 0.01f * z; position.z= std::max(0.01f, position.z); }
+    void move( const float z ) { position.z-= position.z * 0.01f * z; position.z= std::max(0.001f, position.z); }
     
     //! repositionne la camera pour observer un objet.
     void look( const BBox& object ) { size= (object.pMax - object.pMin).Length(); rotation= Vec2(0, 0); position= Vec3(0, 0, size); }

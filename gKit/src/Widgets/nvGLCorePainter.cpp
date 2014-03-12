@@ -51,7 +51,9 @@ const static gk::glsl::vec4 s_colors[cNbColors]=
 
 GLCorePainter::GLCorePainter( )
     :
-    m_font_texture(0)
+    m_font_texture(0),
+	m_widget_program(), m_widgets(), 
+	m_string_program(), m_strings()
 {}
 
 GLCorePainter::~GLCorePainter( )

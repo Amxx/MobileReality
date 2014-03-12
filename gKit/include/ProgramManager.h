@@ -38,10 +38,10 @@ public:
 
     //! prepare les sources d'un programme a partir des sections du fichier source, common est un fichier include. 
     //! renvoie le GLCompiler charge de construire le programe. permet de modifier les sources avant la compilation.
-    GLCompiler *loadProgram( const std::string& source, const std::string& common= "" );
+    GLCompiler& loadProgram( const std::string& source, const std::string& common= "" );
 
     //! renvoie un programme nomme ou GLProgram::null() s'il n'existe pas. 
-    GLProgram *program( const std::string& label );
+    GLProgram *program( const std::string& label, const unsigned int version= 0 );
     
     //! recharge les sources modifies et recompile les programmes modifies.
     //! les objets c++ ne sont pas detruits (les pointeurs sont toujours valides), seuls les objets opengl sont modifies.
@@ -82,7 +82,7 @@ GLProgram *createProgram( const std::string& source, const std::string& common= 
 //! utilitaire: acces simplifie au singleton ProgramManager.
 //! \ingroup OpenGL.
 inline
-GLCompiler *loadProgram( const std::string& source, const std::string& common= "" )
+GLCompiler &loadProgram( const std::string& source, const std::string& common= "" )
 {
     return ProgramManager::manager().loadProgram(source, common);
 }
@@ -90,9 +90,9 @@ GLCompiler *loadProgram( const std::string& source, const std::string& common= "
 //! utilitaire: acces simplifie au singleton ProgramManager.
 //! \ingroup OpenGL.
 inline
-GLProgram *findProgram( const std::string& label )
+GLProgram *findProgram( const std::string& label, const unsigned int version= 0 )
 {
-    return ProgramManager::manager().program(label);
+    return ProgramManager::manager().program(label, version);
 }
 
 //! utilitaire: acces simplifie au singleton ProgramManager.

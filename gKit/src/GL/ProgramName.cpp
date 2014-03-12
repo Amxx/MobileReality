@@ -1,7 +1,5 @@
 
 
-//~ #include "GL/GLTexture.h"
-//~ #include "GL/GLSampler.h"
 #include "GL/GLProgram.h"
 #include "GL/ProgramName.h"
 
@@ -57,47 +55,6 @@ bool uniform_check( ProgramName& uniform, int size, GLenum type )
     
     return true;
 }
-
-#if 0
-int setTexture( const ProgramSampler& uniform, GLTexture *texture, GLSampler *sampler )
-{
-    if(uniform.isValid() == false)
-        return -1;
-    if(texture == NULL)
-    {
-        ERROR("setTexture('%s'): null texture\n", uniform.program->samplerName(uniform));
-        return -1;
-    }
-    
-    if(sampler == NULL)
-    {
-        sampler= defaultSampler();
-    }
-    
-    int unit= uniform.index();
-    glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(texture->target(), texture->name);
-    glBindSampler(unit, (sampler != NULL) ? sampler->name : 0);
-    
-    return setSamplerUniform(uniform, uniform.index());
-}
-
-int resetTexture( const ProgramSampler& uniform, GLTexture *texture )
-{
-    if(uniform.isValid() == false)
-        return -1;
-    if(texture == NULL)
-    {
-        ERROR("setTexture('%s'): null texture\n", uniform.program->samplerName(uniform));
-        return -1;
-    }
-    
-    int unit= uniform.index();    
-    glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(texture->target(), 0);
-    return 0;
-}
-#endif
 
 
 ProgramName& ProgramName::operator= ( const int x )

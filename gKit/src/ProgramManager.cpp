@@ -31,26 +31,25 @@ GLProgram *ProgramManager::createProgram( const std::string& label, const std::s
     return compiler->make();
 }
 
-GLCompiler *ProgramManager::loadProgram( const std::string& source, const std::string& common )
+GLCompiler &ProgramManager::loadProgram( const std::string& source, const std::string& common )
 {
     GLCompiler *compiler= new GLCompiler(source);      // nomme le programme == nom du fichier source
     m_compilers.push_back(compiler);
     
     compiler->loadCommon(IOFileSystem::findFile(common, m_paths));
-    compiler->load(IOFileSystem::findFile(source, m_paths));
-    
-    return compiler;
+    return compiler->load(IOFileSystem::findFile(source, m_paths));
 }
 
 GLProgram *ProgramManager::createProgram( const std::string& source, const std::string& common )
 {
-    return loadProgram(source, common)->make();
+    return loadProgram(source, common).make();
 }
 
-GLProgram *ProgramManager::program( const std::string& label )
+GLProgram *ProgramManager::program( const std::string& label, const unsigned int version )
 {
     for(unsigned int i= 0; i < m_compilers.size(); i++)
-        if(m_compilers[i]->program->label == label)
+        if(m_compilers[i]->program->label == label
+        && m_compilers[i]->program->version == version)
             return m_compilers[i]->program;
     
     return GLProgram::null();

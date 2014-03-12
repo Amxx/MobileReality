@@ -1,4 +1,5 @@
 
+#include <cstdio>
 #include <algorithm>
 
 #include "Widgets/nvWidgets.h"
@@ -81,7 +82,8 @@ int UIFont::getTextLineWidthAt( const char *text, const int at ) const
         w+= getGlyph(text[i]).advance;
     }
     
-    return w +2;
+    //~ return w +2;
+    return w;
 }
 
 int UIFont::getPickedCharNb( const char *text, const Point& p ) const
@@ -96,6 +98,7 @@ int UIFont::getPickedCharNb( const char *text, const Point& p ) const
             return i;
         
         w+= getGlyph(text[i]).advance;
+        //~ printf("advance '%c' %d, %d\n", text[i], getGlyph(text[i]).advance, w);
     }
     
     return i;

@@ -3,33 +3,45 @@
 #define _GLSL_UNIFORMS_H
 
 #include "Vec.h"
+#include <vector>
 
 namespace gk {
 
-//! representation des types glsl pour simplifier la construction des uniform buffers et les affectations. 
+//! representation des types glsl pour simplifier la construction des uniform buffers et les affectations.
 //! \ingroup OpenGL.
 namespace glsl {        // std140 / 430
 
-#ifdef _WIN32   // visual studio
+#ifdef _MSC_VER   // visual studio
 # define ALIGN(...) __declspec(align(__VA_ARGS__))
+//# define ALIGN(...) 
+
+//// marche pas
+//// cf http://stackoverflow.com/a/9410016
+//template<class T, class Alloc>
+//void resize( std::vector<T, Alloc>& v, typename std::vector<T, Alloc>::size_type new_size, T const& val )
+//{
+//  if (v.size() < new_size) v.insert(v.end(), new_size - v.size(), val);
+//  else if (new_size < v.size()) v.erase(v.begin() + new_size, v.end());
+//}
+
 #else   // gcc, clang, icc
 # define ALIGN(...) __attribute__((aligned(__VA_ARGS__)))
 #endif
 
-    
-    
+
+
 //! scalar bool, int, uint, float
 template < typename T >
 struct ALIGN(4) gscalar
 {
     T value;
-    
+
     gscalar( const T& v= 0 ) : value(v) {}
     gscalar& operator= ( const T& v ) { value= v; return *this; }
-    
+
     operator T( ) { return value; }
     operator T( ) const { return value; }
-    
+
     bool operator== ( const T& b ) { return (value == b); }
     bool operator!= ( const T& b ) { return !((*this) == b); }
     bool operator== ( const gscalar<T>& b ) { return (value == b.value); }
@@ -38,15 +50,15 @@ struct ALIGN(4) gscalar
 
 //! vec2, ivec2, uvec2, bvec2
 template < typename T >
-struct ALIGN(8) gvec2 
+struct ALIGN(8) gvec2
 {
     gscalar<T> x;
     gscalar<T> y;
-    
+
     gvec2( const T& v ) : x(v), y(v) {}
     gvec2( const T& _x= 0, const T& _y= 0 ) : x(_x), y(_y) {}
     gvec2( const TVec2<T>& v ) : x(v.x), y(v.y) {}
-    
+
     operator const T *( ) const { return &x.value; }
     operator T *( ) { return &x.value; }
     bool operator== ( const T& b ) { return (x == b.x) && (y == b.y); }
@@ -55,17 +67,17 @@ struct ALIGN(8) gvec2
 
 //! vec3, ivec3, uvec3, bvec3
 template < typename T >
-struct ALIGN(16) gvec3 
+struct ALIGN(16) gvec3
 {
     gscalar<T> x;
     gscalar<T> y;
     gscalar<T> z;
-    
+
     gvec3( const T& v ) : x(v), y(v), z(v) {}
     gvec3( const gvec2<T>& v, const T& _z= 0 ) : x(v.x), y(v.y), z(_z) {}
     gvec3( const T& _x= 0, const T& _y= 0, const T& _z= 0 ) : x(_x), y(_y), z(_z) {}
     gvec3( const TVec3<T>& v ) : x(v.x), y(v.y), z(v.z) {}
-    
+
     operator const T *( ) const { return &x.value; }
     operator T *( ) { return &x.value; }
     bool operator== ( const T& b ) { return (x == b.x) && (y == b.y) && (z == b.z); }
@@ -74,7 +86,7 @@ struct ALIGN(16) gvec3
 
 //! vec4, ivec4, uvec4, bvec4
 template < typename T >
-struct ALIGN(16) gvec4 
+struct ALIGN(16) gvec4
 {
     gscalar<T> x;
     gscalar<T> y;
@@ -86,7 +98,7 @@ struct ALIGN(16) gvec4
     gvec4( const gvec3<T>& v, const T& _w= 0 ) : x(v.x), y(v.y), z(v.z), w(_w) {}
     gvec4( const T& _x= 0, const T& _y= 0, const T& _z= 0, const T& _w= 0 ) : x(_x), y(_y), z(_z), w(_w) {}
     gvec4( const TVec4<T>& v ) : x(v.x), y(v.y), z(v.z), w(v.w) {}
-    
+
     operator const T *( ) const { return &x.value; }
     operator T *( ) { return &x.value; }
     bool operator== ( const T& b ) { return (x == b.x) && (y == b.y) && (z == b.z) && (w == b.w); }
@@ -99,10 +111,10 @@ template < typename T, unsigned int R >  // inutile ??
 struct grmat
 {
     T row[R];
-    
+
     T& operator[]( const unsigned int id ) { return row[id]; }
     const T& operator[]( const unsigned int id ) const { return row[id]; }
-    
+
     operator const T *( ) const { return &row[0].x.x; }
     operator T *( ) { return &row[0].x.x; }
 };
@@ -111,12 +123,12 @@ template< typename T >
 struct grmat<T, 2u>
 {
     T row[2];
-    
+
     grmat( const T& a= T(), const T& b= T() ) { row[0]= a; row[1]= b; }
-    
+
     T& operator[]( const unsigned int id ) { return row[id]; }
     const T& operator[]( const unsigned int id ) const { return row[id]; }
-    
+
     operator const T *( ) const { return &row[0].x.x; }
     operator T *( ) { return &row[0].x.x; }
 };
@@ -125,12 +137,12 @@ template< typename T >
 struct grmat<T, 3u>
 {
     T row[3];
-    
+
     grmat( const T& a= T(), const T& b= T(), const T& c= T() ) { row[0]= a; row[1]= b; row[2]= c; }
-    
+
     T& operator[]( const unsigned int id ) { return row[id]; }
     const T& operator[]( const unsigned int id ) const { return row[id]; }
-    
+
     operator const T *( ) const { return &row[0].x.x; }
     operator T *( ) { return &row[0].x.x; }
 };
@@ -139,12 +151,12 @@ template< typename T >
 struct grmat<T, 4u>
 {
     T row[4];
-    
-    grmat( const T& a= T(), const T& b= T(), const T& c= T(), const T& d= T() ) { row[0]= a; row[1]= b; row[2]= c; row[3]= d; }    
-    
+
+    grmat( const T& a= T(), const T& b= T(), const T& c= T(), const T& d= T() ) { row[0]= a; row[1]= b; row[2]= c; row[3]= d; }
+
     T& operator[]( const unsigned int id ) { return row[id]; }
     const T& operator[]( const unsigned int id ) const { return row[id]; }
-    
+
     operator const T *( ) const { return &row[0].x.x; }
     operator T *( ) { return &row[0].x.x; }
 };
@@ -154,7 +166,7 @@ template < typename T, unsigned int C >
 struct gcmat
 {
     T column[C];
-    
+
     T& operator[]( const unsigned int id ) { return column[id]; }
 };
 
@@ -167,7 +179,7 @@ grmat<T,R> grmul( const grmat<T,R>& a, const grmat<T,R>& b )
         for(unsigned int c= 0; c < R; c++)
             for(unsigned int k= 0; k < R; k++)
                 m[r][c]+= a[r][k] * b[k][c];
-    
+
     return m;
 }
 
@@ -179,7 +191,7 @@ grmat<T,R> grtranspose( const grmat<T,R>& a )
     for(unsigned int r= 0; r < R; r++)
         for(unsigned int c= 0; c < R; c++)
             m[r][c]= a[c][r];
-    
+
     return m;
 }
 

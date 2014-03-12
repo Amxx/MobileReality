@@ -108,16 +108,17 @@ public:
             buffers[i]= color;
             
             glFramebufferTexture(_target, GL_COLOR_ATTACHMENT0 + i, color->name, 0);
+            glBindTexture(color->target, 0);
         }
         
         if(buffer_bits & DEPTH_BIT)
         {
             depth_buffer= (new GLTexture())->createTexture2D(GLTexture::UNIT0, width, height, depth_format);
+            
             glFramebufferTexture(_target, GL_DEPTH_ATTACHMENT, depth_buffer->name, 0);
+            glBindTexture(depth_buffer->target, 0);
         }
         
-        // desactive la texture active.
-        glBindTexture(GL_TEXTURE_2D, 0);
         return this;
     }
     

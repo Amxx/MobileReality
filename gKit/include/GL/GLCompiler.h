@@ -125,6 +125,15 @@ public:
     //! compile les shaders et les linke dans un program.
     GLProgram *make( );
     
+    //! compile une 'version' des shaders et les linke dans un program. 
+    //! utilise par gk::ProgramManager pour identifier plusieurs variantes du meme programme (compilation avec #define).
+    GLProgram *makeVersion( const unsigned int _version )
+    {
+        GLProgram *program= make();
+        if(program != GLProgram::null()) program->version= _version;
+        return program;
+    }
+    
     //! recharge les sources et recompile le program, si necessaire.
     GLProgram *reload( );
 };

@@ -21,11 +21,14 @@ public:
     void processMouseMotionEvent( SDL_MouseMotionEvent& event );
     void processMouseButtonEvent( SDL_MouseButtonEvent& event );
     
-    // process sdl keyboard events
+    // process sdl keyboard events, "special" keys
     void processKeyboardEvent( SDL_KeyboardEvent& event );
     
-    // process sdl dropfile events
-    // void processDropfileEvent( );
+    // process sdl text input events "standard input" 
+    void processTextEvent( const char *string );
+
+    // process sdl drop file events
+    void processDropEvent( const char *file );
     
 private:
     //  Translate non-ascii keys from SDL to nvWidgets
