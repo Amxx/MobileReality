@@ -5,12 +5,12 @@
 	<subscale>"0.786667"</subscale>
 
 
-<!--
 	<obj>"bigguy.obj"</obj>
 	<obj-scale>"0.25"</obj-scale>
--->
+<!--
 	<obj>"cube.obj"</obj>
 	<obj-scale>"3.00"</obj-scale>
+-->
 
 
 	<video-front-id>"1"</video-front-id>

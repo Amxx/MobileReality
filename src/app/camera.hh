@@ -10,14 +10,14 @@ class Camera : public VideoDevice, public Calibration
 	
 	private:
 		VideoDevice* 	_device;
-		cv::Matx33f		_orientation;
+		cv::Matx44f		_orientation;
 	
 	
 	
 	
 	public:
 		Camera(VideoDevice* = nullptr, std::string = "");
-		Camera(VideoDevice*, cv::Matx33f, std::string = "");
+		Camera(VideoDevice*, cv::Matx44f, std::string = "");
 		
 		// VideoDevice Methods
 		bool				open(int idx = 0)								{ _device->open(idx); 							}
@@ -38,7 +38,7 @@ class Camera : public VideoDevice, public Calibration
 		
 		// Camera Methods
 		bool 								isready()						const;		
-		const cv::Matx33f&	orientation()				const;
+		const cv::Matx44f&	orientation()				const;
 
 		void								openAndCalibrate(std::string path);
 		void								openAndCalibrate(std::string path, Scanner&);

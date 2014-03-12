@@ -20,22 +20,20 @@ EnvMap::EnvMap(cv::Size s) :
 	std::vector<Face*>::push_back(new Face(s));
 }
 
-void EnvMap::addFrame(Camera& camera, cv::Matx33f modelview)
+void EnvMap::addFrame(Camera& camera, cv::Matx44f modelview)
 {
 	cv::Mat frame = cv::Mat(camera.frame());
 	
-	const cv::Matx33f transform = modelview.inv() *	camera.orientation().inv() *	cv::Matx33f(1.0, 0.0, 0.0,			0.0, -1.0, 0.0,			0.0, 0.0, -1.0) *	camera.A().inv();
+	static const cv::Matx44f toGL(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+	cv::Matx33f transform = Matx44to33(modelview.inv() * camera.orientation().inv() * toGL) * camera.A().inv();
 	
 	for (int u=0; u<frame.size().height; ++u)
 		for (int v=0; v<frame.size().width; ++v)
 		{
-
 			cv::Matx31f pt = transform * cv::Matx31f(v, u, 1.0);					
-
-			float n = sqrt(pt(0)*pt(0) + pt(1)*pt(1) + pt(2)*pt(2));
 			
+			float n = sqrt(pt(0)*pt(0) + pt(1)*pt(1) + pt(2)*pt(2));			
 			pt(0) /= n;			pt(1) /= n;			pt(2) /= n;
-											pt(1) *= -1;		pt(2) *= -1;		// NEEDED, DONT UNDERSTAND WHY ! o_O
 			
 			int i;
 			float sc, tc, m = 0.;
@@ -65,7 +63,7 @@ void EnvMap::addFrame(Camera& camera, cv::Matx33f modelview)
 		for (int x=0; x<_size.height; ++x)
 			for (int y=0; y<_size.width; ++y)
 				if (face->_time.at<int>(x,y) == _current_time)
-					face->at<cv::Vec3f>(x,y)				/= face->_wght.at<int>(x,y);
+					face->at<cv::Vec3f>(x,y) /= face->_wght.at<int>(x,y);
 	
 	_current_time++;
 }
@@ -76,7 +74,7 @@ void EnvMap::clear()
 {
 	for (Face* face : *this)
 		for (int x=0; x<_size.height; ++x)
-			for (int y=0; y<_size.height; ++y)
+			for (int y=0; y<_size.width; ++y)
 				face->at<cv::Vec3f>(x,y)				= cv::Vec3f(0.f, 0.f, 0.f);
 }
 
@@ -84,16 +82,28 @@ void EnvMap::clear()
 
 
 
-void EnvMap::save(const cv::Mat& img, const std::string& path)
+void EnvMap::save(const std::string& path)
 {
-	/*
-	cv::Mat tone(img.size(), CV_8UC3);
-	for (int i=0; i<img.size().height; ++i)
-		for (int j=0; j<img.size().width; ++j)
-			for (int k=0; k<3; ++k)
-				tone.at<cv::Vec3b>(i,j)[k] = (uchar) (255.0 * img.at<cv::Vec3f>(i,j)[k]);
+	cv::Mat tone(cv::Size(_size.width*3, _size.height*4), CV_8UC3);
+	for (int i=0; i<6; ++i)
+	{
+		int dx, dy;
+		switch (i)
+		{
+			case 0: dx = 1 * _size.height; dy = 2 * _size.width; break;
+			case 1: dx = 1 * _size.height; dy = 0 * _size.width; break;
+			case 2: dx = 1 * _size.height; dy = 1 * _size.width; break;
+			case 3: dx = 3 * _size.height; dy = 1 * _size.width; break;
+			case 4: dx = 2 * _size.height; dy = 1 * _size.width; break;
+			case 5: dx = 0 * _size.height; dy = 1 * _size.width; break;		
+		}
+		Face*	face = (*this)[i];
+		for (int x=0; x<_size.height; ++x)
+			for (int y=0; y<_size.width; ++y)
+				for (int k=0; k<3; ++k)
+					tone.at<cv::Vec3b>(x+dx,y+dy)[k] = (uchar) (255.0 * face->at<cv::Vec3f>(x,y)[k]);
+	}
 	imwrite(path, tone);
-	*/
 }
 
 

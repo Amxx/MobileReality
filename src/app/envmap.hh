@@ -32,12 +32,11 @@ class EnvMap : public std::vector<Face*>
 	public:
 		EnvMap(cv::Size = cv::Size(512, 512));
 	
-		void 						addFrame(Camera&, cv::Matx33f);
+		void 						addFrame(Camera&, cv::Matx44f);
 		const cv::Mat&	color(int id = 0) const { return *((*this)[id]); }
-		void 						clear();
-		static void 		save(const cv::Mat&, const std::string&);
-	
 		
+		void 						clear();
+		void 						save(const std::string&);
 		
 };
 

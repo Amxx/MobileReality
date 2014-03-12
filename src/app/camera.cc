@@ -3,10 +3,13 @@
 Camera::Camera(VideoDevice* device , std::string path) :
 	Calibration(path),
 	_device(device),
-	_orientation(cv::Matx33f(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0))
+	_orientation(cv::Matx44f(	1.0, 0.0, 0.0, 0.0,
+														0.0, 1.0, 0.0, 0.0,
+														0.0, 0.0, 1.0, 0.0,
+														0.0, 0.0, 0.0, 1.0 ))
 {
 }
-Camera::Camera(VideoDevice* device , cv::Matx33f orientation, std::string path) :
+Camera::Camera(VideoDevice* device , cv::Matx44f orientation, std::string path) :
 	Calibration(path),
 	_device(device),
 	_orientation(orientation)
@@ -32,7 +35,7 @@ bool Camera::isready() const
 {
 	return _device->isopen() && Calibration::iscalibrated();
 }
-const cv::Matx33f&	Camera::orientation() const
+const cv::Matx44f&	Camera::orientation() const
 {
 	return _orientation;
 }
