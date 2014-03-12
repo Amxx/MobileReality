@@ -13,10 +13,10 @@
 -->
 
 
-	<video-front-id>"1"</video-front-id>
+	<video-front-id>"0"</video-front-id>
 	<params-front>data/params/c910.xml</params-front>
 	
-	<video-back-id>"2"</video-back-id>
+	<video-back-id>"1"</video-back-id>
 	<params-back>data/params/logitech.xml</params-back>
 
 	<scanner>install/share/libscanner_zbar.so</scanner>
