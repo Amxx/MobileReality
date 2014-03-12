@@ -47,7 +47,7 @@ class Core : public gk::App
 		
 		// Object
 		gk::GLBasicMesh*											_mesh;
-
+	
 		// Rendering
 		std::map<std::string, gk::GLProgram*>	_GLPrograms;
 		std::map<std::string,	gk::GLTexture*>	_GLTextures;

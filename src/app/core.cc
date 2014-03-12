@@ -22,8 +22,9 @@
 #define 	ENVMAP_SIZE					cv::Size(256, 256)																// NEEDED
 
 // =========== RENDERING OPTIONS ============
-// #define	DISABLE_RENDERING
-
+// #define	DISABLE_BACKGROUND_RENDERING
+// #define	DISABLE_SCENE_RENDERING
+#define		VALIDFRAMES					10																								//NEEDED (DEFAULT 1)
 // ============== VIEW OPTIONS ==============
 #define 	DISABLE_VIEW
 
@@ -32,8 +33,15 @@
 #define		CONTROL							VideoDevice::BRIGHTNESS														// NEEDED
 
 
+
+
+
+
+
+
+
 // ############################################################################
-// #                                 METHODE                                  #
+// #                                 METHODS                                  #
 // ############################################################################
 
 Core::Core(int argc, char* argv[]) :
@@ -183,12 +191,11 @@ int Core::init()
 	_GLPrograms["background"] = gk::createProgram("background.glsl");
 	if (_GLPrograms["background"] == gk::GLProgram::null()) return -1;
 
-	_GLPrograms["rendering"] = gk::createProgram("rendering.glsl");
-	if (_GLPrograms["rendering"] == gk::GLProgram::null()) return -1;
-	
-	glBindAttribLocation(_GLPrograms["rendering"]->name, 0, "position");
-	glBindAttribLocation(_GLPrograms["rendering"]->name, 1, "normal");
-	glBindAttribLocation(_GLPrograms["rendering"]->name, 1, "texcoord");
+	_GLPrograms["materialrendering"] = gk::createProgram("materialrendering.glsl");
+	if (_GLPrograms["materialrendering"] == gk::GLProgram::null()) return -1;
+	glBindAttribLocation(_GLPrograms["materialrendering"]->name, 0, "position");
+	glBindAttribLocation(_GLPrograms["materialrendering"]->name, 1, "normal");
+	glBindAttribLocation(_GLPrograms["materialrendering"]->name, 2, "texcoord");
 	
 	// ===============================================================
 	// =                C R E A T E   T E X T U R E S                =
@@ -205,11 +212,13 @@ int Core::init()
 	if (mesh == nullptr) return -1;
 	
 	_mesh = new gk::GLBasicMesh(GL_TRIANGLES, mesh->indices.size());
-	_mesh->createBuffer(0, mesh->positions);
-	_mesh->createBuffer(1, mesh->normals);
-	_mesh->createBuffer(2, mesh->texcoords);
+	_mesh->createBuffer(0,	mesh->positions);
+  _mesh->createBuffer(1,	mesh->texcoords);
+	_mesh->createBuffer(2,		mesh->normals);
 	_mesh->createIndexBuffer(mesh->indices);
+	
 	delete mesh;
+	
 	
 	return 1;
 }
@@ -244,6 +253,7 @@ int Core::draw()
 	// ===============================================================
 	// =                 G R A B I N G   I M A G E S                 =
 	// ===============================================================
+	
 	#ifndef DISABLE_CAMERA_0
 		if (_cameras[0]) _cameras[0]->grabFrame();
 	#endif
@@ -251,42 +261,51 @@ int Core::draw()
 		if (_cameras[1]) _cameras[1]->grabFrame();
 	#endif
 	
+	glClear(GL_COLOR_BUFFER_BIT);
+	
 	// ===============================================================
 	// =               B A C K G R O U N D   F R A M E               =
-	// ======== c    c   c   c c c c=======================================================
+	// ===============================================================
+	
+	#ifndef DISABLE_BACKGROUND_RENDERING	
 		glClear(GL_DEPTH_BUFFER_BIT);	
-		
 		glBindTexture(_GLTextures["frame0"]->target, _GLTextures["frame0"]->name);
 		glTexSubImage2D(_GLTextures["frame0"]->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
 				
 		glUseProgram(_GLPrograms["background"]->name);
-		_GLPrograms["background"]->sampler("frame") 			= 0;
+		_GLPrograms["background"]->sampler("frame") = 0;
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	#endif
 	
 	// ===============================================================
 	// =                R E A D I N G   S Y M B O L S                =
 	// ===============================================================
+	
 	std::vector<Symbol> symbols = _scanner->scan(_cameras[0]->frame());	
-		
+	
 	// ===============================================================
 	// =                    P O S I T I O N I N G                    =
 	// ===============================================================
-	cv::Matx44f model, view;	// View (bloc camera)
-		
+	
+	static cv::Matx44f	model;																				// Presistent	: Model
+	static cv::Matx44f	view;																					// Persistent	: View (bloc camera)
+	static int					presist	= 0;																	// Persistent : Persistency duration
+	
 	for (Symbol& symbol : symbols)
 		try {
-			cv::Matx44f toGL(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+			static cv::Matx44f toGL(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 			// LEGACY MODE FOR CUBE
 			try 				{	model = parseSymbolToModel(symbol.data, _scale)																	* toGL;	}
 			catch (...)	{ model = parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2))	* toGL;	}
 			symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
-			view =	_cameras[0]->orientation().inv() * viewFromSymbol(symbol.rvec, symbol.tvec);
-			break;
+			view		=	_cameras[0]->orientation().inv() * viewFromSymbol(symbol.rvec, symbol.tvec);
+			presist	= (!isNull(view) && !isNull(model))?VALIDFRAMES:0;
+			if (presist) break;
 		} catch (...) {
 			std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
 		}
 	
-	if (!isNull(view) && !isNull(model))
+	if (presist && presist--)
 	{		
 	// ===============================================================
 	// =                B U I L D I N G   E N V M A P                =
@@ -304,7 +323,7 @@ int Core::draw()
 	// ===============================================================
 	// =                S C E N E   R E N D E R I N G                =
 	// ===============================================================
-		#ifndef DISABLE_RENDERING
+		#ifndef DISABLE_SCENE_RENDERING
 			glClear(GL_DEPTH_BUFFER_BIT);	
 
 			glBindTexture(_GLTextures["envmap"]->target, _GLTextures["envmap"]->name);
@@ -316,18 +335,29 @@ int Core::draw()
 			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[5]->ptr());
 			glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		
-			static const	gk::Transform		proj			= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), windowWidth(), windowHeight(), 1.0, 10000.0));
-			static const	gk::Transform		scale			= gk::Scale(atof(_config("obj-scale").c_str()));
+			static	gk::Transform		scale	= gk::Scale(atof(_config("obj-scale").c_str()));
+			static	gk::Transform		proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.0, 10000.0));
+		//static	gk::Transform		proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), windowWidth(), windowHeight(), 1.0, 10000.0));
 			
-			gk::Transform mv	=	cv2gkit(_cameras[0]->orientation() * view * model) * scale;	// Point de vue de _cameras[0]				// * toGL
-			gk::Transform mvp = proj * mv;																									// Projection de _cameras[0]
+			gk::Transform 					mv		=	cv2gkit(_cameras[0]->orientation() * view * model) * scale;	// Point de vue de _cameras[0]
+			gk::Transform 					mvp		= proj * mv;																									// Projection de _cameras[0]
 
-			glUseProgram(_GLPrograms["rendering"]->name);
-			// _GLPrograms["rendering"]->uniform("obj_color")		= gk::VecColor(0.7, 1.0, 0.7);
-			_GLPrograms["rendering"]->uniform("mvMatrix")			= mv.matrix();
-			_GLPrograms["rendering"]->uniform("mvMatrixInv")	= mv.inverseMatrix();
-			_GLPrograms["rendering"]->uniform("mvpMatrix")		= mvp.matrix();
-			_GLPrograms["rendering"]->sampler("envmap")				= 1;
+			glUseProgram(_GLPrograms["materialrendering"]->name);    
+			_GLPrograms["materialrendering"]->uniform("mvMatrix")				= mv.matrix();
+			_GLPrograms["materialrendering"]->uniform("mvMatrixInv")		= mv.inverseMatrix();
+			_GLPrograms["materialrendering"]->uniform("mvpMatrix")			= mvp.matrix();
+		//_GLPrograms["materialrendering"]->uniform("ka")							= 0.0f;			// 1.0
+			_GLPrograms["materialrendering"]->uniform("kd")							= 0.5f;				// 0.6
+			_GLPrograms["materialrendering"]->uniform("ks")							= 0.5f;				// 0.3
+			_GLPrograms["materialrendering"]->uniform("ns")							= 4096.0f;		// 64.0
+		//_GLPrograms["materialrendering"]->uniform("ambient_color")	= gk::VecColor(1, 1, 1, 1);
+		//_GLPrograms["materialrendering"]->uniform("diffuse_color")	= gk::VecColor(1, 1, 1, 1);
+		//_GLPrograms["materialrendering"]->uniform("specular_color")	= gk::VecColor(1, 1, 1, 1);    
+		//_GLPrograms["materialrendering"]->uniform("ambient_light")	= gk::VecColor(1, 1, 1, 1);
+		//_GLPrograms["materialrendering"]->uniform("diffuse_light")	= gk::VecColor(1, 1, 1, 1);
+		//_GLPrograms["materialrendering"]->uniform("specular_light")	= gk::VecColor(1, 1, 1, 1);
+			_GLPrograms["materialrendering"]->sampler("envmap")					= 1;
+			
 			_mesh->draw();
 		#endif
 	}
@@ -372,29 +402,35 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 	if (event.state == SDL_PRESSED)
 		switch (event.keysym.sym)
 		{
-			case 'c':
-			{
-				_envmap.clear();
-				break;
-			}
-			case 'b':
+			case SDLK_F1:
 			{
 				_buildenvmap = !_buildenvmap;
-				std::cout << "build envmap : " << std::string(_buildenvmap?"on":"off") << std::endl;
+				#ifdef VERBOSE 
+					printf("build envmap : %s\n", _buildenvmap?"on":"off");
+				#endif
 				break;
 			}
-			case 's':		
+			case SDLK_F2:
+			{
+				_envmap.clear();
+				#ifdef VERBOSE 
+					printf("envmap cleared\n");
+				#endif
+				break;
+			}
+			case SDLK_F3:
 			{
 				time_t now = time(0);
 				std::stringstream path;
 				path << "data/env/envmap_" << now << ".png";
-				std::cout << "writing color envmap '" << path.str() << "' ... " << std::flush;
+				#ifdef VERBOSE 
+					printf("writing color envmap '%s' ... \n", path.str().c_str());
+				#endif
 				_envmap.save(path.str());				
-				std::cout << "done" << std::endl;
 				break;
 			}
 			
-			case SDLK_F6:
+			case SDLK_F4:
 			{
 				time_t now = time(0);
 				std::stringstream path;
@@ -402,7 +438,6 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				gk::writeFramebuffer(path.str());
 				break;
 			}
-			
 			case SDLK_F5:
 				gk::reloadPrograms();
 				break;
@@ -410,9 +445,6 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 			case SDLK_ESCAPE:
 				closeWindow();
 				break;
-			
-			
-			
 			
 			case SDLK_RIGHT:
 			{
@@ -499,19 +531,44 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 		}
 }
 
+
+
+
+
 // ############################################################################
+
+
+
+
 
 void Core::processWindowResize(SDL_WindowEvent &event)
 {
+	glViewport(0, 0, windowWidth(), windowHeight());
 }
 
+
+
+
+
 // ############################################################################
+
+
+
+
 
 void Core::processMouseButtonEvent(SDL_MouseButtonEvent &event)
 {
 }
 
+
+
+
+
 // ############################################################################
+
+
+
+
 
 void Core::processMouseMotionEvent(SDL_MouseMotionEvent &event)
 {
