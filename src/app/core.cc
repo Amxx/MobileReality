@@ -22,22 +22,35 @@
 #define 	ENVMAP_SIZE					cv::Size(256, 256)																// NEEDED
 
 // =========== RENDERING OPTIONS ============
-// #define	DISABLE_BACKGROUND_RENDERING
+#define	DISABLE_BACKGROUND_RENDERING
 // #define	DISABLE_SCENE_RENDERING
 #define		VALIDFRAMES					10																								//NEEDED (DEFAULT 1)
 // ============== VIEW OPTIONS ==============
 #define 	DISABLE_VIEW
 
 // ============= OTHERS OPTIONS =============
-// #define		VERBOSE
+#define		VERBOSE
 #define		CONTROL							VideoDevice::BRIGHTNESS														// NEEDED
 
 
 
 
 
+// ============= DEBUG OPTIONS ==============
+// #define		DEBUG_ALL
+// #define		DEBUG_ENVMAP
+// #define		DEBUG_MVP
 
 
+
+#ifdef DEBUG_ALL
+	#ifndef DEBUG_ENVMAP
+	#define	DEBUG_ENVMAP
+	#endif
+	#ifndef DEBUG_MVP
+	#define	DEBUG_MVP
+	#endif
+#endif
 
 
 // ############################################################################
@@ -46,13 +59,10 @@
 
 Core::Core(int argc, char* argv[]) :
 	gk::App(),
-	
 	_cameras(2),
 	_envmap(ENVMAP_SIZE),
-	
 	_scale(6.0),
 	_subscale(236.0/300.0),
-	
 	_buildenvmap(true)
 {
 	// ===============================================================
@@ -214,10 +224,24 @@ int Core::init()
 	_mesh = new gk::GLBasicMesh(GL_TRIANGLES, mesh->indices.size());
 	_mesh->createBuffer(0,	mesh->positions);
   _mesh->createBuffer(1,	mesh->texcoords);
-	_mesh->createBuffer(2,		mesh->normals);
+	_mesh->createBuffer(2,	mesh->normals);
 	_mesh->createIndexBuffer(mesh->indices);
 	
 	delete mesh;
+	
+	
+	#ifdef DEBUG_ENVMAP
+	for (int i=0; i<ENVMAP_SIZE.height; ++i)
+		for (int j=0; j<ENVMAP_SIZE.width; ++j)
+		{
+			_envmap[0]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
+			_envmap[1]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
+			_envmap[2]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
+			_envmap[3]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
+			_envmap[4]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
+			_envmap[5]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
+		}
+	#endif
 	
 	
 	return 1;
@@ -286,81 +310,80 @@ int Core::draw()
 	// ===============================================================
 	// =                    P O S I T I O N I N G                    =
 	// ===============================================================
+	#ifndef DEBUG_MVP
+		static cv::Matx44f	model;																				// Presistent	: Model
+		static cv::Matx44f	view;																					// Persistent	: View (bloc camera)
+		static int					presist	= 0;																	// Persistent : Persistency duration
 	
-	static cv::Matx44f	model;																				// Presistent	: Model
-	static cv::Matx44f	view;																					// Persistent	: View (bloc camera)
-	static int					presist	= 0;																	// Persistent : Persistency duration
+		for (Symbol& symbol : symbols)
+			try {
+				static cv::Matx44f toGL(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+				// LEGACY MODE FOR CUBE
+				try 				{	model = parseSymbolToModel(symbol.data, _scale)																	* toGL;	}
+				catch (...)	{ model = parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2))	* toGL;	}
+				symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
+				view		=	_cameras[0]->orientation().inv() * viewFromSymbol(symbol.rvec, symbol.tvec);
+				presist	= (!isNull(view) && !isNull(model))?VALIDFRAMES:0;
+				if (presist) break;
+			} catch (...) {
+				std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
+			}
 	
-	for (Symbol& symbol : symbols)
-		try {
-			static cv::Matx44f toGL(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-			// LEGACY MODE FOR CUBE
-			try 				{	model = parseSymbolToModel(symbol.data, _scale)																	* toGL;	}
-			catch (...)	{ model = parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2))	* toGL;	}
-			symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
-			view		=	_cameras[0]->orientation().inv() * viewFromSymbol(symbol.rvec, symbol.tvec);
-			presist	= (!isNull(view) && !isNull(model))?VALIDFRAMES:0;
-			if (presist) break;
-		} catch (...) {
-			std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
-		}
-	
-	if (presist && presist--)
-	{		
+		if (presist && presist--)
+		{		
 	// ===============================================================
 	// =                B U I L D I N G   E N V M A P                =
 	// ===============================================================
-		#ifndef DISABLE_ENVMAP
-			if (_buildenvmap)
-			{
-				_envmap.addFrame(*_cameras[1], view * model);
-				#ifdef DUAL_ACQUISITION
-					_envmap.addFrame(*_cameras[0], view * model);
-				#endif
-			}
-		#endif
-		
+			#if !defined(DISABLE_ENVMAP) && !defined(DEBUG_ENVMAP)
+				if (_buildenvmap)
+				{
+					_envmap.addFrame(*_cameras[1], view * model);
+					#ifdef DUAL_ACQUISITION
+						_envmap.addFrame(*_cameras[0], view * model);
+					#endif
+				}
+			#endif
+	#endif
 	// ===============================================================
 	// =                S C E N E   R E N D E R I N G                =
 	// ===============================================================
-		#ifndef DISABLE_SCENE_RENDERING
-			glClear(GL_DEPTH_BUFFER_BIT);	
+	#ifndef DISABLE_SCENE_RENDERING
+		glClear(GL_DEPTH_BUFFER_BIT);	
 
-			glBindTexture(_GLTextures["envmap"]->target, _GLTextures["envmap"]->name);
-			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[0]->ptr());
-			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[1]->ptr());
-			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[2]->ptr());
-			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[3]->ptr());
-			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[4]->ptr());
-			glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[5]->ptr());
-			glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-		
-			static	gk::Transform		scale	= gk::Scale(atof(_config("obj-scale").c_str()));
-			static	gk::Transform		proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.0, 10000.0));
-		//static	gk::Transform		proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), windowWidth(), windowHeight(), 1.0, 10000.0));
-			
-			gk::Transform 					mv		=	cv2gkit(_cameras[0]->orientation() * view * model) * scale;	// Point de vue de _cameras[0]
-			gk::Transform 					mvp		= proj * mv;																									// Projection de _cameras[0]
-
-			glUseProgram(_GLPrograms["materialrendering"]->name);    
-			_GLPrograms["materialrendering"]->uniform("mvMatrix")				= mv.matrix();
-			_GLPrograms["materialrendering"]->uniform("mvMatrixInv")		= mv.inverseMatrix();
-			_GLPrograms["materialrendering"]->uniform("mvpMatrix")			= mvp.matrix();
-		//_GLPrograms["materialrendering"]->uniform("ka")							= 0.0f;			// 1.0
-			_GLPrograms["materialrendering"]->uniform("kd")							= 0.5f;				// 0.6
-			_GLPrograms["materialrendering"]->uniform("ks")							= 0.5f;				// 0.3
-			_GLPrograms["materialrendering"]->uniform("ns")							= 4096.0f;		// 64.0
-		//_GLPrograms["materialrendering"]->uniform("ambient_color")	= gk::VecColor(1, 1, 1, 1);
-		//_GLPrograms["materialrendering"]->uniform("diffuse_color")	= gk::VecColor(1, 1, 1, 1);
-		//_GLPrograms["materialrendering"]->uniform("specular_color")	= gk::VecColor(1, 1, 1, 1);    
-		//_GLPrograms["materialrendering"]->uniform("ambient_light")	= gk::VecColor(1, 1, 1, 1);
-		//_GLPrograms["materialrendering"]->uniform("diffuse_light")	= gk::VecColor(1, 1, 1, 1);
-		//_GLPrograms["materialrendering"]->uniform("specular_light")	= gk::VecColor(1, 1, 1, 1);
-			_GLPrograms["materialrendering"]->sampler("envmap")					= 1;
-			
-			_mesh->draw();
+		glBindTexture(_GLTextures["envmap"]->target, _GLTextures["envmap"]->name);
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[0]->ptr());
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[1]->ptr());
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[2]->ptr());
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[3]->ptr());
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[4]->ptr());
+		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[5]->ptr());
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	
+		static	gk::Transform		scale	= gk::Scale(atof(_config("obj-scale").c_str()));
+		static	gk::Transform		proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.0, 10000.0));
+		#ifndef DEBUG_MVP
+			gk::Transform 					mv	=	cv2gkit(_cameras[0]->orientation() * view * model) * scale;	// Point de vue de _cameras[0]
+		#else
+			gk::Transform 					mv	=	gk::LookAt(gk::Point(5.0, 10.0, 20.0), gk::Point(0.0, 0.0, 0.0), gk::Vector(0.0, 1.0, 0.0)) * scale;
 		#endif
-	}
+		gk::Transform 					mvp		= proj * mv;
+		
+		glUseProgram(_GLPrograms["materialrendering"]->name);    
+		_GLPrograms["materialrendering"]->uniform("mvMatrix")				= mv.matrix();
+		_GLPrograms["materialrendering"]->uniform("mvMatrixInv")		= mv.inverseMatrix();
+		
+		_GLPrograms["materialrendering"]->uniform("mvpMatrix")			= mvp.matrix();
+		_GLPrograms["materialrendering"]->uniform("kd")							= 0.8f;								// 0.6
+		_GLPrograms["materialrendering"]->uniform("ks")							= 0.2f;								// 0.3
+		_GLPrograms["materialrendering"]->uniform("ns")							= 64.0f;							// 64.0
+		_GLPrograms["materialrendering"]->sampler("envmap")					= 1;
+		
+		_mesh->draw();
+	#endif
+	#ifndef DEBUG_MVP
+		}
+	#endif
+		
 	present();
 	
 	// ===============================================================
@@ -368,10 +391,10 @@ int Core::draw()
 	// ===============================================================
 	#ifndef DISABLE_VIEW
 		#ifndef DISABLE_CAMERA_0
-			cv::imshow("camera 0",								cv::Mat(_cameras[0]->frame()));
+			cv::imshow("camera 0", cv::Mat(_cameras[0]->frame()));
 		#endif
 		#ifndef DISABLE_CAMERA_1
-			cv::imshow("camera 1",								cv::Mat(_cameras[1]->frame()));
+			cv::imshow("camera 1", cv::Mat(_cameras[1]->frame()));
 		#endif
 		#ifndef DISABLE_ENVMAP
 			cv::imshow("Envmap 1 : +X", _envmap.color(0));

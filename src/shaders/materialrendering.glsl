@@ -1,23 +1,46 @@
 #version 140
 
+#define PI 3.14159
+
+
+
 #ifdef VERTEX_SHADER
 
+uniform 	samplerCube	envmap;
 uniform		mat4				mvMatrix;
 uniform		mat4				mvpMatrix;
+uniform		float				ns;
+
 in				vec3				position;
 in				vec3				texcoords;
 in				vec3				normal;
 in				vec3				texcoord;
+
 out				vec3				vertex_position;
 out				vec3				vertex_normal;
 out				vec3				vertex_texcoords;
+out				float				level_diffuse;
+out				float 			level_specular;
+out 			vec4				env_diffuse;
 
 void main( )
 {
 	gl_Position				= (mvpMatrix * vec4(position, 1.0));	
 	vertex_position 	= (mvMatrix  * vec4(position, 1.0)).xyz;
-	vertex_normal			= (mvMatrix  * vec4(normal,   0.0)).xyz;
+	vertex_normal			= (mvMatrix  * vec4(normal,   0.0)).xyz;	
 	vertex_texcoords	= texcoords;
+	
+	int		size				= textureSize(envmap, 0).x;
+	level_diffuse			= log2(size);
+	level_specular		= log2(size * sqrt(3.0)) - 0.5 * log2(ns + 1);
+	
+	vec3	n						=	normalize(normal);
+	env_diffuse				= (	textureLod(envmap, vec3(+1.0, +0.0, +0.0),	level_diffuse) * pow(clamp(0.5 + n.x / sqrt(2.0), 0, 1), 2.0)
+											+ textureLod(envmap, vec3(-1.0, +0.0, +0.0),	level_diffuse) * pow(clamp(0.5 - n.x / sqrt(2.0), 0, 1), 2.0)
+											+ textureLod(envmap, vec3(+0.0, +1.0, +0.0),	level_diffuse) * pow(clamp(0.5 + n.y / sqrt(2.0), 0, 1), 2.0)
+											+ textureLod(envmap, vec3(+0.0, -1.0, +0.0),	level_diffuse) * pow(clamp(0.5 - n.y / sqrt(2.0), 0, 1), 2.0)
+											+ textureLod(envmap, vec3(+0.0, +0.0, +1.0),	level_diffuse) * pow(clamp(0.5 + n.z / sqrt(2.0), 0, 1), 2.0)
+											+ textureLod(envmap, vec3(+0.0, +0.0, -1.0),	level_diffuse) * pow(clamp(0.5 - n.z / sqrt(2.0), 0, 1), 2.0)	) * PI / 3.0;
 }
 #endif
 
@@ -26,65 +49,37 @@ void main( )
 
 #ifdef FRAGMENT_SHADER
 	
-	
 uniform 	samplerCube	envmap;
 uniform 	mat4				mvMatrixInv;
-
-//uniform		vec4				ambient_light;
-//uniform		vec4				ambient_color;
-//uniform		vec4				diffuse_light;
-//uniform		vec4				diffuse_color;
-//uniform		vec4				specular_light;
-//uniform		vec4				specular_color;
-//uniform		float				ka;
 uniform		float				kd;
 uniform		float				ks;
-uniform		float				ns;
 
-
-in				vec3				vertex_position;        // view
-in				vec3				vertex_normal;          // view
+in				vec3				vertex_position;
+in				vec3				vertex_normal;
 in				vec3				vertex_texcoords;
+in				float				level_diffuse;
+in				float 			level_specular;
+in	 			vec4				env_diffuse;
 
 out				vec4				fragment_color;
 
-#define PI 3.14159
-
-
 void main( ) 
 {	
+	//! utilise "Plausible Blinn-Phong Reflection of Standard Cube MIP-Maps"
+	//! http://graphics.cs.williams.edu/papers/EnvMipReport2013/paper.pdf
+	
 	vec3	n								= normalize(vertex_normal);
 	vec3	l								= reflect(normalize(vertex_position), n);
 	vec3	l_glob					= normalize(mat3(mvMatrixInv) * l);
-	vec3	n_glob					= normalize(mat3(mvMatrixInv) * n);
-	vec3	h								= normalize(n + l);
 	float cos_theta				= abs(dot(n, l));
-//	float blinn						= pow( abs(dot(n, h)), ns ) * (ns + 2) / (2 * PI);
 	
-//	vec4	ambient 				= vec4(1.0);
-//	vec4	diffuse					= vec4(1.0);	  
-//	vec4	specular				= vec4(1.0);
-//	specular.rgb					= specular.rgb * blinn;
-
-	//! utilise "Plausible Blinn-Phong Reflection of Standard Cube MIP-Maps"
-	//! http://graphics.cs.williams.edu/papers/EnvMipReport2013/paper.pdf
-
-	int		size						= textureSize(envmap, 0).x;
-	float level_diffuse		= log2(size);
-	float level_specular	= log2(size * sqrt(3.0)) - 0.5 * log2(ns + 1);
 	
-//	vec4	env_ambient			= diffuse_light;
-	vec4	env_diffuse			= textureLod(envmap, n_glob, level_diffuse);
-	vec4	env_specular		= textureLod(envmap, l_glob, level_specular);
-
-//	vec3 color						= vec3(	env_ambient		* ambient_light		* ka * ambient_color	* ambient		* abs(dot(n, l)) / PI 
-//															+ env_diffuse		* diffuse_light		* kd * diffuse_color	* diffuse		* cos_theta 
-//															+ env_specular	* specular_light	* ks * specular_color	* specular	* cos_theta);
+	vec4	env_specular		= textureLod(envmap,	l_glob, level_specular);
+//vec4	env_specular		= texture(envmap, 		l_glob);
 	
-	vec3 color						= vec3(	env_diffuse		* kd * cos_theta 
-															+ env_specular	* ks * cos_theta);
+	vec3 color						= vec3(	env_diffuse  * kd + env_specular * ks	);
 															
-	fragment_color				= vec4(color, 1);   // opaque
+	fragment_color				= vec4(color, 1);
 	
 }
 #endif

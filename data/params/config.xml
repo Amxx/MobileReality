@@ -12,8 +12,8 @@
 	<obj>"sphere.obj"</obj>
 	<obj-scale>"3.00"</obj-scale>
 -->
-	<obj>"bigguy.obj"</obj>
-	<obj-scale>"0.25"</obj-scale>
+	<obj>"sphere.obj"</obj>
+	<obj-scale>"2.00"</obj-scale>
 
 
 	<video-front-id>"1"</video-front-id>

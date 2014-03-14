@@ -52,6 +52,7 @@ class Core : public gk::App
 		std::map<std::string, gk::GLProgram*>	_GLPrograms;
 		std::map<std::string,	gk::GLTexture*>	_GLTextures;
 	
+		// Status
 		bool																	_buildenvmap;
 		
 	
