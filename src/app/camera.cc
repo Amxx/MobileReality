@@ -1,19 +1,21 @@
 #include "camera.hh"
 
 Camera::Camera(VideoDevice* device , std::string path) :
-	Calibration(path),
+	Calibration(),
 	_device(device),
 	_orientation(cv::Matx44f(	1.0, 0.0, 0.0, 0.0,
 														0.0, 1.0, 0.0, 0.0,
 														0.0, 0.0, 1.0, 0.0,
 														0.0, 0.0, 0.0, 1.0 ))
 {
+	if (!path.empty()) load(path);
 }
 Camera::Camera(VideoDevice* device , cv::Matx44f orientation, std::string path) :
-	Calibration(path),
+	Calibration(),
 	_device(device),
 	_orientation(orientation)
 {
+	if (!path.empty()) load(path);
 }
 
 
@@ -46,7 +48,11 @@ const cv::Matx44f&	Camera::orientation() const
 
 
 
-void Camera::openAndCalibrate(std::string path)	// With chessboard
+
+
+
+
+void Camera::UIOpen()
 {
 	// Opening WebCam
 	while (!isopen())
@@ -58,8 +64,9 @@ void Camera::openAndCalibrate(std::string path)	// With chessboard
 		open(video_idx);
 		std::cout << "done (" << isopen() << ")" << std::endl;
 	}
-
-	// Calibrating WebCam
+}
+void Camera::UICalibrate(std::string path) // With chessboard
+{
 	load(path);
 	if (!iscalibrated())
 	{
@@ -67,21 +74,8 @@ void Camera::openAndCalibrate(std::string path)	// With chessboard
 		save(path);
 	}
 }
-
-void Camera::openAndCalibrate(std::string path, Scanner& scanner) // With QRCode
+void Camera::UICalibrate(std::string path, Scanner& scanner) // With QRCode
 {
-	// Opening WebCam
-	while (!isopen())
-	{
-		int video_idx;
-		std::cout << "Webcam identifier (-1 for auto) : ";
-		std::cin >> video_idx;
-		std::cout << "Oppening video device ... " << std::flush;
-		open(video_idx);
-		std::cout << "done (" << isopen() << ")" << std::endl;
-	}
-
-	// Calibrating WebCam
 	load(path);
 	if (!iscalibrated())
 	{

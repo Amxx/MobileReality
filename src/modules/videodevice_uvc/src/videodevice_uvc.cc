@@ -3,7 +3,7 @@
 #define  LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
 
 // ==================================================================================================
-extern "C" VideoDevice* maker() { return new videodevices::UVC(); }
+extern "C" Module* maker() { return new videodevices::UVC(); }
 // ==================================================================================================
 
 videodevices::UVC::UVC() : 
@@ -20,7 +20,6 @@ videodevices::UVC::~UVC()
 bool videodevices::UVC::open(int idx)
 {
 	if (isopen()) return false;
-	
 	// =================================
 	// =      P A R A M E T E R S      =
 	// =================================

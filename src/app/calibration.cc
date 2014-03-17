@@ -33,6 +33,7 @@ Calibration::Calibration() :
 {
 }
 Calibration::Calibration(const string& path) :
+	_radius(-1),
 	_ready(false)
 {
 	load(path);
@@ -47,9 +48,11 @@ bool Calibration::load(const string& path)
 	fs["Distortion_Coefficients"] >> _K;
 	fs["Image_Size"]							>> _size;
 	fs["Root_Mean_Square"] 				>> _rms;
-	fs["Responce Function"]				>> _response;
+	fs["Fisheye_Radius"] 					>> _radius;
+	fs["Responce_Function"]				>> _response;
 	fs.release();
 	_A = Matx33f(_tA);
+	std::cout << "======> LOADING : " << path << std::endl;
 	return (_ready = true);
 }
 bool Calibration::save(const string& path) const
@@ -61,7 +64,8 @@ bool Calibration::save(const string& path) const
   fs << "Distortion_Coefficients" << _K;
   fs << "Image_Size"							<< _size;
 	fs << "Root_Mean_Square"				<< _rms;
-	fs << "Responce Function"				<< _response;
+	fs << "Fisheye_Radius" 					<< _radius;
+	fs << "Responce_Function"				<< _response;
   fs.release();
 	return true;
 }
@@ -78,7 +82,7 @@ bool Calibration::intrinsic_calibrate(VideoDevice& video, Scanner& scanner, doub
 	vector<vector<Matx21f>> imagePoints;
 	Mat view;
 	unsigned int frame_nb = 0;
-	while(imagePoints.size() < nb)
+	while(imagePoints.size() < nb && ++frame_nb)
 	{
 		IplImage* frame = video.getFrame();
 		view = Mat(frame);
@@ -88,13 +92,14 @@ bool Calibration::intrinsic_calibrate(VideoDevice& video, Scanner& scanner, doub
 		for (Symbol& symbol : scanner.scan(frame))
 		{
 			drawChessboardCorners(view, Size(2, 2), Mat(symbol.pts), true);
-			if ((blink = !(frame_nb++ % 10)))	imagePoints.push_back(symbol.pts);
+			if ((blink = (frame_nb++ > 10)))	imagePoints.push_back(symbol.pts);
 		}
 		
 		if (blink)
 		{
 			cout << "Calibration " << imagePoints.size() << " / " << nb << endl; 
 			bitwise_not(view, view);
+			frame_nb = 0;
 		}
 		imshow("Calibration", view);
 		if (waitKey(30) == 27) return false;
@@ -115,7 +120,7 @@ bool Calibration::intrinsic_calibrate(VideoDevice& video, double scale, unsigned
 	vector<vector<Matx21f>> imagePoints;
 	Mat view;
 	unsigned int frame_nb = 0;
-	while(imagePoints.size() < nb)
+	while(imagePoints.size() < nb && ++frame_nb)
 	{
 		IplImage* frame = video.getFrame();
 		view = Mat(frame);
@@ -133,7 +138,7 @@ bool Calibration::intrinsic_calibrate(VideoDevice& video, double scale, unsigned
 					cornerSubPix(viewGray, pointBuf, Size(11,11), Size(-1,-1), TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1));
 	
 					drawChessboardCorners(view, size, Mat(pointBuf), true);
-					if ((blink = !(frame_nb++ % 10)))	imagePoints.push_back(pointBuf);
+					if ((blink = (frame_nb > 10)))	imagePoints.push_back(pointBuf);
 				}
 				break;
 			}
@@ -165,6 +170,7 @@ bool Calibration::intrinsic_calibrate(VideoDevice& video, double scale, unsigned
 		{
 			cout << "Calibration " << imagePoints.size() << " / " << nb << endl; 
 			bitwise_not(view, view);
+			frame_nb = 0;
 		}
 		imshow("Calibration", view);
 		if (waitKey(30) == 27) return false;
@@ -185,28 +191,28 @@ bool Calibration::intrinsic_calibrate(VideoDevice& video, double scale, unsigned
  * =																				HDR CALIBRATION																					= *
  * ================================================================================================== */
 
-bool hdr_calibration(VideoDevice& video)
-{
+// bool hdr_calibration(VideoDevice& video)
+// {
 	// ====== WILL BECOME ARGUMENTS ======
-	int nb_exposures;
-	int nb_points;
+	// int nb_exposures;
+	// int nb_points;
 	// ===================================
 		
-	std::vector<float>		input_time(nb_exposures);
-	std::vector<Mat>	input_frame(nb_exposures);
-	for (int i=0; i<nb_exposures; ++i)
-	{
-		float time = 1; // TODO SET EXPOSURE
-		//camera.setExposure(exposure);
-		input_time[i]		= time;
-		input_frame[i]	= Mat(video.getFrame());
-	}
+	// std::vector<float>		input_time(nb_exposures);
+	// std::vector<Mat>	input_frame(nb_exposures);
+	// for (int i=0; i<nb_exposures; ++i)
+	// {
+		// float time = 1; // TODO SET EXPOSURE
+		// camera.setExposure(exposure);
+		// input_time[i]		= time;
+		// input_frame[i]	= Mat(video.getFrame());
+	// }
 	
-	//void* calibrate = createCalibrateDebevec();
-	//calibrate->process(input_frame, _response, input_time);
+	// void* calibrate = createCalibrateDebevec();
+	// calibrate->process(input_frame, _response, input_time);
 	
 
-}
+// }
 
 
 
@@ -220,14 +226,14 @@ bool hdr_calibration(VideoDevice& video)
 
 
 
-float Calibration::ldrToHdr(const Vec3b& color, float exposure)
-{
-	Vec3f hdr;
-	hdr(0) = _response.at<float>((int) color(0))  - log(exposure);
-	hdr(1) = _response.at<float>((int) color(1))  - log(exposure);
-	hdr(2) = _response.at<float>((int) color(2))  - log(exposure);
+// float Calibration::ldrToHdr(const Vec3b& color, float exposure)
+// {
+	// Vec3f hdr;
+	// hdr(0) = _response.at<float>((int) color(0))  - log(exposure);
+	// hdr(1) = _response.at<float>((int) color(1))  - log(exposure);
+	// hdr(2) = _response.at<float>((int) color(2))  - log(exposure);
 	
-	//TODO COMPUTE VALUE
+	// TODO COMPUTE VALUE
 	
-	return 0.f;
-}
+	// return 0.f;
+// }

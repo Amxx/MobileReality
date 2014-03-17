@@ -3,7 +3,7 @@
 #define  LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
 
 // ==================================================================================================
-extern "C" VideoDevice* maker() { return new videodevices::OpenCV(); }
+extern "C" Module* maker() { return new videodevices::OpenCV(); }
 // ==================================================================================================
 
 videodevices::OpenCV::OpenCV() :

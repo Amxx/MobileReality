@@ -1,6 +1,9 @@
 #ifndef OPENCV_DEVICE_HH
 #define OPENCV_DEVICE_HH
 
+#include "module.hh"
+#include "videodevice.hh"
+
 #include <iostream>
 #include <linux/videodev2.h>
 #include <sys/ioctl.h>
@@ -8,12 +11,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "uvc-release.h"
 
-#include "videodevice.hh"
-
 
 namespace videodevices
 {
-	class UVC : public VideoDevice
+	class UVC : public ModuleT<VideoDevice>
 	{
 		private:
 			struct vdIn*	_videoIn;

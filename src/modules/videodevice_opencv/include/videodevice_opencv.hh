@@ -1,14 +1,16 @@
 #ifndef OPENCV_DEVICE_HH
 #define OPENCV_DEVICE_HH
 
+#include "module.hh"
+#include "videodevice.hh"
+
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
-#include "videodevice.hh"
 
 
 namespace videodevices
 {
-	class OpenCV : public VideoDevice, private cv::VideoCapture
+	class OpenCV : public ModuleT<VideoDevice>, private cv::VideoCapture
 	{
 		private:
 			cv::Mat 	_cvframe;

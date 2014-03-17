@@ -5,15 +5,14 @@
 #include "calibration.hh"
 #include "scanner.hh"
 
+#define  LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
+
 class Camera : public VideoDevice, public Calibration
 {
 	
 	private:
 		VideoDevice* 	_device;
 		cv::Matx44f		_orientation;
-	
-	
-	
 	
 	public:
 		Camera(VideoDevice* = nullptr, std::string = "");
@@ -40,8 +39,9 @@ class Camera : public VideoDevice, public Calibration
 		bool 								isready()						const;		
 		const cv::Matx44f&	orientation()				const;
 
-		void								openAndCalibrate(std::string path);
-		void								openAndCalibrate(std::string path, Scanner&);
+		void								UIOpen();
+		void								UICalibrate(std::string path);
+		void								UICalibrate(std::string path, Scanner&);
 	
 };
 

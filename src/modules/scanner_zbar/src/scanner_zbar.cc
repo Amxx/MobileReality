@@ -2,17 +2,15 @@
 
 
 extern "C" {
-	Scanner* maker() { return new scanners::ZBar(); }
+	Module* maker() { return new scanners::ZBar(); }
 }
-
-
-
 
 scanners::ZBar::ZBar():
 	scanner()
 {
 	scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 1);
 }
+
 std::vector<Symbol> scanners::ZBar::scan(IplImage* img)
 {
 	cv::Mat frame(img), frame_grayscale;

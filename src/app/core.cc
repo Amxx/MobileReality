@@ -10,27 +10,29 @@
 // #                                  DEFINE                                  #
 // ############################################################################
 
+
+#define		DEFAULT_BRIGHTNESS	128																								// NEEDED
+#define		DEFAULT_GAIN				16																								// NEEDED
+#define 	ENVMAP_SIZE					cv::Size(256, 256)																// NEEDED
+#define		VALIDFRAMES					10																								// NEEDED (DEFAULT 1)
+
+
 // =========== CAMERA OPTIONS (OTHER OPTIONS MAY SUFFER FROM THIS) ============
 // #define 	DISABLE_CAMERA_0
 // #define 	DISABLE_CAMERA_1
-#define		DEFAULT_BRIGHTNESS	128																								// NEEDED
-#define		DEFAULT_GAIN				16																								// NEEDED
 
 // =========== ENVMAP OPTIONS (OTHER OPTIONS MAY SUFFER FROM THIS) ============
 // #define 	DISABLE_ENVMAP
 // #define	DUAL_ACQUISITION
-#define 	ENVMAP_SIZE					cv::Size(256, 256)																// NEEDED
 
 // =========== RENDERING OPTIONS ============
-#define	DISABLE_BACKGROUND_RENDERING
+// #define	DISABLE_BACKGROUND_RENDERING
 // #define	DISABLE_SCENE_RENDERING
-#define		VALIDFRAMES					10																								//NEEDED (DEFAULT 1)
 // ============== VIEW OPTIONS ==============
 #define 	DISABLE_VIEW
 
 // ============= OTHERS OPTIONS =============
 #define		VERBOSE
-#define		CONTROL							VideoDevice::BRIGHTNESS														// NEEDED
 
 
 
@@ -40,9 +42,6 @@
 // #define		DEBUG_ALL
 // #define		DEBUG_ENVMAP
 // #define		DEBUG_MVP
-
-
-
 #ifdef DEBUG_ALL
 	#ifndef DEBUG_ENVMAP
 	#define	DEBUG_ENVMAP
@@ -61,31 +60,19 @@ Core::Core(int argc, char* argv[]) :
 	gk::App(),
 	_cameras(2),
 	_envmap(ENVMAP_SIZE),
-	_scale(6.0),
-	_subscale(236.0/300.0),
 	_buildenvmap(true)
 {
 	// ===============================================================
 	// =   C O N F I G U R A T I O N   I N I T I A L I S A T I O N   =
 	// ===============================================================
-		
-	_config("obj")					= "cube.obj";
-
-	_config("params-front")	= "params/default-front.xml";
-	_config("params-back")	= "params/default-back.xml";
-	_config("video")				= "install/share/libvideodevice_uvc.so";
-	_config("scanner")			= "install/share/libscanner_zbar.so";
-
+	
 	if (argc > 1) _config.load(argv[1]);
 
-	if (_config("scale").size())		_scale		= atof(_config("scale").c_str());
-	if (_config("subscale").size())	_subscale = atof(_config("subscale").c_str());
-	
 	// ===============================================================
 	// =                   L O A D   S C A N N E R                   =
 	// ===============================================================
-		
-	_scanner	= loadScanner(_config("scanner"));
+	
+	_scanner	= ModuleT<Scanner>::extract(Module::load(_config.libs_scanner));
 	if (_scanner == nullptr) exit(1);
 	
 	// ===============================================================
@@ -94,18 +81,18 @@ Core::Core(int argc, char* argv[]) :
 	#if !defined(DISABLE_CAMERA_0) || !defined(DISABLE_CAMERA_1)
 		VideoDevice* videodevice;
 		#ifndef DISABLE_CAMERA_0
-			videodevice = loadVideoDevice(_config("video"));
+			videodevice = ModuleT<VideoDevice>::extract(Module::load(_config.libs_video));
 			if (videodevice == nullptr) exit(1);
-			_cameras[0] = new Camera(videodevice, cv::Matx44f(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0), _config("params-front"));
-			if (_config("video-front-id").size()) _cameras[0]->open(atoi(_config("video-front-id").c_str()));
-			_cameras[0]->openAndCalibrate(_config("params-front"), *_scanner);
+			_cameras[0] = new Camera(videodevice, cv::Matx44f(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0));
+			if (_config.devices_front_id != -1) _cameras[0]->open(_config.devices_front_id);
+			_cameras[0]->UIOpen();
 		#endif
 		#ifndef DISABLE_CAMERA_1
-			videodevice = loadVideoDevice(_config("video"));
+			videodevice = ModuleT<VideoDevice>::extract(Module::load(_config.libs_video));
 			if (videodevice == nullptr) exit(1);
-			_cameras[1] = new Camera(videodevice,  cv::Matx44f(-1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0), _config("params-back"));
-			if (_config("video-back-id").size()) _cameras[1]->open(atoi(_config("video-back-id").c_str()));
-			_cameras[1]->openAndCalibrate(_config("params-back"), *_scanner);
+			_cameras[1] = new Camera(videodevice,  cv::Matx44f(-1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0));
+			if (_config.devices_back_id != -1) _cameras[1]->open(_config.devices_back_id);
+			_cameras[1]->UIOpen();
 		#endif
 	#endif
 	
@@ -131,6 +118,7 @@ Core::Core(int argc, char* argv[]) :
 				std::cout << "GAIN       : " << gain							<< std::endl;
 				std::cout << "==================================" << std::endl;
 				// _cameras[0]->showParameters();
+				_cameras[0]->UICalibrate(_config.devices_front_params, *_scanner);
 			#endif
 		#endif
 		#ifndef DISABLE_CAMERA_1
@@ -139,12 +127,18 @@ Core::Core(int argc, char* argv[]) :
 			_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
 			_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:DEFAULT_BRIGHTNESS);
 			_cameras[1]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:DEFAULT_GAIN);
+			
+			
+			_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	DEFAULT_BRIGHTNESS);
+			_cameras[1]->setParameter(VideoDevice::GAIN,				DEFAULT_GAIN);
+			
 			#ifdef VERBOSE
 				std::cout << "============ CAMERA 1 ============" << std::endl;
 				std::cout << "BRIGHTNESS : " << brightness				<< std::endl;
 				std::cout << "GAIN       : " << gain							<< std::endl;
 				std::cout << "==================================" << std::endl;
 				// _cameras[1]->showParameters();
+				_cameras[1]->UICalibrate(_config.devices_back_params, *_scanner);
 			#endif
 		#endif		
 	#endif
@@ -218,7 +212,7 @@ int Core::init()
 	// =                    C R E A T E   M E S H                    =
 	// ===============================================================
 	
-	gk::Mesh *mesh = gk::MeshIO::readOBJ(_config("obj"));
+	gk::Mesh *mesh = gk::MeshIO::readOBJ(_config.object_file);
 	if (mesh == nullptr) return -1;
 	
 	_mesh = new gk::GLBasicMesh(GL_TRIANGLES, mesh->indices.size());
@@ -319,9 +313,9 @@ int Core::draw()
 			try {
 				static cv::Matx44f toGL(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 				// LEGACY MODE FOR CUBE
-				try 				{	model = parseSymbolToModel(symbol.data, _scale)																	* toGL;	}
-				catch (...)	{ model = parseMatx33f_tr(symbol.data, cv::Matx31f(_scale/2, _scale/2, _scale/2))	* toGL;	}
-				symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_scale, _subscale));
+				try 				{	model = parseSymbolToModel(	symbol.data, _config.markers_size															) * toGL;	}
+				catch (...)	{ model = parseMatx33f_tr		(	symbol.data, _config.markers_size *cv::Matx31f(0.5, 0.5, 0.5)	) * toGL;	}
+				symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_config.markers_size, _config.markers_scale));
 				view		=	_cameras[0]->orientation().inv() * viewFromSymbol(symbol.rvec, symbol.tvec);
 				presist	= (!isNull(view) && !isNull(model))?VALIDFRAMES:0;
 				if (presist) break;
@@ -359,7 +353,7 @@ int Core::draw()
 		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,	0, 0, 0, ENVMAP_SIZE.width, ENVMAP_SIZE.height, GL_BGR, GL_FLOAT, _envmap[5]->ptr());
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	
-		static	gk::Transform		scale	= gk::Scale(atof(_config("obj-scale").c_str()));
+		static	gk::Transform		scale	= gk::Scale(_config.object_scale);
 		static	gk::Transform		proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.0, 10000.0));
 		#ifndef DEBUG_MVP
 			gk::Transform 					mv	=	cv2gkit(_cameras[0]->orientation() * view * model) * scale;	// Point de vue de _cameras[0]
@@ -370,12 +364,11 @@ int Core::draw()
 		
 		glUseProgram(_GLPrograms["materialrendering"]->name);    
 		_GLPrograms["materialrendering"]->uniform("mvMatrix")				= mv.matrix();
-		_GLPrograms["materialrendering"]->uniform("mvMatrixInv")		= mv.inverseMatrix();
-		
+		_GLPrograms["materialrendering"]->uniform("mvMatrixInv")		= mv.inverseMatrix();		
 		_GLPrograms["materialrendering"]->uniform("mvpMatrix")			= mvp.matrix();
-		_GLPrograms["materialrendering"]->uniform("kd")							= 0.8f;								// 0.6
-		_GLPrograms["materialrendering"]->uniform("ks")							= 0.2f;								// 0.3
-		_GLPrograms["materialrendering"]->uniform("ns")							= 64.0f;							// 64.0
+		_GLPrograms["materialrendering"]->uniform("kd")							= _config.object_material_kd;
+		_GLPrograms["materialrendering"]->uniform("ks")							= _config.object_material_ks;
+		_GLPrograms["materialrendering"]->uniform("ns")							= _config.object_material_ns;
 		_GLPrograms["materialrendering"]->sampler("envmap")					= 1;
 		
 		_mesh->draw();
@@ -517,7 +510,7 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 						printf("[CAMERA %d] gain set to %d\n", 0, gain);
 					#endif
 				#endif
-				#ifndef DISABLE_CAMERA_0	
+				#ifndef DISABLE_CAMERA_1	
 					gain = std::min(_cameras[1]->getParameter(VideoDevice::GAIN) + 8, 255);
 					_cameras[1]->setParameter(VideoDevice::GAIN, gain);
 					#ifdef VERBOSE 
@@ -536,7 +529,7 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 						printf("[CAMERA %d] gain set to %d\n", 0, gain);
 					#endif
 				#endif
-				#ifndef DISABLE_CAMERA_0	
+				#ifndef DISABLE_CAMERA_1	
 					gain = std::max(_cameras[1]->getParameter(VideoDevice::GAIN) - 8, 0);
 					_cameras[1]->setParameter(VideoDevice::GAIN, gain);
 					#ifdef VERBOSE 

@@ -3,13 +3,14 @@
 
 #include "scanner.hh"
 #include "symbol.hh"
+#include "module.hh"
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <zbar.h>
 
 namespace scanners
 {
-	class ZBar : public Scanner
+	class ZBar : public ModuleT<Scanner>
 	{
 		private:
 			zbar::ImageScanner	scanner;

@@ -30,6 +30,13 @@ void EnvMap::addFrame(Camera& camera, cv::Matx44f modelview)
 	for (int u=0; u<frame.size().height; ++u)
 		for (int v=0; v<frame.size().width; ++v)
 		{
+			if (camera.radius() != -1)
+			{
+				float ru = u-frame.size().height/2;
+				float rv = v-frame.size().width/2;
+				if (ru*ru+rv*rv>camera.radius()*camera.radius()) continue;
+			}
+			
 			cv::Matx31f pt = transform * cv::Matx31f(v, u, 1.0);					
 			
 			float n = sqrt(pt(0)*pt(0) + pt(1)*pt(1) + pt(2)*pt(2));			

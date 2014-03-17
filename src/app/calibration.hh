@@ -29,21 +29,22 @@ class Calibration
 		bool intrinsic_calibrate(VideoDevice&, Scanner&, double, unsigned int = 30);
 		bool intrinsic_calibrate(VideoDevice&, double, unsigned int = 30, Pattern = CHESSBOARD, cv::Size = cv::Size(7, 4));
 	
-		const cv::Matx33f&	A()							const	{ return _A; }
-		const cv::Mat& 			K() 						const	{ return _K; }
-		bool								iscalibrated()	const	{ return _ready; }
+		const cv::Matx33f&	A()							const	{ return _A; 			}
+		const cv::Mat& 			K() 						const	{ return _K; 			}
+		const cv::Size&			size()					const { return _size;		}
+		const double&				rms()						const { return _rms;		}
+		const double&				radius()				const { return _radius;	}
 		
+		bool								iscalibrated()	const	{ return _ready; 	}
 		
-		//TODO
-		float ldrToHdr(const cv::Vec3b&, float = 1.0);
-
-		
+		// float ldrToHdr(const cv::Vec3b&, float = 1.0); // TODO
 		
 	private:
 		cv::Matx33f				_A;
 		cv::Mat						_K;
 		cv::Size					_size;
 		double						_rms;
+		double						_radius;
 		bool							_ready;
 	
 		cv::Mat						_response;

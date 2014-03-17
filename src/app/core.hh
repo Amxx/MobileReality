@@ -27,9 +27,10 @@
 // =================================
 #include "camera.hh"
 #include "configuration.hh"
+#include "envmap.hh"
+#include "module.hh"
 #include "tools.hh"
 #include "tools_mat.hh"
-#include "envmap.hh"
 
 
 class Core : public gk::App
@@ -40,11 +41,7 @@ class Core : public gk::App
 		Configuration													_config;
 		EnvMap																_envmap;
 		Scanner*															_scanner;
-		
-		// Real scene description
-		float																	_scale;
-		float																	_subscale;
-		
+				
 		// Object
 		gk::GLBasicMesh*											_mesh;
 	
