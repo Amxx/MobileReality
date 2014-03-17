@@ -10,7 +10,7 @@
 
 namespace videodevices
 {
-	class OpenCV : public ModuleT<VideoDevice>, private cv::VideoCapture
+	class OpenCV : public Module<VideoDevice>, private cv::VideoCapture
 	{
 		private:
 			cv::Mat 	_cvframe;

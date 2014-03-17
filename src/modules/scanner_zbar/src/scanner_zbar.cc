@@ -2,7 +2,7 @@
 
 
 extern "C" {
-	Module* maker() { return new scanners::ZBar(); }
+	Module<Scanner>* maker() { return new scanners::ZBar(); }
 }
 
 scanners::ZBar::ZBar():

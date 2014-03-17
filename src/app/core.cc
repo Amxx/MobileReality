@@ -19,7 +19,7 @@
 
 // =========== CAMERA OPTIONS (OTHER OPTIONS MAY SUFFER FROM THIS) ============
 // #define 	DISABLE_CAMERA_0
-// #define 	DISABLE_CAMERA_1
+#define 	DISABLE_CAMERA_1
 
 // =========== ENVMAP OPTIONS (OTHER OPTIONS MAY SUFFER FROM THIS) ============
 // #define 	DISABLE_ENVMAP
@@ -72,7 +72,7 @@ Core::Core(int argc, char* argv[]) :
 	// =                   L O A D   S C A N N E R                   =
 	// ===============================================================
 	
-	_scanner	= ModuleT<Scanner>::extract(Module::load(_config.libs_scanner));
+	_scanner	= Module<Scanner>::load(_config.libs_scanner);
 	if (_scanner == nullptr) exit(1);
 	
 	// ===============================================================
@@ -81,14 +81,14 @@ Core::Core(int argc, char* argv[]) :
 	#if !defined(DISABLE_CAMERA_0) || !defined(DISABLE_CAMERA_1)
 		VideoDevice* videodevice;
 		#ifndef DISABLE_CAMERA_0
-			videodevice = ModuleT<VideoDevice>::extract(Module::load(_config.libs_video));
+			videodevice = Module<VideoDevice>::load(_config.libs_video);
 			if (videodevice == nullptr) exit(1);
 			_cameras[0] = new Camera(videodevice, cv::Matx44f(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0));
 			if (_config.devices_front_id != -1) _cameras[0]->open(_config.devices_front_id);
 			_cameras[0]->UIOpen();
 		#endif
 		#ifndef DISABLE_CAMERA_1
-			videodevice = ModuleT<VideoDevice>::extract(Module::load(_config.libs_video));
+			videodevice = Module<VideoDevice>::load(_config.libs_video);
 			if (videodevice == nullptr) exit(1);
 			_cameras[1] = new Camera(videodevice,  cv::Matx44f(-1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0));
 			if (_config.devices_back_id != -1) _cameras[1]->open(_config.devices_back_id);
@@ -107,11 +107,13 @@ Core::Core(int argc, char* argv[]) :
 		int brightness, gain;
 	
 		#ifndef DISABLE_CAMERA_0
-			brightness	= _cameras[0]->getParameter(VideoDevice::BRIGHTNESS);
-			gain				= _cameras[0]->getParameter(VideoDevice::GAIN);
+			// brightness	= _cameras[0]->getParameter(VideoDevice::BRIGHTNESS);
+			// gain				= _cameras[0]->getParameter(VideoDevice::GAIN);
 			_cameras[0]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
-			_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:DEFAULT_BRIGHTNESS);
-			_cameras[0]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:DEFAULT_GAIN);
+			// _cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:DEFAULT_BRIGHTNESS);
+			// _cameras[0]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:DEFAULT_GAIN);
+			_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	DEFAULT_BRIGHTNESS);
+			_cameras[0]->setParameter(VideoDevice::GAIN,				DEFAULT_GAIN);
 			#ifdef VERBOSE
 				std::cout << "============ CAMERA 0 ============" << std::endl;
 				std::cout << "BRIGHTNESS : " << brightness				<< std::endl;
@@ -122,16 +124,13 @@ Core::Core(int argc, char* argv[]) :
 			#endif
 		#endif
 		#ifndef DISABLE_CAMERA_1
-			brightness	= _cameras[1]->getParameter(VideoDevice::BRIGHTNESS);
-			gain				= _cameras[1]->getParameter(VideoDevice::GAIN);
+			// brightness	= _cameras[1]->getParameter(VideoDevice::BRIGHTNESS);
+			// gain				= _cameras[1]->getParameter(VideoDevice::GAIN);
 			_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
-			_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:DEFAULT_BRIGHTNESS);
-			_cameras[1]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:DEFAULT_GAIN);
-			
-			
-			_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	DEFAULT_BRIGHTNESS);
+			// _cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	(brightness>0)?brightness:DEFAULT_BRIGHTNESS);
+			// _cameras[1]->setParameter(VideoDevice::GAIN,				(gain>0)?gain:DEFAULT_GAIN);
+			_cameras[1	]->setParameter(VideoDevice::BRIGHTNESS,	DEFAULT_BRIGHTNESS);
 			_cameras[1]->setParameter(VideoDevice::GAIN,				DEFAULT_GAIN);
-			
 			#ifdef VERBOSE
 				std::cout << "============ CAMERA 1 ============" << std::endl;
 				std::cout << "BRIGHTNESS : " << brightness				<< std::endl;

@@ -14,7 +14,7 @@
 
 namespace videodevices
 {
-	class UVC : public ModuleT<VideoDevice>
+	class UVC : public Module<VideoDevice>
 	{
 		private:
 			struct vdIn*	_videoIn;

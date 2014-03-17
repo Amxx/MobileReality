@@ -10,7 +10,7 @@
 
 namespace scanners
 {
-	class ZBar : public ModuleT<Scanner>
+	class ZBar : public Module<Scanner>
 	{
 		private:
 			zbar::ImageScanner	scanner;
