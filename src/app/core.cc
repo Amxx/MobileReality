@@ -19,7 +19,7 @@
 
 // =========== CAMERA OPTIONS (OTHER OPTIONS MAY SUFFER FROM THIS) ============
 // #define 	DISABLE_CAMERA_0
-#define 	DISABLE_CAMERA_1
+// #define 	DISABLE_CAMERA_1
 
 // =========== ENVMAP OPTIONS (OTHER OPTIONS MAY SUFFER FROM THIS) ============
 // #define 	DISABLE_ENVMAP
@@ -42,10 +42,18 @@
 // #define		DEBUG_ALL
 // #define		DEBUG_ENVMAP
 // #define		DEBUG_MVP
+
+
+
 #ifdef DEBUG_ALL
 	#ifndef DEBUG_ENVMAP
 	#define	DEBUG_ENVMAP
 	#endif
+	#ifndef DEBUG_MVP
+	#define	DEBUG_MVP
+	#endif
+#endif
+#ifdef DISABLE_CAMERA_0
 	#ifndef DEBUG_MVP
 	#define	DEBUG_MVP
 	#endif
@@ -270,7 +278,6 @@ int Core::draw()
 	// ===============================================================
 	// =                 G R A B I N G   I M A G E S                 =
 	// ===============================================================
-	
 	#ifndef DISABLE_CAMERA_0
 		if (_cameras[0]) _cameras[0]->grabFrame();
 	#endif
@@ -283,8 +290,7 @@ int Core::draw()
 	// ===============================================================
 	// =               B A C K G R O U N D   F R A M E               =
 	// ===============================================================
-	
-	#ifndef DISABLE_BACKGROUND_RENDERING	
+	#if !defined(DISABLE_BACKGROUND_RENDERING) && !defined(DISABLE_CAMERA_0)
 		glClear(GL_DEPTH_BUFFER_BIT);	
 		glBindTexture(_GLTextures["frame0"]->target, _GLTextures["frame0"]->name);
 		glTexSubImage2D(_GLTextures["frame0"]->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
@@ -297,9 +303,10 @@ int Core::draw()
 	// ===============================================================
 	// =                R E A D I N G   S Y M B O L S                =
 	// ===============================================================
-	
-	std::vector<Symbol> symbols = _scanner->scan(_cameras[0]->frame());	
-	
+	#ifndef DISABLE_CAMERA_0
+		std::vector<Symbol> symbols = _scanner->scan(_cameras[0]->frame());	
+	#endif
+
 	// ===============================================================
 	// =                    P O S I T I O N I N G                    =
 	// ===============================================================
@@ -330,13 +337,16 @@ int Core::draw()
 			#if !defined(DISABLE_ENVMAP) && !defined(DEBUG_ENVMAP)
 				if (_buildenvmap)
 				{
-					_envmap.addFrame(*_cameras[1], view * model);
+					#ifndef DISABLE_CAMERA_1
+						_envmap.addFrame(*_cameras[1], view * model);
+					#endif
 					#ifdef DUAL_ACQUISITION
 						_envmap.addFrame(*_cameras[0], view * model);
 					#endif
 				}
 			#endif
 	#endif
+	
 	// ===============================================================
 	// =                S C E N E   R E N D E R I N G                =
 	// ===============================================================
@@ -353,11 +363,15 @@ int Core::draw()
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	
 		static	gk::Transform		scale	= gk::Scale(_config.object_scale);
-		static	gk::Transform		proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.0, 10000.0));
-		#ifndef DEBUG_MVP
-			gk::Transform 					mv	=	cv2gkit(_cameras[0]->orientation() * view * model) * scale;	// Point de vue de _cameras[0]
+		#ifndef DISABLE_CAMERA_0
+			static	gk::Transform	proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.f, 10000.f));
 		#else
-			gk::Transform 					mv	=	gk::LookAt(gk::Point(5.0, 10.0, 20.0), gk::Point(0.0, 0.0, 0.0), gk::Vector(0.0, 1.0, 0.0)) * scale;
+			static	gk::Transform	proj	= gk::Perspective(45.f, (float) windowWidth()/windowHeight(), 0.1f, 10000.f);
+		#endif
+		#ifndef DEBUG_MVP
+			gk::Transform 				mv	=	cv2gkit(_cameras[0]->orientation() * view * model) * scale;	// Point de vue de _cameras[0]
+		#else
+			gk::Transform 				mv	=	gk::LookAt(gk::Point(5.0, 10.0, 20.0), gk::Point(0.0, 0.0, 0.0), gk::Vector(0.0, 1.0, 0.0)) * scale;
 		#endif
 		gk::Transform 					mvp		= proj * mv;
 		
@@ -375,7 +389,7 @@ int Core::draw()
 	#ifndef DEBUG_MVP
 		}
 	#endif
-		
+
 	present();
 	
 	// ===============================================================

@@ -40,7 +40,7 @@ void main( )
 											+ textureLod(envmap, vec3(+0.0, +1.0, +0.0),	level_diffuse) * pow(clamp(0.5 + n.y / sqrt(2.0), 0, 1), 2.0)
 											+ textureLod(envmap, vec3(+0.0, -1.0, +0.0),	level_diffuse) * pow(clamp(0.5 - n.y / sqrt(2.0), 0, 1), 2.0)
 											+ textureLod(envmap, vec3(+0.0, +0.0, +1.0),	level_diffuse) * pow(clamp(0.5 + n.z / sqrt(2.0), 0, 1), 2.0)
-											+ textureLod(envmap, vec3(+0.0, +0.0, -1.0),	level_diffuse) * pow(clamp(0.5 - n.z / sqrt(2.0), 0, 1), 2.0)	) / 3.0;
+											+ textureLod(envmap, vec3(+0.0, +0.0, -1.0),	level_diffuse) * pow(clamp(0.5 - n.z / sqrt(2.0), 0, 1), 2.0)	) / 2.0;
 }
 #endif
 

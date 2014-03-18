@@ -2,8 +2,8 @@
 <opencv_storage>
 
 	<object>
-		<file>bigguy.obj</file>
-		<scale>0.3</scale>
+		<file>sphere.obj</file>
+		<scale>3.0</scale>
 		<material>
 			<kd>0.8</kd>
 			<ks>0.2</ks>
@@ -13,11 +13,11 @@
 	
 	<devices>
 		<front>
-			<id>2</id>
+			<id>1</id>
 			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
-			<id>1</id>
+			<id>2</id>
 			<params>data/params/c910-fisheye.xml</params>
 		</back>
 	</devices>
