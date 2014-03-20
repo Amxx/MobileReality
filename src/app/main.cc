@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[])
 {
-  Core app(argc, argv);
-  app.run();
+	Core app(argc, argv);
+	app.run();
   return 0;
 }

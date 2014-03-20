@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<opencv_storage>
+
+	<object>
+		<file>sphere.obj</file>
+		<scale>3.0</scale>
+		<material>
+			<kd>0.8</kd>
+			<ks>0.2</ks>
+			<ns>128.0</ns>
+		</material>
+	</object>
+	
+	<devices>
+		<front>
+			<id>1</id>
+			<params>data/params/logitech.xml</params>
+		</front>
+		<back>
+			<id>2</id>
+			<params>data/params/c910-fisheye.xml</params>
+		</back>
+	</devices>
+	
+	<markers>
+		<size>3.0</size>
+		<scale>0.786667</scale>
+	</markers>
+
+	<libs>
+		<scanner>install/share/libscanner_zbar.so</scanner>
+		<video>install/share/libvideodevice_uvc.so</video>
+	</libs>
+	
+</opencv_storage>

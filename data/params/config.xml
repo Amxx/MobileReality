@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <opencv_storage>
 
+	<!-- ######################################## Object ######################################## -->
 	<object>
 		<file>sphere.obj</file>
 		<scale>3.0</scale>
@@ -10,26 +11,52 @@
 			<ns>128.0</ns>
 		</material>
 	</object>
-	
+		
+	<!-- ################################### Devices options #################################### -->
 	<devices>
 		<front>
-			<id>1</id>
+			<enable>on</enable>																						<!-- on | off								-->
+			<id>2</id>																										<!-- [int] | auto | manual	-->
 			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
-			<id>2</id>
+			<enable>on</enable>																						<!-- on | off								-->
+			<id>1</id>																										<!-- [int] | auto | manual	-->
 			<params>data/params/c910-fisheye.xml</params>
 		</back>
 	</devices>
 	
+	<!-- ################################# Markers description ################################## -->
 	<markers>
 		<size>3.0</size>
 		<scale>0.786667</scale>
 	</markers>
-
-	<libs>
-		<scanner>install/share/libscanner_zbar.so</scanner>
-		<video>install/share/libvideodevice_uvc.so</video>
-	</libs>
 	
+	<!-- ######################## General parameters of the application ######################### -->
+	<generalParameters>
+		<verbose>on</verbose>																						<!-- on | off								-->
+		<defaultValues>
+			<brightness>128</brightness>																	<!-- -1 for auto						-->
+			<gain>16</gain>																								<!-- -1 for auto						-->
+			<persistency>10</persistency>
+		</defaultValues>
+		<envmap>
+			<type>dynamic</type>																					<!-- dynamic | debug				-->
+			<size>256 256</size>
+			<dual>on</dual>																								<!-- on | off								-->
+		</envmap>
+		<localisation>
+			<type>dynamic</type>																					<!-- dynamic | debug				-->
+		</localisation>		
+		<rendering>
+			<background>on</background>																		<!-- on | off								-->
+			<scene>on</scene>																							<!-- on | off								-->
+			<view>off</view>																							<!-- on | off								-->
+		</rendering>
+		<modules>
+			<scanner>install/share/libscanner_zbar.so</scanner>
+			<video>install/share/libvideodevice_uvc.so</video>
+		</modules>
+	</generalParameters>
 </opencv_storage>
+

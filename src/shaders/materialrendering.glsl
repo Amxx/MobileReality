@@ -35,12 +35,12 @@ void main( )
 	level_specular		= log2(size * sqrt(3.0)) - 0.5 * log2(ns + 1);
 	
 	vec3	n						=	normalize(normal);
-	env_diffuse				= (	textureLod(envmap, vec3(+1.0, +0.0, +0.0),	level_diffuse) * pow(clamp(0.5 + n.x / sqrt(2.0), 0, 1), 2.0)
-											+ textureLod(envmap, vec3(-1.0, +0.0, +0.0),	level_diffuse) * pow(clamp(0.5 - n.x / sqrt(2.0), 0, 1), 2.0)
-											+ textureLod(envmap, vec3(+0.0, +1.0, +0.0),	level_diffuse) * pow(clamp(0.5 + n.y / sqrt(2.0), 0, 1), 2.0)
-											+ textureLod(envmap, vec3(+0.0, -1.0, +0.0),	level_diffuse) * pow(clamp(0.5 - n.y / sqrt(2.0), 0, 1), 2.0)
-											+ textureLod(envmap, vec3(+0.0, +0.0, +1.0),	level_diffuse) * pow(clamp(0.5 + n.z / sqrt(2.0), 0, 1), 2.0)
-											+ textureLod(envmap, vec3(+0.0, +0.0, -1.0),	level_diffuse) * pow(clamp(0.5 - n.z / sqrt(2.0), 0, 1), 2.0)	) / 2.0;
+	env_diffuse				= (	textureLod(envmap, vec3(+1.0, +0.0, +0.0),	level_diffuse) * pow(max(0.75 + n.x, 0), 2.0)
+											+ textureLod(envmap, vec3(-1.0, +0.0, +0.0),	level_diffuse) * pow(max(0.75 - n.x, 0), 2.0)
+											+ textureLod(envmap, vec3(+0.0, +1.0, +0.0),	level_diffuse) * pow(max(0.75 + n.y, 0), 2.0)
+											+ textureLod(envmap, vec3(+0.0, -1.0, +0.0),	level_diffuse) * pow(max(0.75 - n.y, 0), 2.0)
+											+ textureLod(envmap, vec3(+0.0, +0.0, +1.0),	level_diffuse) * pow(max(0.75 + n.z, 0), 2.0)
+											+ textureLod(envmap, vec3(+0.0, +0.0, -1.0),	level_diffuse) * pow(max(0.75 - n.z, 0), 2.0)	) / 1.75 / PI;
 }
 #endif
 
