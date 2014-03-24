@@ -3,24 +3,25 @@
 
 	<!-- ######################################## Object ######################################## -->
 	<object>
-		<file>sphere.obj</file>
-		<scale>3.0</scale>
+		<file>bigguy.obj</file>
+		<scale>0.3</scale>
 		<material>
 			<kd>0.8</kd>
-			<ks>0.2</ks>
+			<ks>0.0</ks>
 			<ns>128.0</ns>
 		</material>
+		<visibility>bigguy_ambient.png</visibility>
 	</object>
 		
 	<!-- ################################### Devices options #################################### -->
 	<devices>
 		<front>
-			<enable>on</enable>																						<!-- on | off								-->
+			<enable>off</enable>																					<!-- on | off								-->
 			<id>2</id>																										<!-- [int] | auto | manual	-->
 			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
-			<enable>on</enable>																						<!-- on | off								-->
+			<enable>off</enable>																					<!-- on | off								-->
 			<id>1</id>																										<!-- [int] | auto | manual	-->
 			<params>data/params/c910-fisheye.xml</params>
 		</back>

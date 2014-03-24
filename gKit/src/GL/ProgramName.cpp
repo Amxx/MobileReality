@@ -56,6 +56,18 @@ bool uniform_check( ProgramName& uniform, int size, GLenum type )
     return true;
 }
 
+ProgramName& ProgramName::operator= ( const bool x )
+{
+    if(uniform_check(*this, 1, GL_BOOL) == false)
+        return *this;
+    
+#ifndef GK_OPENGL4
+    glUniform1i(location, x);
+#else
+    glProgramUniform1i(program->name, location, x);
+#endif
+    return *this;
+}
 
 ProgramName& ProgramName::operator= ( const int x )
 {

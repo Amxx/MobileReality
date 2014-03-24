@@ -120,12 +120,12 @@ Core::Core(int argc, char* argv[]) :
 			_cameras[0]->setParameter(VideoDevice::GAIN,				gain);
 			if (_config.general.verbose)
 			{
-				printf("┌─────────────────────────────────────────────────────────────────────────┐\n");
-				printf("│                             C A M E R A   0                             │\n");
-				printf("├─────────────────────────────────────────────────────────────────────────┤\n");
-				printf("│ brightness : %-58d │\n", brightness);
-				printf("│ gain       : %-58d │\n", gain);
-				printf("└─────────────────────────────────────────────────────────────────────────┘\n");
+				printf("┌─────────────────────────────────────────────────────────────────────┐\n");
+				printf("│                           C A M E R A   0                           │\n");
+				printf("├─────────────────────────────────────────────────────────────────────┤\n");
+				printf("│ brightness : %-54d │\n", brightness);
+				printf("│ gain       : %-54d │\n", gain);
+				printf("└─────────────────────────────────────────────────────────────────────┘\n");
 				// _cameras[0]->showParameters();
 			}
 			_cameras[0]->UICalibrate(_config.devices.front.params, *_scanner);
@@ -139,12 +139,12 @@ Core::Core(int argc, char* argv[]) :
 			_cameras[1]->setParameter(VideoDevice::GAIN,				gain);
 			if (_config.general.verbose)
 			{
-				printf("┌─────────────────────────────────────────────────────────────────────────┐\n");
-				printf("│                             C A M E R A   1                             │\n");
-				printf("├─────────────────────────────────────────────────────────────────────────┤\n");
-				printf("│ brightness : %-58d │\n", brightness);
-				printf("│ gain       : %-58d │\n", gain);
-				printf("└─────────────────────────────────────────────────────────────────────────┘\n");
+				printf("┌─────────────────────────────────────────────────────────────────────┐\n");
+				printf("│                           C A M E R A   1                           │\n");
+				printf("├─────────────────────────────────────────────────────────────────────┤\n");
+				printf("│ brightness : %-54d │\n", brightness);
+				printf("│ gain       : %-54d │\n", gain);
+				printf("└─────────────────────────────────────────────────────────────────────┘\n");
 				// _cameras[1]->showParameters();
 			}
 			_cameras[1]->UICalibrate(_config.devices.back.params, *_scanner);
@@ -213,9 +213,10 @@ int Core::init()
 	// =                C R E A T E   T E X T U R E S                =
 	// ===============================================================
 	
-	_GLTextures["frame0"] = (new gk::GLTexture())->createTexture2D(0, 640, 480);
-	_GLTextures["envmap"] = (new gk::GLTexture())->createTextureCube(1, _config.general.envmap.size.width, _config.general.envmap.size.height);
-	
+	_GLTextures["frame0"]			= (new gk::GLTexture())->createTexture2D(0, 640, 480);
+	if (!_config.object.visibility.empty())
+		_GLTextures["visibility"]	= (new gk::GLTexture())->createTexture2D(1, gk::readImage(_config.object.visibility));
+	_GLTextures["envmap"]			= (new gk::GLTexture())->createTextureCube(2, _config.general.envmap.size.width, _config.general.envmap.size.height);
 	// ===============================================================
 	// =                    C R E A T E   M E S H                    =
 	// ===============================================================
@@ -228,6 +229,8 @@ int Core::init()
   _mesh->createBuffer(1,	mesh->texcoords);
 	_mesh->createBuffer(2,	mesh->normals);
 	_mesh->createIndexBuffer(mesh->indices);
+	
+	_debugviewpoint = gk::Orbiter(mesh->box);
 	
 	delete mesh;
 	
@@ -280,6 +283,21 @@ int Core::draw()
 	static	cv::Matx44f	view;																					// Persistent	: View (bloc camera)
 					bool				position_fresh		= false;
 	static	int					position_duration	= 0;												// Persistent : Persistency duration
+	
+	
+	
+	
+	int x, y;
+	unsigned int button= SDL_GetRelativeMouseState(&x, &y);
+  if(button & SDL_BUTTON(1))
+    _debugviewpoint.rotate(x, y);      // orbit
+  else if(button & SDL_BUTTON(2))
+		_debugviewpoint.move( float(x) / float(windowWidth()), float(y) / float(windowHeight()) ); // pan
+	else if(button & SDL_BUTTON(3))
+		_debugviewpoint.move(x);           // dolly
+	
+	
+	
 	
 	
 	// ===============================================================
@@ -363,7 +381,10 @@ int Core::draw()
 				proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.f, 10000.f));
 				break;
 			case Options::DEBUG:
-				mv		=	gk::LookAt(gk::Point(5.0, 10.0, 20.0), gk::Point(0.0, 0.0, 0.0), gk::Vector(0.0, 1.0, 0.0)) * scale;
+				// mv		=	_viewpoint.transform() * scale;																										// standart use
+				// mv		=	gk::LookAt(gk::Point()-_viewpointdistance*_viewpoint.view(), gk::Point(), _viewpoint.up()) * scale;
+				// mv		=	gk::LookAt(gk::Point()-_viewpointdistance*_viewpoint.view(), gk::Point(), _viewpoint.up()) * scale;
+				mv = _debugviewpoint.view();
 				proj	= gk::Perspective(45.f, (float) windowWidth()/windowHeight(), 0.1f, 10000.f);
 				break;
 		}
@@ -376,7 +397,9 @@ int Core::draw()
 		_GLPrograms["materialrendering"]->uniform("kd")							= _config.object.material.kd;
 		_GLPrograms["materialrendering"]->uniform("ks")							= _config.object.material.ks;
 		_GLPrograms["materialrendering"]->uniform("ns")							= _config.object.material.ns;
-		_GLPrograms["materialrendering"]->sampler("envmap")					= 1;
+		_GLPrograms["materialrendering"]->uniform("usevisibility")	= !_config.object.visibility.empty();
+		_GLPrograms["materialrendering"]->sampler("visibility")			= 1;
+		_GLPrograms["materialrendering"]->sampler("envmap")					= 2;
 		
 		_mesh->draw();
 	}
@@ -555,7 +578,7 @@ void Core::processWindowResize(SDL_WindowEvent &event)
 
 
 void Core::processMouseButtonEvent(SDL_MouseButtonEvent &event)
-{
+{	
 }
 
 

@@ -13,6 +13,7 @@
 #include "Mesh.h"
 #include "MeshIO.h"
 #include "ProgramManager.h"
+#include "Orbiter.h"
 
 #include "GL/GLBasicMesh.h"
 #include "GL/GLBuffer.h"
@@ -51,8 +52,8 @@ class Core : public gk::App
 	
 		// Status
 		bool																	_buildenvmap;
+		gk::Orbiter														_debugviewpoint;
 		
-	
 	public:
     Core(int = 0, char*[] = nullptr);
     ~Core();

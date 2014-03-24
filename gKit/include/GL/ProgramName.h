@@ -65,6 +65,7 @@ public:
     
     ~ProgramName( ) {}
     
+    ProgramName& operator= ( const bool x );
     ProgramName& operator= ( const int x );
     ProgramName& operator= ( const unsigned int x );
     ProgramName& operator= ( const float x );
