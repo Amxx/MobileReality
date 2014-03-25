@@ -58,7 +58,6 @@ Core::Core(int argc, char* argv[]) :
 	// ===============================================================
 	// =          C O N F I G U R A T I O N   L O A D I N G          =
 	// ===============================================================
-	
 	if (argc > 1) _config.load(argv[1]);
 	
 	_envmap = EnvMap(_config.general.envmap.size);
@@ -71,6 +70,8 @@ Core::Core(int argc, char* argv[]) :
 		{ _config.general.localisation.type	= Options::DEBUG;		fprintf(stderr, "[WARNING] localisation has been set to debug as front device is not enable\n");	}
 		_config.general.rendering.background	= false;
 	}
+	if (!_config.general.envmap.path.empty())
+	{ _config.general.envmap.type = Options::DEBUG;						fprintf(stderr, "[WARNING] envmap acquisition has been set to debug default value was givven\n");	}
 
 	if (_config.general.verbose)
 		_config.view();
@@ -78,7 +79,6 @@ Core::Core(int argc, char* argv[]) :
 	// ===============================================================
 	// =                   L O A D   S C A N N E R                   =
 	// ===============================================================
-	
 	_scanner	= Module<Scanner>::load(_config.general.modules.scanner);
 	if (_scanner == nullptr) exit(1);
 	
@@ -212,11 +212,30 @@ int Core::init()
 	// ===============================================================
 	// =                C R E A T E   T E X T U R E S                =
 	// ===============================================================
-	
 	_GLTextures["frame0"]			= (new gk::GLTexture())->createTexture2D(0, 640, 480);
 	if (!_config.object.visibility.empty())
 		_GLTextures["visibility"]	= (new gk::GLTexture())->createTexture2D(1, gk::readImage(_config.object.visibility));
-	_GLTextures["envmap"]			= (new gk::GLTexture())->createTextureCube(2, _config.general.envmap.size.width, _config.general.envmap.size.height);
+	
+	// ===============================================================
+	// =                  C R E A T E   E N V M A P                  =
+	// ===============================================================
+	if (_config.general.envmap.path.empty())
+		_GLTextures["envmap"]			= (new gk::GLTexture())->createTextureCube(2, _config.general.envmap.size.width, _config.general.envmap.size.height);
+	else
+		_GLTextures["envmap"]			= (new gk::GLTexture())->createTextureCube(2, gk::readImageArray(_config.general.envmap.path.c_str(), 6));
+	
+	if (_config.general.envmap.type == Options::DEBUG && _config.general.envmap.path.empty())
+		for (int i=0; i<_config.general.envmap.size.height; ++i)
+			for (int j=0; j<_config.general.envmap.size.width; ++j)
+			{
+				_envmap[0]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
+				_envmap[1]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
+				_envmap[2]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
+				_envmap[3]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
+				_envmap[4]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
+				_envmap[5]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
+			}
+			
 	// ===============================================================
 	// =                    C R E A T E   M E S H                    =
 	// ===============================================================
@@ -233,22 +252,7 @@ int Core::init()
 	_debugviewpoint = gk::Orbiter(mesh->box);
 	
 	delete mesh;
-	
-	// ===============================================================
-	// =                   D E B U G   E N V M A P                   =
-	// ===============================================================
-	if (_config.general.envmap.type == Options::DEBUG)
-		for (int i=0; i<_config.general.envmap.size.height; ++i)
-			for (int j=0; j<_config.general.envmap.size.width; ++j)
-			{
-				_envmap[0]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
-				_envmap[1]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
-				_envmap[2]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
-				_envmap[3]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
-				_envmap[4]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
-				_envmap[5]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
-			}
-	
+		
 	return 1;
 }
   
@@ -285,20 +289,14 @@ int Core::draw()
 	static	int					position_duration	= 0;												// Persistent : Persistency duration
 	
 	
-	
-	
+	// ===============================================================
+	// =              M O U S E   I N T E R A C T I O N              =
+	// ===============================================================
 	int x, y;
 	unsigned int button= SDL_GetRelativeMouseState(&x, &y);
-  if(button & SDL_BUTTON(1))
-    _debugviewpoint.rotate(x, y);      // orbit
-  else if(button & SDL_BUTTON(2))
-		_debugviewpoint.move( float(x) / float(windowWidth()), float(y) / float(windowHeight()) ); // pan
-	else if(button & SDL_BUTTON(3))
-		_debugviewpoint.move(x);           // dolly
-	
-	
-	
-	
+	if (button & SDL_BUTTON(1))				_debugviewpoint.rotate(x, y);
+  else if (button & SDL_BUTTON(2))	_debugviewpoint.move(float(x) / float(windowWidth()), float(y) / float(windowHeight()));
+	else if (button & SDL_BUTTON(3))	_debugviewpoint.move(x);
 	
 	// ===============================================================
 	// =                 G R A B I N G   I M A G E S                 =
@@ -322,7 +320,7 @@ int Core::draw()
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 	
-	if (_config.general.localisation.type == Options::DYNAMIC)
+	if (_config.general.localisation.type == Options::DYNAMIC || (_config.general.envmap.type == Options::DYNAMIC && _buildenvmap))
 	{
 	// ===============================================================
 	// =                R E A D I N G   S Y M B O L S                =
@@ -350,7 +348,7 @@ int Core::draw()
 	// ===============================================================
 	// =                B U I L D I N G   E N V M A P                =
 	// ===============================================================
-	if (_config.general.envmap.type == Options::DYNAMIC && position_fresh && _buildenvmap)
+	if (_config.general.envmap.type == Options::DYNAMIC && _buildenvmap && position_fresh)
 	{
 		if (_config.devices.back.enable)	_envmap.addFrame(*_cameras[1], view * model);
 		if (_config.general.envmap.dual)	_envmap.addFrame(*_cameras[0], view * model);
@@ -381,10 +379,7 @@ int Core::draw()
 				proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.f, 10000.f));
 				break;
 			case Options::DEBUG:
-				// mv		=	_viewpoint.transform() * scale;																										// standart use
-				// mv		=	gk::LookAt(gk::Point()-_viewpointdistance*_viewpoint.view(), gk::Point(), _viewpoint.up()) * scale;
-				// mv		=	gk::LookAt(gk::Point()-_viewpointdistance*_viewpoint.view(), gk::Point(), _viewpoint.up()) * scale;
-				mv = _debugviewpoint.view();
+				mv		= _debugviewpoint.view();
 				proj	= gk::Perspective(45.f, (float) windowWidth()/windowHeight(), 0.1f, 10000.f);
 				break;
 		}
@@ -545,7 +540,6 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				}
 				break;
 			}
-			
 			default:
 				if (_config.general.verbose) printf("Key %d unmapped\n", (int) event.keysym.sym);
 				break;

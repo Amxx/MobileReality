@@ -78,10 +78,11 @@ namespace Options
 		};
 		struct Envmap
 		{
-			Envmap() : type(DYNAMIC), size(256,256), dual(false) {}
+			Envmap() : type(DYNAMIC), size(256,256), dual(false), path("") {}
 			Type				type;
 			cv::Size		size;
 			bool				dual;
+			std::string	path;
 		};
 		struct Localisation
 		{
@@ -158,8 +159,9 @@ class Configuration
 			if (!fs["generalParameters"]["defaultValues"]["gain"].empty())							fs["generalParameters"]["defaultValues"]["gain"]										>> general.defaultValues.gain;
 			if (!fs["generalParameters"]["defaultValues"]["persistency"].empty())				fs["generalParameters"]["defaultValues"]["persistency"]							>> general.defaultValues.persistency;
 			general.envmap.type						= strcmp(((std::string) fs["generalParameters"]["envmap"]["type"]).c_str(), "debug")?Options::DYNAMIC:Options::DEBUG;
-			general.envmap.dual						= !strcmp(((std::string) fs["generalParameters"]["envmap"]["dual"]).c_str(), "on");
 			if (!fs["generalParameters"]["envmap"]["size"].empty())											fs["generalParameters"]["envmap"]["size"]														>> general.envmap.size;
+			general.envmap.dual						= !strcmp(((std::string) fs["generalParameters"]["envmap"]["dual"]).c_str(), "on");
+			if (!fs["generalParameters"]["envmap"]["path"].empty())											fs["generalParameters"]["envmap"]["path"]														>> general.envmap.path;
 			general.localisation.type			= strcmp(((std::string) fs["generalParameters"]["localisation"]["type"]).c_str(), "debug")?Options::DYNAMIC:Options::DEBUG;
 			general.rendering.background	= strcmp(((std::string) fs["generalParameters"]["rendering"]["background"]).c_str(), "off");
 			general.rendering.scene				= strcmp(((std::string) fs["generalParameters"]["rendering"]["scene"]).c_str(), "off");
@@ -238,6 +240,7 @@ class Configuration
 			printf("│ general.envmap.type               : %-31s │\n",												(general.envmap.type?std::string("dynamic"):std::string("debug")).c_str());
 			printf("│ general.envmap.size               : [%4d x %-4d]                   │\n",	general.envmap.size.width, general.envmap.size.height);
 			printf("│ general.envmap.dual               : %-31s │\n",												(general.envmap.dual?std::string("on"):std::string("off")).c_str());
+			printf("│ general.envmap.path               : %-31s │\n",												format(general.envmap.path, 31, 8).c_str());
 			printf("│ general.localisation.type         : %-31s │\n",												(general.localisation.type?std::string("dynamic"):std::string("debug")).c_str());
 			printf("│ general.rendering.background      : %-31s │\n",												(general.rendering.background?std::string("on"):std::string("off")).c_str());
 			printf("│ general.rendering.scene           : %-31s │\n",												(general.rendering.scene?std::string("on"):std::string("off")).c_str());
