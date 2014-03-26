@@ -6,45 +6,6 @@
 
 #define  LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
 
-// ############################################################################
-// #                                  DEFINE                                  #
-// #                   DEPRECATED : USE CONFIG FILE INSTEAD                   #
-// ############################################################################
-// #define	DEFAULT_BRIGHTNESS	128																							// NEEDED
-// #define	DEFAULT_GAIN				16																							// NEEDED
-// #define 	ENVMAP_SIZE					cv::Size(256, 256)															// NEEDED
-// #define	VALIDFRAMES					10																							// NEEDED (DEFAULT 1)
-// =========== CAMERA OPTIONS (OTHER OPTIONS MAY SUFFER FROM THIS) ============
-// #define 	DISABLE_CAMERA_0
-// #define 	DISABLE_CAMERA_1
-// =========== ENVMAP OPTIONS (OTHER OPTIONS MAY SUFFER FROM THIS) ============
-// #define 	DISABLE_ENVMAP
-// #define	DUAL_ACQUISITION
-// =========== RENDERING OPTIONS ============
-// #define	DISABLE_BACKGROUND_RENDERING
-// #define	DISABLE_SCENE_RENDERING
-// ============== VIEW OPTIONS ==============
-// #define 	DISABLE_VIEW
-// ============= OTHERS OPTIONS =============
-// #define		VERBOSE
-// ============= DEBUG OPTIONS ==============
-// #define	DEBUG_ALL
-// #define	DEBUG_ENVMAP
-// #define	DEBUG_MVP
-// #ifdef DEBUG_ALL
-// 	#ifndef DEBUG_ENVMAP
-// 	#define	DEBUG_ENVMAP
-// 	#endif
-// 	#ifndef DEBUG_MVP
-// 	#define	DEBUG_MVP
-// 	#endif
-// #endif
-// #ifdef DISABLE_CAMERA_0
-// 	#ifndef DEBUG_MVP
-// 	#define	DEBUG_MVP
-// 	#endif
-// #endif
-
 
 // ############################################################################
 // #                                 METHODS                                  #
@@ -53,28 +14,15 @@
 Core::Core(int argc, char* argv[]) :
 	gk::App(),
 	_cameras(2),
+	_new_method(true),
 	_buildenvmap(true)
 {
 	// ===============================================================
 	// =          C O N F I G U R A T I O N   L O A D I N G          =
 	// ===============================================================
-	if (argc > 1) _config.load(argv[1]);
-	
+	if (argc > 1) _config.load(argv[1]).check();
+	if (_config.general.verbose) _config.display();
 	_envmap = EnvMap(_config.general.envmap.size);
-	
-	if (!_config.devices.front.enable)
-	{
-		if (_config.general.envmap.type == Options::DYNAMIC)
-		{ _config.general.envmap.type				= Options::DEBUG;		fprintf(stderr, "[WARNING] envmap has been set to debug as front device is not enable\n");				}
-		if (_config.general.localisation.type == Options::DYNAMIC)
-		{ _config.general.localisation.type	= Options::DEBUG;		fprintf(stderr, "[WARNING] localisation has been set to debug as front device is not enable\n");	}
-		_config.general.rendering.background	= false;
-	}
-	if (!_config.general.envmap.path.empty())
-	{ _config.general.envmap.type = Options::DEBUG;						fprintf(stderr, "[WARNING] envmap acquisition has been set to debug default value was givven\n");	}
-
-	if (_config.general.verbose)
-		_config.view();
 	
 	// ===============================================================
 	// =                   L O A D   S C A N N E R                   =
@@ -107,9 +55,10 @@ Core::Core(int argc, char* argv[]) :
 	// ===============================================================
 	if (_config.devices.front.enable || _config.devices.back.enable)
 	{
-		std::cout << "Waiting for camera to set autoexposure ... " << std::flush;
-		sleep(1);
-		std::cout << "done" << std::endl;
+		if (_cameras[0]) _cameras[0]->setParameter(VideoDevice::MODE, VideoDevice::AUTOEXPOSURE);
+		if (_cameras[1]) _cameras[1]->setParameter(VideoDevice::MODE, VideoDevice::AUTOEXPOSURE);
+		
+		printf("Waiting for camera to set autoexposure ... "); fflush(stdout); sleep(1); printf("done\n");
 	
 		if (_config.devices.front.enable)
 		{
@@ -158,7 +107,7 @@ Core::Core(int argc, char* argv[]) :
 	gk::AppSettings settings;
 	settings.setGLVersion(3,1);
 	// settings.setFullscreen();
-	if(createWindow(640, 480, settings) < 0) closeWindow();
+	if(createWindow(800, 600, settings) < 0) closeWindow();
 	
 }
 
@@ -191,8 +140,8 @@ Core::~Core()
 
 int Core::init()
 {
-	
-	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	//glClearColor(0.1, 0.1, 0.1, 1.0);
 	
 	// ===============================================================
 	// =        L O A D   S H A D E R S   A S   P R O G R A M        =
@@ -229,11 +178,11 @@ int Core::init()
 			for (int j=0; j<_config.general.envmap.size.width; ++j)
 			{
 				_envmap[0]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
-				_envmap[1]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
+				_envmap[1]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
 				_envmap[2]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
-				_envmap[3]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
+				_envmap[3]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
 				_envmap[4]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
-				_envmap[5]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
+				_envmap[5]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
 			}
 			
 	// ===============================================================
@@ -242,17 +191,15 @@ int Core::init()
 	
 	gk::Mesh *mesh = gk::MeshIO::readOBJ(_config.object.file);
 	if (mesh == nullptr) return -1;
-	
 	_mesh = new gk::GLBasicMesh(GL_TRIANGLES, mesh->indices.size());
 	_mesh->createBuffer(0,	mesh->positions);
   _mesh->createBuffer(1,	mesh->texcoords);
 	_mesh->createBuffer(2,	mesh->normals);
 	_mesh->createIndexBuffer(mesh->indices);
-	
 	_debugviewpoint = gk::Orbiter(mesh->box);
-	
 	delete mesh;
-		
+	
+	
 	return 1;
 }
   
@@ -341,7 +288,7 @@ int Core::draw()
 				position_fresh		= !isNull(view) && !isNull(model);
 				if (position_fresh) { position_duration = _config.general.defaultValues.persistency; break; }
 			} catch (...) {
-				std::cout << "Invalid symbol, could not extract model informations from `" << symbol.data << "`" << std::endl;
+				printf("Invalid symbol, could not extract model informations from `%s`\n", symbol.data.c_str());
 			}
 	}
 	
@@ -380,12 +327,13 @@ int Core::draw()
 				break;
 			case Options::DEBUG:
 				mv		= _debugviewpoint.view();
-				proj	= gk::Perspective(45.f, (float) windowWidth()/windowHeight(), 0.1f, 10000.f);
+				proj	= gk::Perspective(45.f, (float) windowWidth()/windowHeight(), 0.1f, 1000000.f);
 				break;
 		}
 		gk::Transform 	mvp		= proj * mv;
 		
 		glUseProgram(_GLPrograms["materialrendering"]->name);    
+		_GLPrograms["materialrendering"]->uniform("new_method")			= _new_method;
 		_GLPrograms["materialrendering"]->uniform("mvMatrix")				= mv.matrix();
 		_GLPrograms["materialrendering"]->uniform("mvMatrixInv")		= mv.inverseMatrix();		
 		_GLPrograms["materialrendering"]->uniform("mvpMatrix")			= mvp.matrix();
@@ -437,34 +385,39 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 	if (event.state == SDL_PRESSED)
 		switch (event.keysym.sym)
 		{
-			case SDLK_F1:
+			case 'b':
 			{
 				_buildenvmap = !_buildenvmap;
-				if (_config.general.verbose) printf("build envmap : %s\n", _buildenvmap?"on":"off");
+				if (_config.general.verbose) printf("- build envmap : %s\n", _buildenvmap?"on":"off");
+				break;
+			}
+			case 'c':
+			{
+				_envmap.clear();
+				if (_config.general.verbose) printf("- envmap cleared\n");
+				break;
+			}
+			case 'm':
+			{
+				_new_method = !_new_method;
+				if (_config.general.verbose) printf("- switch to %s methode\n", (_new_method?std::string("new"):std::string("old")).c_str());
+				break;
+			}
+			case SDLK_F1:
+			{
+				time_t now = time(0);
+				std::stringstream path;
+				path << "data/view/screenshot_" << now << ".png";
+				gk::writeFramebuffer(path.str());
 				break;
 			}
 			case SDLK_F2:
-			{
-				_envmap.clear();
-				if (_config.general.verbose) printf("envmap cleared\n");
-				break;
-			}
-			case SDLK_F3:
 			{
 				time_t now = time(0);
 				std::stringstream path;
 				path << "data/env/envmap_" << now << ".png";
 				if (_config.general.verbose) printf("writing color envmap '%s' ... \n", path.str().c_str());
 				_envmap.save(path.str());				
-				break;
-			}
-			
-			case SDLK_F4:
-			{
-				time_t now = time(0);
-				std::stringstream path;
-				path << "data/view/screenshot_" << now << ".png";
-				gk::writeFramebuffer(path.str());
 				break;
 			}
 			case SDLK_F5:

@@ -3,14 +3,14 @@
 
 	<!-- ######################################### Object ######################################### -->
 	<object>
-		<file>bigguy.obj</file>
+		<file>data/objects/venus.obj</file>
 		<scale>3.0</scale>
 		<material>
 			<kd>1.0</kd>
-			<ks>0.2</ks>
-			<ns>1024.0</ns>
+			<ks>0.0</ks>
+			<ns>1000000.0</ns>
 		</material>
-		<visibility>bigguy_ambient.png</visibility>
+		<!--<visibility>bigguy_ambient.png</visibility>-->
 	</object>
 		
 	<!-- #################################### Devices options ##################################### -->
@@ -42,10 +42,10 @@
 			<persistency>10</persistency>
 		</defaultValues>
 		<envmap>
-			<type>dynamic</type>																					<!-- dynamic | debug					-->
+			<type>debug</type>																						<!-- dynamic | debug					-->
 			<size>256 256</size>
-			<dual>on</dual>																								<!-- on | off									-->
-			<path>data/envmap/2/%03d.jpg</path>
+			<dual>off</dual>																							<!-- on | off									-->
+			<path>data/envmap/1/%03d.jpg</path>
 		</envmap>
 		<localisation>
 			<type>debug</type>																						<!-- dynamic | debug					-->

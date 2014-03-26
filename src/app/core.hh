@@ -51,6 +51,7 @@ class Core : public gk::App
 		std::map<std::string,	gk::GLTexture*>	_GLTextures;
 	
 		// Status
+		bool																	_new_method;
 		bool																	_buildenvmap;
 		gk::Orbiter														_debugviewpoint;
 		

@@ -23,12 +23,19 @@ function build
   make install &&
   cd ..
 }
-
+function launch
+{
+	if test $# -gt 0; then
+		cfg=$1
+	else
+		cfg=data/params/config.xml 
+	fi
+	./install/bin/Reality $cfg
+}
 function remove
 {
   rm -rfv $1
 }
-
 function help
 {
   echo "Project generator"
@@ -75,5 +82,5 @@ fi
 
 echo "Options $options"
 
-build
+build && launch
 #help

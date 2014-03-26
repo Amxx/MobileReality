@@ -10,6 +10,7 @@ uniform 	samplerCube	envmap;
 uniform		mat4				mvMatrix;
 uniform		mat4				mvpMatrix;
 uniform		float				ns;
+uniform		bool				new_method;
 
 in				vec3				position;
 in				vec3				texcoord;
@@ -29,14 +30,15 @@ void main()
 	gl_Position				= (mvpMatrix * vec4(position, 1.0));	
 	vertex_position 	= (mvMatrix  * vec4(position, 1.0)).xyz;
 	vertex_normal			= (mvMatrix  * vec4(normal,   0.0)).xyz;	
-	vertex_texcoord	= texcoord;
+	vertex_texcoord		= texcoord;
 	
 	int		size				= textureSize(envmap, 0).x;
 	diffuse_level			= log2(size);
 	specular_level		= log2(size * sqrt(3.0)) - 0.5 * log2(ns + 1);
 	
 	vec3	n						=	normalize(normal);
-	diffuse_light			= (	textureLod(envmap, vec3(+1.0, +0.0, +0.0),	diffuse_level)
+	if (new_method)
+		diffuse_light		= (	textureLod(envmap, vec3(+1.0, +0.0, +0.0),	diffuse_level)
 												* pow(max(0.75 + n.x, 0), 2.0)
 											+ textureLod(envmap, vec3(-1.0, +0.0, +0.0),	diffuse_level)
 												* pow(max(0.75 - n.x, 0), 2.0)
@@ -48,9 +50,8 @@ void main()
 												* pow(max(0.75 + n.z, 0), 2.0)
 											+ textureLod(envmap, vec3(+0.0, +0.0, -1.0),	diffuse_level)
 												* pow(max(0.75 - n.z, 0), 2.0)															) / 1.75 / PI;
-	
-	// Old Method
-	//diffuse_light				= textureLod(envmap, n,	diffuse_level);
+	else
+		diffuse_light				= textureLod(envmap, n,	diffuse_level);
 }
 #endif
 
@@ -91,6 +92,5 @@ void main()
 	vec3	color						= vec3(	env_diffuse  * kd + env_specular * ks	);
 															
 	fragment_color				= vec4(color, 1);
-	
 }
 #endif
