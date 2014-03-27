@@ -14,6 +14,7 @@
 #include "MeshIO.h"
 #include "ProgramManager.h"
 #include "Orbiter.h"
+#include "OrbiterIO.h"
 
 #include "GL/GLBasicMesh.h"
 #include "GL/GLBuffer.h"

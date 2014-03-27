@@ -86,11 +86,14 @@ void main()
 	
 	vec4	env_diffuse			= diffuse_light;
 	if (usevisibility) env_diffuse *= texture(visibility, vertex_texcoord.st);
-
 	vec4	env_specular		= textureLod(envmap,	l_glob, specular_level);
-	
-	vec3	color						= vec3(	env_diffuse  * kd + env_specular * ks	);
-															
+	vec3	color						= vec3(	env_diffuse  * kd + env_specular * ks	);	
 	fragment_color				= vec4(color, 1);
+
+
+	// ===============================
+	// =   S H O W   C U B E M A P   =
+	// ===============================
+	// fragment_color				= texture(envmap, vec3(mvMatrixInv * vec4(vertex_position, 1.0)));
 }
 #endif

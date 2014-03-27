@@ -12,6 +12,6 @@
 *.la
 *.a
 
-
+.debugviewpoint.save
 build/
 install/

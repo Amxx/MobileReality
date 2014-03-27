@@ -1,7 +1,6 @@
 #version 140
 
 #ifdef VERTEX_SHADER
-uniform		int					offset;
 out				vec2				texcoords;
 
 void main()

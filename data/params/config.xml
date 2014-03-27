@@ -1,29 +1,29 @@
 <?xml version="1.0"?>
 <opencv_storage>
-
+	
 	<!-- ######################################### Object ######################################### -->
 	<object>
-		<file>data/objects/venus.obj</file>
-		<scale>3.0</scale>
+		<file>data/objects/sphere.obj</file>
+		<scale>1.0</scale>
 		<material>
 			<kd>1.0</kd>
-			<ks>0.0</ks>
+			<ks>0.2</ks>
 			<ns>1000000.0</ns>
 		</material>
-		<!--<visibility>bigguy_ambient.png</visibility>-->
+		<!--<visibility>data/objects/bigguy_ambient.png</visibility>-->
 	</object>
-		
+	
 	<!-- #################################### Devices options ##################################### -->
 	<devices>
 		<front>
-			<enable>off</enable>																					<!-- on | off									-->
-			<id>2</id>																										<!-- [int] | auto | manual		-->
-			<params>data/params/logitech.xml</params>
+			<enable>on</enable>																						<!-- on | off									-->
+			<id>0</id>																										<!-- [int] | auto | manual		-->
+			<params>data/params/c910.xml</params>
 		</front>
 		<back>
-			<enable>off</enable>																					<!-- on | off									-->
+			<enable>on</enable>																						<!-- on | off									-->
 			<id>1</id>																										<!-- [int] | auto | manual		-->
-			<params>data/params/c910-fisheye.xml</params>
+			<params>data/params/logitech.xml</params>
 		</back>
 	</devices>
 	
@@ -35,30 +35,38 @@
 	
 	<!-- ######################### General parameters of the application ########################## -->
 	<generalParameters>
+	
 		<verbose>on</verbose>																						<!-- on | off									-->
+	
 		<defaultValues>
 			<brightness>128</brightness>																	<!-- -1 for auto							-->
-			<gain>64</gain>																								<!-- -1 for auto							-->
+			<gain>4</gain>																								<!-- -1 for auto							-->
 			<persistency>10</persistency>
 		</defaultValues>
+		
 		<envmap>
 			<type>debug</type>																						<!-- dynamic | debug					-->
 			<size>256 256</size>
 			<dual>off</dual>																							<!-- on | off									-->
-			<path>data/envmap/1/%03d.jpg</path>
+			<path>data/envmap/6/%03d.jpg</path>
 		</envmap>
+		
 		<localisation>
 			<type>debug</type>																						<!-- dynamic | debug					-->
 		</localisation>		
+		
 		<rendering>
 			<background>off</background>																	<!-- on | off									-->
 			<scene>on</scene>																							<!-- on | off									-->
 			<view>off</view>																							<!-- on | off									-->
 		</rendering>
+		
 		<modules>
 			<scanner>install/share/libscanner_zbar.so</scanner>
 			<video>install/share/libvideodevice_uvc.so</video>
 		</modules>
+		
 	</generalParameters>
+	
 </opencv_storage>
 
