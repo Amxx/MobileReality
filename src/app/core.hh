@@ -44,13 +44,7 @@ class Core : public gk::App
 				
 		// Object
 		gk::GLBasicMesh*													_mesh;
-	
-		// Rendering
-		// std::map<std::string, gk::GLProgram*>			_GLPrograms;
-		// std::map<std::string,	gk::GLTexture*>			_GLTextures;
-		// std::map<std::string,	gk::GLFramebuffer*>	_GLFramebuffer;
 		std::map<std::string,	gk::GLResource*>		_GLResources;
-	
 	
 		// Status
 		bool																			_new_method;
@@ -65,6 +59,7 @@ class Core : public gk::App
     int quit();
     int draw();
 	
+		void processKeyboardEvent();
 		void processKeyboardEvent(SDL_KeyboardEvent&);
 		void processWindowResize(SDL_WindowEvent&);
 		void processMouseButtonEvent(SDL_MouseButtonEvent&);

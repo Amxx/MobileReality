@@ -14,8 +14,7 @@
 Core::Core(int argc, char* argv[]) :
 	gk::App(),
 	_cameras(2),
-	_new_method(true),
-	_buildenvmap(true)
+	_new_method(true)
 {
 	// ===============================================================
 	// =          C O N F I G U R A T I O N   L O A D I N G          =
@@ -23,7 +22,7 @@ Core::Core(int argc, char* argv[]) :
 	if (argc > 1) _config.load(argv[1]).check();
 	if (_config.general.verbose) _config.display();
 
-//	_envmap = EnvMap(_config.general.envmap.size);
+	_buildenvmap = _config.general.envmap.type == Options::DYNAMIC;
 	
 	// ===============================================================
 	// =                   L O A D   S C A N N E R                   =
@@ -104,11 +103,13 @@ Core::Core(int argc, char* argv[]) :
 	// ===============================================================
 	// =                   R E A D Y   T O   R U N                   =
 	// ===============================================================
-	
 	gk::AppSettings settings;
 	settings.setGLVersion(3,1);
 	// settings.setFullscreen();
 	if(createWindow(800, 600, settings) < 0) closeWindow();
+	
+	glClearColor(0.1, 0.1, 0.1, 1.0);
+	present();
 }
 
 
@@ -124,9 +125,6 @@ Core::Core(int argc, char* argv[]) :
 Core::~Core()
 {
 	for (Camera* camera : _cameras) if (camera) camera->close();
-	// for (auto p : _GLPrograms)		p.second->release();
-	// for (auto t	: _GLTextures)		t.second->release();
-	// for (auto f : _GLFramebuffer)	f.second->release();
 	for (auto r : _GLResources)	r.second->release();
 }
 
@@ -149,7 +147,6 @@ int Core::init()
 	// ===============================================================
 	// =        L O A D   S H A D E R S   A S   P R O G R A M        =
 	// ===============================================================
-	
 	gk::programPath("install/shaders");
 	
 	_GLResources["prg:background"]				= gk::createProgram("background.glsl");
@@ -176,17 +173,18 @@ int Core::init()
 	// =                  C R E A T E   E N V M A P                  =
 	// ===============================================================	
 	if (_config.general.envmap.type == Options::DEBUG && !_config.general.envmap.path.empty())
-	{
-		_GLResources["tex:envmap"]			= (new gk::GLTexture())->createTextureCube(3, gk::readImageArray(_config.general.envmap.path.c_str(), 6));
-	}
+		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(3, gk::readImageArray(_config.general.envmap.path.c_str(), 6));
 	else
-	{
-		_GLResources["tex:envmap"]			= (new gk::GLTexture())->createTextureCube(3, _config.general.envmap.size.width, _config.general.envmap.size.height);
-		_GLResources["frb:envmap"]			= (new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, _config.general.envmap.size.width, _config.general.envmap.size.height, gk::GLFramebuffer::COLOR0_BIT);
-		_envmap = EnvMap(	static_cast<gk::GLProgram*>			(_GLResources["prg:cuberendering"]),
-											static_cast<gk::GLFramebuffer*>	(_GLResources["frb:envmap"]),
-											static_cast<gk::GLTexture*>			(_GLResources["tex:envmap"])	);
-	}
+		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(3, _config.general.envmap.size.width, _config.general.envmap.size.height);
+	
+	_GLResources["frb:envmap"]		= (new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER,
+																																		static_cast<gk::GLTexture*>(_GLResources["tex:envmap"])->width, 
+																																		static_cast<gk::GLTexture*>(_GLResources["tex:envmap"])->height, 
+																																		gk::GLFramebuffer::COLOR0_BIT);
+	
+	_envmap = EnvMap(	static_cast<gk::GLProgram*>			(_GLResources["prg:cuberendering"]),
+										static_cast<gk::GLFramebuffer*>	(_GLResources["frb:envmap"]),
+										static_cast<gk::GLTexture*>			(_GLResources["tex:envmap"])	);
 	
 	// ===============================================================
 	// =                    C R E A T E   M E S H                    =
@@ -206,13 +204,7 @@ int Core::init()
 }
   
 
-
-
-
 // ############################################################################
-
-
-
 
 
 int Core::quit()
@@ -234,15 +226,18 @@ int Core::draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
+	// ===============================================================
+	// =                        C O N T E X T                        =
+	// ===============================================================
 	static	cv::Matx44f	model;																				// Presistent	: Model
 	static	cv::Matx44f	view;																					// Persistent	: View (bloc camera)
 					bool				position_fresh		= false;
 	static	int					position_duration	= 0;												// Persistent : Persistency duration
 	
-	
 	// ===============================================================
-	// =              M O U S E   I N T E R A C T I O N              =
+	// =               U S E R   I N T E R A C T I O N               =
 	// ===============================================================
+	processKeyboardEvent();
 	int x, y;
 	unsigned int button= SDL_GetRelativeMouseState(&x, &y);
 	if (button & SDL_BUTTON(1))				_debugviewpoint.rotate(x, y);
@@ -255,7 +250,7 @@ int Core::draw()
 	if (_config.devices.front.enable)
 	{
 		_cameras[0]->grabFrame();
-		glActiveTexture(GL_TEXTURE0+0);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:frame0"])->target, _GLResources["tex:frame0"]->name);
 		glTexSubImage2D(static_cast<gk::GLTexture*>(_GLResources["tex:frame0"])->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -263,7 +258,7 @@ int Core::draw()
 	if (_config.devices.back.enable)
 	{
 		_cameras[1]->grabFrame();
-		glActiveTexture(GL_TEXTURE0+1);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:frame1"])->target, _GLResources["tex:frame1"]->name);
 		glTexSubImage2D(static_cast<gk::GLTexture*>(_GLResources["tex:frame1"])->target, 0, 0, 0, _cameras[1]->frame()->width, _cameras[1]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[1]->frame()->imageData);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -272,7 +267,7 @@ int Core::draw()
 	// ===============================================================
 	// =                    P O S I T I O N I N G                    =
 	// ===============================================================	
-	if (_config.general.localisation.type == Options::DYNAMIC || (_config.general.envmap.type == Options::DYNAMIC && _buildenvmap))
+	if (_config.general.localisation.type == Options::DYNAMIC)
 		for (Symbol& symbol : _scanner->scan(_cameras[0]->frame()))
 			try {
 				static cv::Matx44f toGL(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
@@ -290,12 +285,11 @@ int Core::draw()
 	// ===============================================================
 	// =                B U I L D I N G   E N V M A P                =
 	// ===============================================================
-	if (_config.general.envmap.type == Options::DYNAMIC && _buildenvmap && position_fresh)
+	if (_buildenvmap && position_fresh)
 	{
 		if (_config.devices.back.enable)	_envmap.cuberender(_cameras[1], view * model, static_cast<gk::GLTexture*>(_GLResources["tex:frame1"]));
 		if (_config.general.envmap.dual)	_envmap.cuberender(_cameras[0], view * model, static_cast<gk::GLTexture*>(_GLResources["tex:frame0"]));
 	}
-
 
 	// ===============================================================
 	// =                      R E N D E R I N G                      =
@@ -360,21 +354,19 @@ int Core::draw()
 		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->sampler("visibility")			= 1;
 		_mesh->draw();
 	}
-	present();
 	
 	// ===============================================================
 	// =                  F R A M E   D I S P L A Y                  =
 	// ===============================================================
 	if (_config.general.rendering.view)
 	{
-		if (_config.devices.front.enable)
-			cv::imshow("camera 0", cv::Mat(_cameras[0]->frame()));
-		if (_config.devices.back.enable)
-			cv::imshow("camera 1", cv::Mat(_cameras[1]->frame()));
+		if (_config.devices.front.enable)	cv::imshow("camera 0", cv::Mat(_cameras[0]->frame()));
+		if (_config.devices.back.enable)	cv::imshow("camera 1", cv::Mat(_cameras[1]->frame()));
 	}
 	
-	cv::waitKey(30);
 	
+	present();
+	cv::waitKey(30);
 	return 1;
 }
 
@@ -385,36 +377,36 @@ int Core::draw()
 // ############################################################################
 
 
+void Core::processKeyboardEvent()
+{
+	if (key('b'))
+	{
+		key('b') = 0;
+		_buildenvmap = !_buildenvmap;
+		if (_config.general.verbose) printf("- build envmap : %s\n", _buildenvmap?"on":"off");
+	}
+	
+	if (key('c'))
+	{
+		key('c') = 0;
+		_envmap.clear();
+		if (_config.general.verbose) printf("- envmap cleared\n");
+	}
+	
+	if (key('m'))
+	{
+		key('m') = 0;
+		_new_method = !_new_method;
+		if (_config.general.verbose) printf("- switch to %s methode\n", (_new_method?std::string("new"):std::string("old")).c_str());
+	}
+}
 
+
+// ############################################################################
 
 
 void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 {
-	
-				/*
-			case SDLK_b:
-			{
-				printf("GAAAA\n");
-				_buildenvmap = !_buildenvmap;
-				if (_config.general.verbose) printf("- build envmap : %s\n", _buildenvmap?"on":"off");
-				break;
-			}
-			case SDLK_c:
-			{
-				printf("GIIII\n");
-				_envmap.clear();
-				if (_config.general.verbose) printf("- envmap cleared\n");
-				break;
-			}
-			case SDLK_m:
-			{
-				_new_method = !_new_method;
-				if (_config.general.verbose) printf("- switch to %s methode\n", (_new_method?std::string("new"):std::string("old")).c_str());
-				break;
-			}
-			*/
-	
-	
 	if (event.state == SDL_PRESSED)
 		switch (event.keysym.sym)
 		{
@@ -427,20 +419,25 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				break;
 			}
 			case SDLK_F5:
+			{
 				gk::reloadPrograms();
 				break;
-			
+			}
 			case SDLK_F9:
+			{
 				gk::writeOrbiter(_debugviewpoint, ".debugviewpoint.save");
 				break;
+			}
 			case SDLK_F10:
+			{
 				_debugviewpoint = gk::readOrbiter(".debugviewpoint.save");
 				break;
-			
+			}
 			case SDLK_ESCAPE:
+			{
 				closeWindow();
 				break;
-			
+			}
 			case SDLK_RIGHT:
 			{
 				int brightness;
@@ -507,7 +504,6 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				break;
 			}
 			default:
-				printf("GUGUGUGU\n");
 				if (_config.general.verbose) printf("Key %d unmapped\n", (int) event.keysym.sym);
 				break;
 		}

@@ -59,7 +59,16 @@ class EnvMap
 				_program->uniform("faceID") = i;
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			}
-		}		
+		}
+		
+		void clear()
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(_envmaptexture->target, _envmaptexture->name);
+			std::vector<unsigned int> zeros(_envmaptexture->width*_envmaptexture->height*4, 0);
+			for(unsigned int i = 0; i<6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,_envmaptexture->format.internal, _envmaptexture->width, _envmaptexture->height, 0, _envmaptexture->format.data_format, _envmaptexture->format.data_type, &zeros.front());
+		}
 };
 
 

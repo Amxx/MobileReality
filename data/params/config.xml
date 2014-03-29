@@ -3,14 +3,14 @@
 	
 	<!-- ######################################### Object ######################################### -->
 	<object>
-		<file>data/objects/bigguy.obj</file>
-		<scale>0.3</scale>
+		<file>data/objects/venus.obj</file>
+		<scale>0.0025</scale>
 		<material>
 			<kd>1.0</kd>
-			<ks>0.2</ks>
+			<ks>0.0</ks>
 			<ns>1000000.0</ns>
 		</material>
-		<visibility>data/objects/bigguy_ambient.png</visibility>
+		<!--<visibility>data/objects/bigguy_ambient.png</visibility>-->
 	</object>
 	
 	<!-- #################################### Devices options ##################################### -->
