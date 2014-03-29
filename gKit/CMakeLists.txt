@@ -92,14 +92,14 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	find_package(SDL2_ttf REQUIRED)
 	find_package(OpenEXR REQUIRED)
 
-	#add_definitions(-DGK_OPENEXR)
+	add_definitions(-DGK_OPENEXR)
 	
 	include_directories(
 		${GLEW_INCLUDE_DIRS}
 		${SDL2_INCLUDE_DIRS}
 		${SDL2IMAGE_INCLUDE_DIRS}
 		${SDL2TTF_INCLUDE_DIRS}
-		#${OPENEXR_INCLUDE_DIRS}
+		${OPENEXR_INCLUDE_DIRS}
 	)
 	target_link_libraries(gKit
 		GL
@@ -107,7 +107,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 		${SDL2_LIBRARY}
 		${SDL2IMAGE_LIBRARY}
 		${SDL2TTF_LIBRARY}
-		#${OPENEXR_LIBRARIES}
+		${OPENEXR_LIBRARIES}
 	)
 	
 	list(APPEND CMAKE_CXX_FLAGS_RELEASE "-mtune=native")
@@ -115,7 +115,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 # =======================================================
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-set(GKIT_LIBRARY			gKit																CACHE INTERNAL	"gKit Library"			)
+set(GKIT_FILES				${gKit_files}												CACHE INTERNAL	"gKit source files"	)
+set(GKIT_LIBRARY			gKit																CACHE INTERNAL	"gKit library"			)
 set(GKIT_INCLUDE_DIRS	${CMAKE_CURRENT_SOURCE_DIR}/include	CACHE PATH			"gKit include dir"	)
 
 install(

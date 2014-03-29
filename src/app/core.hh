@@ -27,34 +27,35 @@
 // =================================
 // =   S E L F   I N C L U D E S   =
 // =================================
-#include "camera.hh"
 #include "configuration.hh"
 #include "envmap.hh"
 #include "module.hh"
 #include "tools.hh"
-#include "tools_mat.hh"
 
 
 class Core : public gk::App
 {	
 	private:
 		// Acquisition and environnement processing
-		std::vector<Camera*>									_cameras;
-		Configuration													_config;
-		EnvMap																_envmap;
-		Scanner*															_scanner;
+		std::vector<Camera*>											_cameras;
+		Configuration															_config;
+		EnvMap																		_envmap;
+		Scanner*																	_scanner;
 				
 		// Object
-		gk::GLBasicMesh*											_mesh;
+		gk::GLBasicMesh*													_mesh;
 	
 		// Rendering
-		std::map<std::string, gk::GLProgram*>	_GLPrograms;
-		std::map<std::string,	gk::GLTexture*>	_GLTextures;
+		// std::map<std::string, gk::GLProgram*>			_GLPrograms;
+		// std::map<std::string,	gk::GLTexture*>			_GLTextures;
+		// std::map<std::string,	gk::GLFramebuffer*>	_GLFramebuffer;
+		std::map<std::string,	gk::GLResource*>		_GLResources;
+	
 	
 		// Status
-		bool																	_new_method;
-		bool																	_buildenvmap;
-		gk::Orbiter														_debugviewpoint;
+		bool																			_new_method;
+		bool																			_buildenvmap;
+		gk::Orbiter																_debugviewpoint;
 		
 	public:
     Core(int = 0, char*[] = nullptr);

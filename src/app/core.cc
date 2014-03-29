@@ -22,7 +22,8 @@ Core::Core(int argc, char* argv[]) :
 	// ===============================================================
 	if (argc > 1) _config.load(argv[1]).check();
 	if (_config.general.verbose) _config.display();
-	_envmap = EnvMap(_config.general.envmap.size);
+
+//	_envmap = EnvMap(_config.general.envmap.size);
 	
 	// ===============================================================
 	// =                   L O A D   S C A N N E R                   =
@@ -55,8 +56,8 @@ Core::Core(int argc, char* argv[]) :
 	// ===============================================================
 	if (_config.devices.front.enable || _config.devices.back.enable)
 	{
-		// if (_cameras[0]) _cameras[0]->setParameter(VideoDevice::MODE, VideoDevice::AUTOEXPOSURE);
-		// if (_cameras[1]) _cameras[1]->setParameter(VideoDevice::MODE, VideoDevice::AUTOEXPOSURE);
+		if (_cameras[0]) _cameras[0]->setParameter(VideoDevice::MODE, VideoDevice::AUTOEXPOSURE);
+		if (_cameras[1]) _cameras[1]->setParameter(VideoDevice::MODE, VideoDevice::AUTOEXPOSURE);
 		
 		printf("Waiting for camera to set autoexposure ... "); fflush(stdout); sleep(1); printf("done\n");
 	
@@ -108,7 +109,6 @@ Core::Core(int argc, char* argv[]) :
 	settings.setGLVersion(3,1);
 	// settings.setFullscreen();
 	if(createWindow(800, 600, settings) < 0) closeWindow();
-	
 }
 
 
@@ -123,9 +123,11 @@ Core::Core(int argc, char* argv[]) :
 
 Core::~Core()
 {
-	for (Camera* camera : _cameras)
-		if (camera)
-			camera->close();
+	for (Camera* camera : _cameras) if (camera) camera->close();
+	// for (auto p : _GLPrograms)		p.second->release();
+	// for (auto t	: _GLTextures)		t.second->release();
+	// for (auto f : _GLFramebuffer)	f.second->release();
+	for (auto r : _GLResources)	r.second->release();
 }
 
 
@@ -150,50 +152,42 @@ int Core::init()
 	
 	gk::programPath("install/shaders");
 	
-	_GLPrograms["background"]					= gk::createProgram("background.glsl");
-	_GLPrograms["cuberendering"]			= gk::createProgram("cuberendering.glsl");
-	_GLPrograms["materialrendering"]	= gk::createProgram("materialrendering.glsl");
+	_GLResources["prg:background"]				= gk::createProgram("background.glsl");
+	_GLResources["prg:cuberendering"]			= gk::createProgram("cuberendering.glsl");
+	_GLResources["prg:materialrendering"]	= gk::createProgram("materialrendering.glsl");
 	
-	if (_GLPrograms["background"]					== gk::GLProgram::null())	return -1;
-	if (_GLPrograms["cuberendering"]			== gk::GLProgram::null())	return -1;
-	if (_GLPrograms["materialrendering"]	== gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:background"]				== gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:cuberendering"]			== gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:materialrendering"]	== gk::GLProgram::null())	return -1;
 	
-	glBindAttribLocation(_GLPrograms["cuberendering"]->name,			0, "position");
-	glBindAttribLocation(_GLPrograms["materialrendering"]->name,	0, "position");
-	glBindAttribLocation(_GLPrograms["materialrendering"]->name,	1, "normal");
-	glBindAttribLocation(_GLPrograms["materialrendering"]->name,	2, "texcoord");
-	
+	glBindAttribLocation(_GLResources["prg:materialrendering"]->name,	0, "position");
+	glBindAttribLocation(_GLResources["prg:materialrendering"]->name,	1, "normal");
+	glBindAttribLocation(_GLResources["prg:materialrendering"]->name,	2, "texcoord");
+		
 	// ===============================================================
 	// =                C R E A T E   T E X T U R E S                =
-	// ===============================================================
-	_GLTextures["frame0"]				= (new gk::GLTexture())->createTexture2D(0, 640, 480);
-	_GLTextures["frame1"]				= (new gk::GLTexture())->createTexture2D(1, 640, 480);
+	// ===============================================================	
+	_GLResources["tex:frame0"]				= (new gk::GLTexture())->createTexture2D(0, 640, 480);
+	_GLResources["tex:frame1"]				= (new gk::GLTexture())->createTexture2D(1, 640, 480);
 	if (!_config.object.visibility.empty())
-		_GLTextures["visibility"]	= (new gk::GLTexture())->createTexture2D(2, gk::readImage(_config.object.visibility));
-	
+		_GLResources["tex:visibility"]	= (new gk::GLTexture())->createTexture2D(2, gk::readImage(_config.object.visibility));
+		
 	// ===============================================================
 	// =                  C R E A T E   E N V M A P                  =
-	// ===============================================================
+	// ===============================================================	
 	if (_config.general.envmap.type == Options::DEBUG && !_config.general.envmap.path.empty())
 	{
-		_GLTextures["envmap"] = (new gk::GLTexture())->createTextureCube(3, gk::readImageArray(_config.general.envmap.path.c_str(), 6));
+		_GLResources["tex:envmap"]			= (new gk::GLTexture())->createTextureCube(3, gk::readImageArray(_config.general.envmap.path.c_str(), 6));
 	}
 	else
 	{
-		_GLTextures["envmap"] = (new gk::GLTexture())->createTextureCube(3, _config.general.envmap.size.width, _config.general.envmap.size.height);
-		if (_config.general.envmap.type == Options::DEBUG)
-			for (int i=0; i<_config.general.envmap.size.height; ++i)
-				for (int j=0; j<_config.general.envmap.size.width; ++j)
-				{
-					_envmap[0]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
-					_envmap[1]->at<cv::Vec3f>(i,j) = cv::Vec3f(1.f, 0.f, 0.f);
-					_envmap[2]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
-					_envmap[3]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 1.f, 0.f);
-					_envmap[4]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
-					_envmap[5]->at<cv::Vec3f>(i,j) = cv::Vec3f(0.f, 0.f, 1.f);
-				}
+		_GLResources["tex:envmap"]			= (new gk::GLTexture())->createTextureCube(3, _config.general.envmap.size.width, _config.general.envmap.size.height);
+		_GLResources["frb:envmap"]			= (new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, _config.general.envmap.size.width, _config.general.envmap.size.height, gk::GLFramebuffer::COLOR0_BIT);
+		_envmap = EnvMap(	static_cast<gk::GLProgram*>			(_GLResources["prg:cuberendering"]),
+											static_cast<gk::GLFramebuffer*>	(_GLResources["frb:envmap"]),
+											static_cast<gk::GLTexture*>			(_GLResources["tex:envmap"])	);
 	}
-			
+	
 	// ===============================================================
 	// =                    C R E A T E   M E S H                    =
 	// ===============================================================
@@ -207,7 +201,6 @@ int Core::init()
 	_mesh->createIndexBuffer(mesh->indices);
 	_debugviewpoint = gk::Orbiter(mesh->box);
 	delete mesh;
-	
 	
 	return 1;
 }
@@ -240,8 +233,7 @@ int Core::quit()
 int Core::draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	
+		
 	static	cv::Matx44f	model;																				// Presistent	: Model
 	static	cv::Matx44f	view;																					// Persistent	: View (bloc camera)
 					bool				position_fresh		= false;
@@ -263,18 +255,19 @@ int Core::draw()
 	if (_config.devices.front.enable)
 	{
 		_cameras[0]->grabFrame();
-		glBindTexture(_GLTextures["frame0"]->target, _GLTextures["frame0"]->name);
-		glTexSubImage2D(_GLTextures["frame0"]->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
+		glActiveTexture(GL_TEXTURE0+0);
+		glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:frame0"])->target, _GLResources["tex:frame0"]->name);
+		glTexSubImage2D(static_cast<gk::GLTexture*>(_GLResources["tex:frame0"])->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	if (_config.devices.back.enable)
 	{
 		_cameras[1]->grabFrame();
-		glBindTexture(_GLTextures["frame1"]->target, _GLTextures["frame1"]->name);
-		glTexSubImage2D(_GLTextures["frame1"]->target, 0, 0, 0, _cameras[1]->frame()->width, _cameras[1]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[1]->frame()->imageData);
+		glActiveTexture(GL_TEXTURE0+1);
+		glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:frame1"])->target, _GLResources["tex:frame1"]->name);
+		glTexSubImage2D(static_cast<gk::GLTexture*>(_GLResources["tex:frame1"])->target, 0, 0, 0, _cameras[1]->frame()->width, _cameras[1]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[1]->frame()->imageData);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
-	
 	
 	// ===============================================================
 	// =                    P O S I T I O N I N G                    =
@@ -299,73 +292,52 @@ int Core::draw()
 	// ===============================================================
 	if (_config.general.envmap.type == Options::DYNAMIC && _buildenvmap && position_fresh)
 	{
-		if (_config.devices.back.enable)	_envmap.addFrame(*_cameras[1], view * model);
-		if (_config.general.envmap.dual)	_envmap.addFrame(*_cameras[0], view * model);
+		if (_config.devices.back.enable)	_envmap.cuberender(_cameras[1], view * model, static_cast<gk::GLTexture*>(_GLResources["tex:frame1"]));
+		if (_config.general.envmap.dual)	_envmap.cuberender(_cameras[0], view * model, static_cast<gk::GLTexture*>(_GLResources["tex:frame0"]));
 	}
-	
-	
-	
-	
 
-	// ============ TODO : WRITE TO CUBEMAP ============
-	/*
+
+	// ===============================================================
+	// =                      R E N D E R I N G                      =
+	// ===============================================================
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glViewport(0, 0, windowWidth(), windowHeight());
 	glClear(GL_DEPTH_BUFFER_BIT);
-	static float v = sqrt(2.0) / 2.0;
-	//static const cv::Matx44f modelview = view * model;
-	static const cv::Matx44f modelview(	+v,		0.0, +v,	0.0,
-																			0.0,	1.0, 0.0, 0.0,
-																			-v,		0.0, +v,	0.0,
-																			0.0,	0.0, 0.0, 1.0);
-	static const cv::Matx44f toGL(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-	cv::Matx33f transform = Matx44to33(modelview.inv() * _cameras[1]->orientation().inv() * toGL) * _cameras[1]->A().inv();
 	
-	gk::Transform mv		= _debugviewpoint.view();
-	gk::Transform proj	= gk::Perspective(45.f, (float) windowWidth()/windowHeight(), 0.1f, 1000000.f);
-	
-	glUseProgram(_GLPrograms["cuberendering"]->name);
-	_GLPrograms["cuberendering"]->uniform("mvp")				= (proj * mv).matrix();
-	_GLPrograms["cuberendering"]->uniform("reproject")	= cv2gkit(transform).matrix();
-	_GLPrograms["cuberendering"]->sampler("frame")			= 1;
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	*/
-	
-	
-
-
-
 	// ===============================================================
 	// =               B A C K G R O U N D   F R A M E               =
 	// ===============================================================
 	if (_config.general.rendering.background)
 	{
 		glClear(GL_DEPTH_BUFFER_BIT);	
-		glUseProgram(_GLPrograms["background"]->name);
-		_GLPrograms["background"]->sampler("frame") = 0;
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:frame0"])->target, _GLResources["tex:frame0"]->name);
+		glUseProgram(_GLResources["prg:background"]->name);
+		static_cast<gk::GLProgram*>(_GLResources["prg:background"])->sampler("frame") = 0;
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
-			
+	
 	// ===============================================================
 	// =                S C E N E   R E N D E R I N G                =
 	// ===============================================================
 	if (_config.general.rendering.scene && (_config.general.localisation.type == Options::DEBUG || (position_duration && position_duration--)))
 	{
-		glClear(GL_DEPTH_BUFFER_BIT);	
-
-		glBindTexture(_GLTextures["envmap"]->target, _GLTextures["envmap"]->name);
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,	0, 0, 0, _config.general.envmap.size.width, _config.general.envmap.size.height, GL_BGR, GL_FLOAT, _envmap[0]->ptr());
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,	0, 0, 0, _config.general.envmap.size.width, _config.general.envmap.size.height, GL_BGR, GL_FLOAT, _envmap[1]->ptr());
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,	0, 0, 0, _config.general.envmap.size.width, _config.general.envmap.size.height, GL_BGR, GL_FLOAT, _envmap[2]->ptr());
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,	0, 0, 0, _config.general.envmap.size.width, _config.general.envmap.size.height, GL_BGR, GL_FLOAT, _envmap[3]->ptr());
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,	0, 0, 0, _config.general.envmap.size.width, _config.general.envmap.size.height, GL_BGR, GL_FLOAT, _envmap[4]->ptr());
-		glTexSubImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,	0, 0, 0, _config.general.envmap.size.width, _config.general.envmap.size.height, GL_BGR, GL_FLOAT, _envmap[5]->ptr());
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:envmap"])->target, _GLResources["tex:envmap"]->name);
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-	
+		if (!_config.object.visibility.empty())
+		{
+			glActiveTexture(GL_TEXTURE0+1);
+			glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:visibility"])->target, _GLResources["tex:visibility"]->name);
+		}
+		
 		gk::Transform		scale	= gk::Scale(_config.object.scale);
 		gk::Transform		proj, mv;
 		switch(_config.general.localisation.type)
 		{
 			case Options::DYNAMIC:
-				mv		=	cv2gkit(_cameras[0]->orientation() * view * model);																																	// Point de vue de _cameras[0]
+				mv		=	cv2gkit(_cameras[0]->orientation() * view * model) * scale;																																	// Point de vue de _cameras[0]
 				proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.f, 10000.f));
 				break;
 			case Options::DEBUG:
@@ -373,20 +345,19 @@ int Core::draw()
 				proj	= gk::Perspective(45.f, (float) windowWidth()/windowHeight(), 0.1f, 1000000.f);
 				break;
 		}
-		gk::Transform mvp = proj * mv * scale;
+		gk::Transform mvp = proj * mv;
 		
-		glUseProgram(_GLPrograms["materialrendering"]->name);    
-		_GLPrograms["materialrendering"]->uniform("new_method")			= _new_method;
-		_GLPrograms["materialrendering"]->uniform("mvMatrix")				= mv.matrix();
-		_GLPrograms["materialrendering"]->uniform("mvMatrixInv")		= mv.inverseMatrix();		
-		_GLPrograms["materialrendering"]->uniform("mvpMatrix")			= mvp.matrix();
-		_GLPrograms["materialrendering"]->uniform("kd")							= _config.object.material.kd;
-		_GLPrograms["materialrendering"]->uniform("ks")							= _config.object.material.ks;
-		_GLPrograms["materialrendering"]->uniform("ns")							= _config.object.material.ns;
-		_GLPrograms["materialrendering"]->uniform("usevisibility")	= !_config.object.visibility.empty();
-		_GLPrograms["materialrendering"]->sampler("visibility")			= 2;
-		_GLPrograms["materialrendering"]->sampler("envmap")					= 3;
-		
+		glUseProgram(_GLResources["prg:materialrendering"]->name);  
+		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("new_method")			= _new_method;
+		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("mvMatrix")				= mv.matrix();
+		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("mvMatrixInv")		= mv.inverseMatrix();		
+		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("mvpMatrix")			= mvp.matrix();
+		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("kd")							= _config.object.material.kd;
+		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("ks")							= _config.object.material.ks;
+		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("ns")							= _config.object.material.ns;
+		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("usevisibility")	= !_config.object.visibility.empty();
+		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->sampler("envmap")					= 0;
+		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->sampler("visibility")			= 1;
 		_mesh->draw();
 	}
 	present();
@@ -400,12 +371,6 @@ int Core::draw()
 			cv::imshow("camera 0", cv::Mat(_cameras[0]->frame()));
 		if (_config.devices.back.enable)
 			cv::imshow("camera 1", cv::Mat(_cameras[1]->frame()));
-		cv::imshow("Envmap 1 : +X", _envmap.color(0));
-		cv::imshow("Envmap 2 : -X", _envmap.color(1));
-		cv::imshow("Envmap 3 : +Y", _envmap.color(2));
-		cv::imshow("Envmap 4 : -Y", _envmap.color(3));
-		cv::imshow("Envmap 5 : +Z", _envmap.color(4));
-		cv::imshow("Envmap 6 : -Z", _envmap.color(5));
 	}
 	
 	cv::waitKey(30);
@@ -425,10 +390,8 @@ int Core::draw()
 
 void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 {
-	if (event.state == SDL_PRESSED)
-		switch (event.keysym.sym)
-		{
-			/*
+	
+				/*
 			case SDLK_b:
 			{
 				printf("GAAAA\n");
@@ -443,28 +406,24 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				if (_config.general.verbose) printf("- envmap cleared\n");
 				break;
 			}
-			*/
 			case SDLK_m:
 			{
 				_new_method = !_new_method;
 				if (_config.general.verbose) printf("- switch to %s methode\n", (_new_method?std::string("new"):std::string("old")).c_str());
 				break;
 			}
+			*/
+	
+	
+	if (event.state == SDL_PRESSED)
+		switch (event.keysym.sym)
+		{
 			case SDLK_F1:
 			{
 				time_t now = time(0);
 				std::stringstream path;
 				path << "data/view/screenshot_" << now << ".png";
 				gk::writeFramebuffer(path.str());
-				break;
-			}
-			case SDLK_F2:
-			{
-				time_t now = time(0);
-				std::stringstream path;
-				path << "data/env/envmap_" << now << ".png";
-				if (_config.general.verbose) printf("writing color envmap '%s' ... \n", path.str().c_str());
-				_envmap.save(path.str());				
 				break;
 			}
 			case SDLK_F5:
@@ -566,7 +525,6 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 
 void Core::processWindowResize(SDL_WindowEvent &event)
 {
-	glViewport(0, 0, windowWidth(), windowHeight());
 }
 
 

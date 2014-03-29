@@ -180,11 +180,13 @@ GLTexture *GLTexture::createTextureCube( const int _unit,
     create(_unit, GL_TEXTURE_CUBE_MAP, _width, _height, 1, _format);
     if(name == 0)
         return this;
-    
+		
+		std::vector<unsigned int> zeros(_width * _height * 4, 0);
+		
     for(unsigned int face= 0; face < 6; face++)
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, 
             format.internal, width, height, 0,
-            format.data_format, format.data_type, NULL);
+            format.data_format, format.data_type, &zeros.front());
     
     glGenerateMipmap(target);
     return this;

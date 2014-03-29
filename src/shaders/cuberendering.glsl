@@ -1,37 +1,72 @@
 #version 140
 
 #ifdef VERTEX_SHADER
-uniform		mat4				mvp;
-uniform		mat4				reproject;
-out				vec2				texcoords;
+uniform		int					faceID;
+out				vec3				position;
 
 void main()
 {
-	vec4 pos[4] 		= vec4[4](vec4(+000.0, +000.0, +1.0, +1.0),
-														vec4(+640.0, +000.0, +1.0, +1.0),
-														vec4(+000.0, +480.0, +1.0, +1.0),
-														vec4(+640.0, +480.0, +1.0, +1.0));
-	vec2 coords[4]	= vec2[4](vec2(0.0, 0.0),
-														vec2(1.0, 0.0),
-														vec2(0.0, 1.0),
-														vec2(1.0, 1.0));
+	vec3 pos[24] 		= vec3[24](	vec3(+1.0, +1.0, +1.0),
+															vec3(+1.0, +1.0, -1.0),
+															vec3(+1.0, -1.0, +1.0),
+															vec3(+1.0, -1.0, -1.0),
+															
+															vec3(-1.0, +1.0, -1.0),
+															vec3(-1.0, +1.0, +1.0),
+															vec3(-1.0, -1.0, -1.0),
+															vec3(-1.0, -1.0, +1.0),
+																
+															vec3(-1.0, +1.0, -1.0),
+															vec3(+1.0, +1.0, -1.0),
+															vec3(-1.0, +1.0, +1.0),
+															vec3(+1.0, +1.0, +1.0),
+																
+															vec3(-1.0, -1.0, +1.0),
+															vec3(+1.0, -1.0, +1.0),
+															vec3(-1.0, -1.0, -1.0),
+															vec3(+1.0, -1.0, -1.0),
+																
+															vec3(-1.0, +1.0, +1.0),
+															vec3(+1.0, +1.0, +1.0),
+															vec3(-1.0, -1.0, +1.0),
+															vec3(+1.0, -1.0, +1.0),
+																
+															vec3(+1.0, +1.0, -1.0),
+															vec3(-1.0, +1.0, -1.0),
+															vec3(+1.0, -1.0, -1.0),
+															vec3(-1.0, -1.0, -1.0)	);	
+															
+	vec4 coords[4]	= vec4[4](	vec4(-1.0, -1.0, +0.0, +1.0),
+															vec4(+1.0, -1.0, +0.0, +1.0),
+															vec4(-1.0, +1.0, +0.0, +1.0),
+															vec4(+1.0, +1.0, +0.0, +1.0)	);
 
-	gl_Position			= mvp * reproject * pos[gl_VertexID];
-	texcoords				= coords[gl_VertexID];
+	position		= pos[faceID*4+gl_VertexID];
+	gl_Position = coords[gl_VertexID];
 }
 #endif
 
 
 #ifdef FRAGMENT_SHADER
 
+uniform		int					faceID;
+	
 uniform		sampler2D		frame;
-
-in				vec2				texcoords;
+uniform		mat4				reproject;
+in				vec3				position;
 out				vec4				fragment_color;
 
 void main()
 {
-	fragment_color = texture(frame, texcoords);
+	vec4 cube_coord		= reproject * vec4(position, 1.0);
+	if (		cube_coord.x >= 0.0 && cube_coord.x <= 640.0
+			&&	cube_coord.y >= 0.0 && cube_coord.y <= 480.0
+			&&	cube_coord.z >= 0.9)
+		fragment_color		= texture(frame, vec2(cube_coord.x / 640, cube_coord.y / 480));
+	else
+		discard;
+	
+	//fragment_color = vec4(position, 1.0 );
 }
 
 #endif
