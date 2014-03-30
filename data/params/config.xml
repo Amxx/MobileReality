@@ -3,11 +3,11 @@
 	
 	<!-- ######################################### Object ######################################### -->
 	<object>
-		<file>data/objects/venus.obj</file>
-		<scale>0.0025</scale>
+		<file>data/objects/sphere.obj</file>
+		<scale>2.5</scale>
 		<material>
 			<kd>1.0</kd>
-			<ks>0.0</ks>
+			<ks>0.4</ks>
 			<ns>1000000.0</ns>
 		</material>
 		<!--<visibility>data/objects/bigguy_ambient.png</visibility>-->
@@ -45,10 +45,10 @@
 		</defaultValues>
 		
 		<envmap>
-			<type>debug</type>																					<!-- dynamic | debug					-->
+			<type>dynamic</type>																					<!-- dynamic | debug					-->
 			<size>256 256</size>
 			<dual>off</dual>																							<!-- on | off									-->
-			<path>data/envmap/6/%03d.jpg</path>
+			<path>data/envmap/1/%03d.jpg</path>
 		</envmap>
 		
 		<localisation>

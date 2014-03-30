@@ -109,6 +109,7 @@ Core::Core(int argc, char* argv[]) :
 	if(createWindow(800, 600, settings) < 0) closeWindow();
 	
 	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	present();
 }
 
@@ -176,15 +177,9 @@ int Core::init()
 		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(3, gk::readImageArray(_config.general.envmap.path.c_str(), 6));
 	else
 		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(3, _config.general.envmap.size.width, _config.general.envmap.size.height);
-	
-	_GLResources["frb:envmap"]		= (new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER,
-																																		static_cast<gk::GLTexture*>(_GLResources["tex:envmap"])->width, 
-																																		static_cast<gk::GLTexture*>(_GLResources["tex:envmap"])->height, 
-																																		gk::GLFramebuffer::COLOR0_BIT);
-	
-	_envmap = EnvMap(	static_cast<gk::GLProgram*>			(_GLResources["prg:cuberendering"]),
-										static_cast<gk::GLFramebuffer*>	(_GLResources["frb:envmap"]),
-										static_cast<gk::GLTexture*>			(_GLResources["tex:envmap"])	);
+
+	_envmap.init(	static_cast<gk::GLProgram*>			(_GLResources["prg:cuberendering"]),
+								static_cast<gk::GLTexture*>			(_GLResources["tex:envmap"])	);
 	
 	// ===============================================================
 	// =                    C R E A T E   M E S H                    =
@@ -289,6 +284,7 @@ int Core::draw()
 	{
 		if (_config.devices.back.enable)	_envmap.cuberender(_cameras[1], view * model, static_cast<gk::GLTexture*>(_GLResources["tex:frame1"]));
 		if (_config.general.envmap.dual)	_envmap.cuberender(_cameras[0], view * model, static_cast<gk::GLTexture*>(_GLResources["tex:frame0"]));
+		_envmap.generateMipMap();
 	}
 
 	// ===============================================================
@@ -317,9 +313,6 @@ int Core::draw()
 	if (_config.general.rendering.scene && (_config.general.localisation.type == Options::DEBUG || (position_duration && position_duration--)))
 	{
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:envmap"])->target, _GLResources["tex:envmap"]->name);
-		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 		if (!_config.object.visibility.empty())
 		{
 			glActiveTexture(GL_TEXTURE0+1);
