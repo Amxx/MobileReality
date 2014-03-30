@@ -49,9 +49,9 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 
-uniform		int					faceID;
-	
 uniform		sampler2D		frame;
+uniform		float				radius;
+
 uniform		mat4				reproject;
 in				vec3				position;
 out				vec4				fragment_color;
@@ -59,14 +59,18 @@ out				vec4				fragment_color;
 void main()
 {
 	vec4 cube_coord		= reproject * vec4(position, 1.0);
-	if (		cube_coord.x >= 0.0 && cube_coord.x <= 640.0
-			&&	cube_coord.y >= 0.0 && cube_coord.y <= 480.0
-			&&	cube_coord.z >= 0.9)
-		fragment_color		= texture(frame, vec2(cube_coord.x / 640, cube_coord.y / 480));
-	else
+	vec2 pixradius		= cube_coord.xy - vec2(320,240);
+	
+	if (radius >= 0.0 && dot(pixradius, pixradius) > radius*radius)	discard;
+	if ( abs(pixradius.x) > 320.0
+	
+			||	cube_coord.y < 0.0 || cube_coord.y > 480.0
+			||	cube_coord.z < 0.9)
 		discard;
 	
-	//fragment_color = vec4(position, 1.0 );
+	fragment_color = texture(frame, vec2(cube_coord.x / 640, cube_coord.y / 480));
+
+	fragment_color = vec4(position, 1.0 );
 }
 
 #endif

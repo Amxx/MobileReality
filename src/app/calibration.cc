@@ -29,6 +29,7 @@ static void calcBoardCornerPositions(Size size, float scale, vector<Matx31f>& co
 // ==================================== Methods ====================================
 
 Calibration::Calibration() :
+	_radius(-1),
 	_ready(false)
 {
 }
@@ -44,12 +45,12 @@ bool Calibration::load(const string& path)
 	FileStorage fs(path, FileStorage::READ);
 	if (!fs.isOpened()) return false;
 	Mat _tA;
-	fs["Camera_Matrix"]						>> _tA;
-	fs["Distortion_Coefficients"] >> _K;
-	fs["Image_Size"]							>> _size;
-	fs["Root_Mean_Square"] 				>> _rms;
-	fs["Fisheye_Radius"] 					>> _radius;
-	fs["Responce_Function"]				>> _response;
+	if (!fs["Camera_Matrix"].empty())							fs["Camera_Matrix"]						>> _tA;
+	if (!fs["Distortion_Coefficients"].empty())		fs["Distortion_Coefficients"] >> _K;
+	if (!fs["Image_Size"].empty())								fs["Image_Size"]							>> _size;
+	if (!fs["Root_Mean_Square"].empty())					fs["Root_Mean_Square"] 				>> _rms;
+	if (!fs["Fisheye_Radius"].empty())						fs["Fisheye_Radius"] 					>> _radius;
+	if (!fs["Responce_Function"].empty())					fs["Responce_Function"]				>> _response;
 	fs.release();
 	_A = Matx33f(_tA);
 	std::cout << "======> LOADING : " << path << std::endl;

@@ -42,7 +42,8 @@ void EnvMap::cuberender(Camera* camera, cv::Matx44f modelview, gk::GLTexture* te
 	glUseProgram(_program->name);
 	_program->sampler("frame")			= 0;
 	_program->uniform("reproject")	= cv2gkit(transform).matrix();
-
+	_program->uniform("radius")			= (float) camera->radius();
+		
 	for (int i=0; i<6; ++i)
 	{
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _envmaptexture->name, 0);

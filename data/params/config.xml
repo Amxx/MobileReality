@@ -18,12 +18,12 @@
 		<front>
 			<enable>on</enable>																						<!-- on | off									-->
 			<id>1</id>																										<!-- [int] | auto | manual		-->
-			<params>data/params/c910.xml</params>
+			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
 			<enable>on</enable>																						<!-- on | off									-->
 			<id>0</id>																										<!-- [int] | auto | manual		-->
-			<params>data/params/logitech.xml</params>
+			<params>data/params/c910-fisheye.xml</params>
 		</back>
 	</devices>
 	
