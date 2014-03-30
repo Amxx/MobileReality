@@ -6,40 +6,13 @@ out				vec3				position;
 
 void main()
 {
-	vec3 pos[24] 		= vec3[24](	vec3(+1.0, +1.0, +1.0),
-															vec3(+1.0, +1.0, -1.0),
-															vec3(+1.0, -1.0, +1.0),
-															vec3(+1.0, -1.0, -1.0),
-															
-															vec3(-1.0, +1.0, -1.0),
-															vec3(-1.0, +1.0, +1.0),
-															vec3(-1.0, -1.0, -1.0),
-															vec3(-1.0, -1.0, +1.0),
-																
-															vec3(-1.0, +1.0, -1.0),
-															vec3(+1.0, +1.0, -1.0),
-															vec3(-1.0, +1.0, +1.0),
-															vec3(+1.0, +1.0, +1.0),
-																
-															vec3(-1.0, -1.0, +1.0),
-															vec3(+1.0, -1.0, +1.0),
-															vec3(-1.0, -1.0, -1.0),
-															vec3(+1.0, -1.0, -1.0),
-																
-															vec3(-1.0, +1.0, +1.0),
-															vec3(+1.0, +1.0, +1.0),
-															vec3(-1.0, -1.0, +1.0),
-															vec3(+1.0, -1.0, +1.0),
-																
-															vec3(+1.0, +1.0, -1.0),
-															vec3(-1.0, +1.0, -1.0),
-															vec3(+1.0, -1.0, -1.0),
-															vec3(-1.0, -1.0, -1.0)	);	
-															
-	vec4 coords[4]	= vec4[4](	vec4(-1.0, -1.0, +0.0, +1.0),
-															vec4(+1.0, -1.0, +0.0, +1.0),
-															vec4(-1.0, +1.0, +0.0, +1.0),
-															vec4(+1.0, +1.0, +0.0, +1.0)	);
+	vec3 pos[24] 		= vec3[24](	vec3(+1.0, +1.0, +1.0), 				vec3(+1.0, +1.0, -1.0),					vec3(+1.0, -1.0, +1.0),					vec3(+1.0, -1.0, -1.0),
+															vec3(-1.0, +1.0, -1.0), 				vec3(-1.0, +1.0, +1.0),					vec3(-1.0, -1.0, -1.0),					vec3(-1.0, -1.0, +1.0),
+															vec3(-1.0, +1.0, -1.0), 				vec3(+1.0, +1.0, -1.0),					vec3(-1.0, +1.0, +1.0),					vec3(+1.0, +1.0, +1.0),
+															vec3(-1.0, -1.0, +1.0),					vec3(+1.0, -1.0, +1.0),					vec3(-1.0, -1.0, -1.0),					vec3(+1.0, -1.0, -1.0),
+															vec3(-1.0, +1.0, +1.0),					vec3(+1.0, +1.0, +1.0),					vec3(-1.0, -1.0, +1.0),					vec3(+1.0, -1.0, +1.0),
+															vec3(+1.0, +1.0, -1.0),					vec3(-1.0, +1.0, -1.0),					vec3(+1.0, -1.0, -1.0),					vec3(-1.0, -1.0, -1.0)				);
+	vec4 coords[4]	= vec4[4](	vec4(-1.0, -1.0, +0.0, +1.0),		vec4(+1.0, -1.0, +0.0, +1.0),		vec4(-1.0, +1.0, +0.0, +1.0),		vec4(+1.0, +1.0, +0.0, +1.0)	);
 
 	position		= pos[faceID*4+gl_VertexID];
 	gl_Position = coords[gl_VertexID];
@@ -58,19 +31,17 @@ out				vec4				fragment_color;
 
 void main()
 {
-	vec4 cube_coord		= reproject * vec4(position, 1.0);
-	vec2 pixradius		= cube_coord.xy - vec2(320,240);
+	vec4 cubecoords	= reproject * vec4(normalize(position), 1.0);
+	if (cubecoords.z <= 0.0) discard;
 	
-	if (radius >= 0.0 && dot(pixradius, pixradius) > radius*radius)	discard;
-	if ( abs(pixradius.x) > 320.0
+	vec2 coords				= vec2(cubecoords.x / cubecoords.z, cubecoords.y / cubecoords.z);
+	vec2 centercoords	=	coords - vec2(320, 240);
 	
-			||	cube_coord.y < 0.0 || cube_coord.y > 480.0
-			||	cube_coord.z < 0.9)
-		discard;
+	if (abs(centercoords.x) > 320 || abs(centercoords.y) > 240)						discard;
+	if (radius >= 0.0 && dot(centercoords, centercoords) > radius*radius)	discard;
 	
-	fragment_color = texture(frame, vec2(cube_coord.x / 640, cube_coord.y / 480));
-
-	fragment_color = vec4(position, 1.0 );
+	fragment_color = texture(frame, coords/vec2(640,480));
 }
+
 
 #endif

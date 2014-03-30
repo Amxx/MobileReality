@@ -6,8 +6,8 @@
 		<file>data/objects/sphere.obj</file>
 		<scale>2.5</scale>
 		<material>
-			<kd>1.0</kd>
-			<ks>0.4</ks>
+			<kd>0.0</kd>
+			<ks>1.0</ks>
 			<ns>1000000.0</ns>
 		</material>
 		<!--<visibility>data/objects/bigguy_ambient.png</visibility>-->
