@@ -10,13 +10,14 @@
 typedef			std::chrono::steady_clock::time_point														timer;
 typedef			std::chrono::duration<long int, std::ratio<1l, 1000000000l>>		duration;
 
-void formatTimer(std::string identifier, duration dt)
+std::string formatTimer(duration dt)
 {
-	printf("%-24s %3d ms %03d µs %03d ns\n",
-	identifier.c_str(),
-	std::chrono::duration_cast<std::chrono::milliseconds>(dt).count(),
-	std::chrono::duration_cast<std::chrono::microseconds>(dt).count()%1000,
-	std::chrono::duration_cast<std::chrono::nanoseconds>(dt).count()%1000);
+	char buffer[1024];
+	sprintf(buffer, "%3d ms %03d ys %03d ns",
+					std::chrono::duration_cast<std::chrono::milliseconds>(dt).count(),
+					std::chrono::duration_cast<std::chrono::microseconds>(dt).count()%1000,
+					std::chrono::duration_cast<std::chrono::nanoseconds>(dt).count()%1000);
+	return std::string(buffer);
 }
 
 
@@ -428,18 +429,26 @@ int Core::draw()
 	
 	if (_config.general.verbose > 1)
 	{
-		formatTimer("User interaction",				t2-t1);
-		formatTimer("Grabbing frames",				t3-t2);
-		formatTimer("Positionning",						t4-t3);
-		formatTimer("Bilding EnvMap",					t5-t4);
-		formatTimer("Rendering - background",	t6-t5);
-		formatTimer("Rendering - scene",			t7-t6);
-		formatTimer("Rendering - frames",			t8-t7);
-		printf("\n");
+		cv::Mat timers(140, 280, CV_8UC1, cv::Scalar(25,25,25));
+		putText(timers, "User interaction",				cv::Point(5,10), 0, 0.36, cv::Scalar(230,230,230));
+		putText(timers, "Grabbing frames",				cv::Point(5,30), 0, 0.36, cv::Scalar(230,230,230));
+		putText(timers, "Positionning",						cv::Point(5,50), 0, 0.36, cv::Scalar(230,230,230));
+		putText(timers, "Bilding EnvMap",					cv::Point(5,70), 0, 0.36, cv::Scalar(230,230,230));
+		putText(timers, "Rendering - background",	cv::Point(5,90), 0, 0.36, cv::Scalar(230,230,230));
+		putText(timers, "Rendering - scene",			cv::Point(5,110), 0, 0.36, cv::Scalar(230,230,230));
+		putText(timers, "Rendering - frames",			cv::Point(5,130), 0, 0.36, cv::Scalar(230,230,230));
+		putText(timers, formatTimer(t2-t1), cv::Point(155,10), 0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, formatTimer(t3-t2), cv::Point(155,30), 0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, formatTimer(t4-t3), cv::Point(155,50), 0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, formatTimer(t5-t4), cv::Point(155,70), 0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, formatTimer(t6-t5), cv::Point(155,90), 0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, formatTimer(t7-t6), cv::Point(155,110), 0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, formatTimer(t8-t7), cv::Point(155,130), 0, 0.32, cv::Scalar(230,230,230));
+		cv::imshow("timers", timers);
 	}
 	
 	present();
-	cv::waitKey(30);
+	cv::waitKey(3);
 	return 1;
 }
 
