@@ -7,8 +7,8 @@
 		<scale>2.5</scale>
 		<material>
 			<kd>1.0</kd>
-			<ks>0.4</ks>
-			<ns>1024.0</ns>
+			<ks>0.2</ks>
+			<ns>4096.0</ns>
 		</material>
 		<!--<visibility>data/objects/bigguy_ambient.png</visibility>-->
 	</object>
@@ -16,12 +16,12 @@
 	<!-- #################################### Devices options ##################################### -->
 	<devices>
 		<front>
-			<enable>off</enable>																						<!-- on | off									-->
+			<enable>on</enable>																						<!-- on | off									-->
 			<id>0</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
-			<enable>off</enable>																						<!-- on | off									-->
+			<enable>on</enable>																						<!-- on | off									-->
 			<id>1</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/c910-fisheye.xml</params>
 		</back>
@@ -48,7 +48,7 @@
 			<type>dynamic</type>																					<!-- dynamic | debug					-->
 			<size>256 256</size>
 			<dual>off</dual>																							<!-- on | off									-->
-			<path>data/envmap/3/%03d.jpg</path>
+			<path>data/envmap/0/%03d.jpg</path>
 		</envmap>
 		
 		<localisation>
@@ -57,7 +57,7 @@
 		
 		<rendering>
 			<background>on</background>																		<!-- on | off									-->
-			<scene>on</scene>																						<!-- on | off									-->
+			<scene>on</scene>																							<!-- on | off									-->
 			<view>off</view>																							<!-- on | off									-->
 		</rendering>
 		

@@ -82,7 +82,6 @@ Configuration& Configuration::check()
 		{ general.envmap.type = Options::DEBUG;		fprintf(stderr, "[WARNING] envmap has been set to debug as front device is not enable\n");				}
 		if (general.localisation.type == Options::DYNAMIC)
 		{ general.localisation.type	= Options::DEBUG;		fprintf(stderr, "[WARNING] localisation has been set to debug as front device is not enable\n");	}
-		general.rendering.background	= false;
 	}
 	if (general.envmap.type == Options::DYNAMIC && !general.envmap.path.empty())
 	{ fprintf(stderr, "[WARNING] envmap path as been discarded as type was set to dynamic\n");																													}

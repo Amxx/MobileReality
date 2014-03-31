@@ -94,6 +94,6 @@ void main()
 	// ===============================
 	// =   S H O W   C U B E M A P   =
 	// ===============================
-	// fragment_color				= texture(envmap, vec3(mvMatrixInv * vec4(vertex_position, 1.0)));
+	//fragment_color				= texture(envmap, vec3(mvMatrixInv * vec4(vertex_position, 1.0)));
 }
 #endif

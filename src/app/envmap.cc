@@ -29,21 +29,19 @@ void EnvMap::init(gk::GLProgram* p, gk::GLTexture* t)
 	generateMipMap();
 }
 
-void EnvMap::cuberender(Camera* camera, cv::Matx44f modelview, gk::GLTexture* texture)
+void EnvMap::cuberender(Camera* camera, const gk::Transform& mv, gk::GLTexture* texture)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer->name);
 	glViewport(0, 0, _framebuffer->width, _framebuffer->height);
-	cv::Matx33f transform = camera->A() * toGL * Matx44to33(camera->orientation() * modelview);
-
+	gk::Matrix4x4 reproject = gk::Matrix4x4::mul( cv2gkit(camera->A() * toGL * Matx44to33(camera->orientation())).matrix(), mv.normalMatrix() );
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(_envmaptexture->target, 0);
 	glBindTexture(texture->target, texture->name);
-			
+	
 	glUseProgram(_program->name);
 	_program->sampler("frame")			= 0;
-	_program->uniform("reproject")	= cv2gkit(transform).matrix();
+	_program->uniform("reproject")	= reproject;
 	_program->uniform("radius")			= (float) camera->radius();
-		
 	for (int i=0; i<6; ++i)
 	{
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _envmaptexture->name, 0);

@@ -19,7 +19,7 @@ class EnvMap
 		~EnvMap();
 		
 		void init(gk::GLProgram* = nullptr, gk::GLTexture* = nullptr);
-		void cuberender(Camera*, cv::Matx44f, gk::GLTexture*);
+		void cuberender(Camera*, const gk::Transform&, gk::GLTexture*);
 		void clear();
 		void generateMipMap();
 };

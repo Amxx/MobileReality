@@ -151,10 +151,12 @@ int Core::init()
 	gk::programPath("install/shaders");
 	
 	_GLResources["prg:background"]				= gk::createProgram("background.glsl");
+	_GLResources["prg:backgroundenvmap"]	= gk::createProgram("backgroundenvmap.glsl");
 	_GLResources["prg:cuberendering"]			= gk::createProgram("cuberendering.glsl");
 	_GLResources["prg:materialrendering"]	= gk::createProgram("materialrendering.glsl");
 	
 	if (_GLResources["prg:background"]				== gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:backgroundenvmap"]	== gk::GLProgram::null())	return -1;
 	if (_GLResources["prg:cuberendering"]			== gk::GLProgram::null())	return -1;
 	if (_GLResources["prg:materialrendering"]	== gk::GLProgram::null())	return -1;
 	
@@ -229,10 +231,10 @@ int Core::draw()
 	// ===============================================================
 	// =                        C O N T E X T                        =
 	// ===============================================================
-	static	cv::Matx44f	model;																				// Presistent	: Model
-	static	cv::Matx44f	view;																					// Persistent	: View (bloc camera)
-					bool				position_fresh		= false;
-	static	int					position_duration	= 0;												// Persistent : Persistency duration
+	static	gk::Transform	mv;
+	static	gk::Transform	mvp;
+	bool									position_fresh		= false;
+	static	int						position_duration	= 0;												// Persistent : Persistency duration
 	
 	
 	// ===============================================================
@@ -271,20 +273,42 @@ int Core::draw()
 	// =                    P O S I T I O N I N G                    =
 	// ===============================================================	
 	NEWCHRONO(t3)
-	if (_config.general.localisation.type == Options::DYNAMIC)
-		for (Symbol& symbol : _scanner->scan(_cameras[0]->frame()))
-			try {
-				static cv::Matx44f toGL(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-				// LEGACY MODE FOR CUBE
-				try 				{	model = parseSymbolToModel(	symbol.data, _config.markers.size															) * toGL;	}
-				catch (...)	{ model = parseMatx33f_tr		(	symbol.data, _config.markers.size *cv::Matx31f(0.5, 0.5, 0.5)	) * toGL;	}
-				symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_config.markers.size, _config.markers.scale));
-				view							=	_cameras[0]->orientation().inv() * viewFromSymbol(symbol.rvec, symbol.tvec);
-				position_fresh		= !isNull(view) && !isNull(model);
-				if (position_fresh) { position_duration = _config.general.defaultValues.persistency; break; }
-			} catch (...) {
-				printf("Invalid symbol, could not extract model informations from `%s`\n", symbol.data.c_str());
-			}
+	switch (_config.general.localisation.type)
+	{
+		case Options::DYNAMIC:
+		{
+			static cv::Matx44f toGL(1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+			cv::Matx44f model, view;
+					
+			for (Symbol& symbol : _scanner->scan(_cameras[0]->frame()))
+				try {
+					// LEGACY MODE FOR CUBE
+					try 				{	model = parseSymbolToModel(	symbol.data, _config.markers.size															) * toGL;	}
+					catch (...)	{ model = parseMatx33f_tr		(	symbol.data, _config.markers.size *cv::Matx31f(0.5, 0.5, 0.5)	) * toGL;	}
+					symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_config.markers.size, _config.markers.scale));
+					view							=	_cameras[0]->orientation().inv() * viewFromSymbol(symbol.rvec, symbol.tvec);
+					position_fresh		= !isNull(view) && !isNull(model);
+					if (position_fresh)
+					{
+						position_duration		= _config.general.defaultValues.persistency;
+						gk::Transform	proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.f, 10000.f));
+						mv									=	cv2gkit(view * model);
+						mvp									= proj * cv2gkit(_cameras[0]->orientation()) * mv * gk::Scale(_config.object.scale);
+						break;
+					}
+				} catch (...) {
+					printf("Invalid symbol, could not extract model informations from `%s`\n", symbol.data.c_str());
+				}
+			break;
+		}
+		case Options::DEBUG:
+		{
+			gk::Transform proj	= gk::Perspective(45.f, (float) windowWidth()/windowHeight(), 0.1f, 1000000.f);
+			mv									= _debugviewpoint.view();
+			mvp									= proj * mv;
+			break;
+		}
+	}
 	
 	// ===============================================================
 	// =                B U I L D I N G   E N V M A P                =
@@ -292,8 +316,8 @@ int Core::draw()
 	NEWCHRONO(t4)
 	if (_buildenvmap && position_fresh)
 	{
-		if (_config.devices.back.enable)	_envmap.cuberender(_cameras[1], view * model, getGLResource<gk::GLTexture>("tex:frame1"));
-		if (_config.general.envmap.dual)	_envmap.cuberender(_cameras[0], view * model, getGLResource<gk::GLTexture>("tex:frame0"));
+		if (_config.devices.back.enable) _envmap.cuberender(_cameras[1], mv, getGLResource<gk::GLTexture>("tex:frame1"));
+		if (_config.general.envmap.dual) _envmap.cuberender(_cameras[0], mv, getGLResource<gk::GLTexture>("tex:frame0"));
 		_envmap.generateMipMap();
 	}
 
@@ -311,11 +335,30 @@ int Core::draw()
 	if (_config.general.rendering.background)
 	{
 		glClear(GL_DEPTH_BUFFER_BIT);	
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(getGLResource<gk::GLTexture>("tex:frame0")->target, _GLResources["tex:frame0"]->name);
-		glUseProgram(_GLResources["prg:background"]->name);
-		getGLResource<gk::GLProgram>("prg:background")->sampler("frame") = 0;
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		
+		switch(_config.general.localisation.type)
+		{
+			case Options::DYNAMIC:
+			{
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(getGLResource<gk::GLTexture>("tex:frame0")->target, _GLResources["tex:frame0"]->name);
+				glUseProgram(_GLResources["prg:background"]->name);
+				getGLResource<gk::GLProgram>("prg:background")->sampler("frame") = 0;
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				break;
+			}
+			case Options::DEBUG:
+			{
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(getGLResource<gk::GLTexture>("tex:envmap")->target, _GLResources["tex:envmap"]->name);
+				glBindSampler(0, _GLResources["spl:linear"]->name);
+				glUseProgram(_GLResources["prg:backgroundenvmap"]->name);
+				getGLResource<gk::GLProgram>("prg:backgroundenvmap")->uniform("reproject")	= mvp.inverseMatrix();
+				getGLResource<gk::GLProgram>("prg:backgroundenvmap")->sampler("envmap")			= 0;
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+				break;
+			}
+		}
 	}
 	
 	// ===============================================================
@@ -329,27 +372,12 @@ int Core::draw()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(getGLResource<gk::GLTexture>("tex:envmap")->target, _GLResources["tex:envmap"]->name);
 		glBindSampler(0, _GLResources["spl:linear"]->name);
-				
+		
 		if (!_config.object.visibility.empty())
 		{
 			glActiveTexture(GL_TEXTURE0+1);
 			glBindTexture(getGLResource<gk::GLTexture>("tex:visibility")->target, _GLResources["tex:visibility"]->name);
 		}
-		
-		gk::Transform		scale	= gk::Scale(_config.object.scale);
-		gk::Transform		proj, mv;
-		switch(_config.general.localisation.type)
-		{
-			case Options::DYNAMIC:
-				mv		=	cv2gkit(_cameras[0]->orientation() * view * model) * scale;																																	// Point de vue de _cameras[0]
-				proj	= cv2gkit(projectionFromIntrinsic(_cameras[0]->A(), _cameras[0]->frame()->width, _cameras[0]->frame()->height, 1.f, 10000.f));
-				break;
-			case Options::DEBUG:
-				mv		= _debugviewpoint.view();
-				proj	= gk::Perspective(45.f, (float) windowWidth()/windowHeight(), 0.1f, 1000000.f);
-				break;
-		}
-		gk::Transform mvp = proj * mv;
 		
 		glUseProgram(_GLResources["prg:materialrendering"]->name);
 		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("new_method")		= _newmethod;
