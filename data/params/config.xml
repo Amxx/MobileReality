@@ -6,9 +6,9 @@
 		<file>data/objects/sphere.obj</file>
 		<scale>2.5</scale>
 		<material>
-			<kd>1.0</kd>
-			<ks>0.2</ks>
-			<ns>4096.0</ns>
+			<kd>0.0</kd>
+			<ks>1.0</ks>
+			<ns>1000000.0</ns>
 		</material>
 		<!--<visibility>data/objects/bigguy_ambient.png</visibility>-->
 	</object>
@@ -36,7 +36,7 @@
 	<!-- ######################### General parameters of the application ########################## -->
 	<generalParameters>
 	
-		<verbose>low</verbose>																					<!-- [int] | off | low | high -->
+		<verbose>high</verbose>																					<!-- [int] | off | low | high -->
 	
 		<defaultValues>
 			<brightness>128</brightness>																	<!-- -1 for auto							-->
@@ -63,7 +63,7 @@
 		
 		<modules>
 			<scanner>install/share/libscanner_zbar.so</scanner>
-			<video>install/share/libvideodevice_uvc.so</video>
+			<video>install/share/libvideodevice_opencv.so</video>
 		</modules>
 		
 	</generalParameters>

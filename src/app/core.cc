@@ -4,7 +4,22 @@
 // #                                  MACROS                                  #
 // ############################################################################
 
-#define  LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
+#define			LOGHERE					std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
+#define			NOW()						std::chrono::steady_clock::now();
+
+typedef			std::chrono::steady_clock::time_point														timer;
+typedef			std::chrono::duration<long int, std::ratio<1l, 1000000000l>>		duration;
+
+void formatTimer(std::string identifier, duration dt)
+{
+	printf("%-24s %3d ms %03d µs %03d ns\n",
+	identifier.c_str(),
+	std::chrono::duration_cast<std::chrono::milliseconds>(dt).count(),
+	std::chrono::duration_cast<std::chrono::microseconds>(dt).count()%1000,
+	std::chrono::duration_cast<std::chrono::nanoseconds>(dt).count()%1000);
+}
+
+
 
 
 // ############################################################################
@@ -222,10 +237,6 @@ int Core::quit()
 // ############################################################################
 
 
-
-#define 		NEWCHRONO(X)		std::chrono::steady_clock::time_point X = std::chrono::steady_clock::now();
-
-
 int Core::draw()
 {
 	// ===============================================================
@@ -240,7 +251,8 @@ int Core::draw()
 	// ===============================================================
 	// =               U S E R   I N T E R A C T I O N               =
 	// ===============================================================
-	NEWCHRONO(t1)
+	timer t1 = NOW();
+	
 	processKeyboardEvent();
 	int x, y;
 	unsigned int button= SDL_GetRelativeMouseState(&x, &y);
@@ -251,7 +263,8 @@ int Core::draw()
 	// ===============================================================
 	// =                 G R A B I N G   I M A G E S                 =
 	// ===============================================================
-	NEWCHRONO(t2)
+	timer t2 = NOW();
+	
 	if (_config.devices.front.enable)
 	{
 		_cameras[0]->grabFrame();
@@ -272,7 +285,8 @@ int Core::draw()
 	// ===============================================================
 	// =                    P O S I T I O N I N G                    =
 	// ===============================================================	
-	NEWCHRONO(t3)
+	timer t3 = NOW();
+	
 	switch (_config.general.localisation.type)
 	{
 		case Options::DYNAMIC:
@@ -313,7 +327,8 @@ int Core::draw()
 	// ===============================================================
 	// =                B U I L D I N G   E N V M A P                =
 	// ===============================================================
-	NEWCHRONO(t4)
+	timer t4 = NOW();
+	
 	if (_buildenvmap && position_fresh)
 	{
 		if (_config.devices.back.enable) _envmap.cuberender(_cameras[1], mv, getGLResource<gk::GLTexture>("tex:frame1"));
@@ -331,7 +346,8 @@ int Core::draw()
 	// ===============================================================
 	// =               B A C K G R O U N D   F R A M E               =
 	// ===============================================================
-	NEWCHRONO(t5)
+	timer t5 = NOW();
+	
 	if (_config.general.rendering.background)
 	{
 		glClear(GL_DEPTH_BUFFER_BIT);	
@@ -364,7 +380,8 @@ int Core::draw()
 	// ===============================================================
 	// =                S C E N E   R E N D E R I N G                =
 	// ===============================================================
-	NEWCHRONO(t6)
+	timer t6 = NOW();
+	
 	if (_config.general.rendering.scene && (_config.general.localisation.type == Options::DEBUG || (position_duration && position_duration--)))
 	{
 		glClear(GL_DEPTH_BUFFER_BIT);
@@ -396,7 +413,8 @@ int Core::draw()
 	// ===============================================================
 	// =                 F R A M E S   D I S P L A Y                 =
 	// ===============================================================
-	NEWCHRONO(t7)
+	timer t7 = NOW();
+	
 	if (_config.general.rendering.view)
 	{
 		if (_config.devices.front.enable)	cv::imshow("camera 0", cv::Mat(_cameras[0]->frame()));
@@ -406,17 +424,18 @@ int Core::draw()
 	// ===============================================================
 	// =                         T I M E R S                         =
 	// ===============================================================
-	NEWCHRONO(t8)
+	timer t8 = NOW();
 	
 	if (_config.general.verbose > 1)
 	{
-		printf("User interaction:       %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count());
-		printf("Grabbing frames:        %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t3-t2).count());
-		printf("Positionning:           %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t4-t3).count());
-		printf("Bilding EnvMap:         %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t5-t4).count());
-		printf("Rendering - background: %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t6-t5).count());
-		printf("Rendering - scene:      %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t7-t6).count());
-		printf("Rendering - frames:     %8d µs\n\n",	std::chrono::duration_cast<std::chrono::microseconds>(t8-t7).count());
+		formatTimer("User interaction",				t2-t1);
+		formatTimer("Grabbing frames",				t3-t2);
+		formatTimer("Positionning",						t4-t3);
+		formatTimer("Bilding EnvMap",					t5-t4);
+		formatTimer("Rendering - background",	t6-t5);
+		formatTimer("Rendering - scene",			t7-t6);
+		formatTimer("Rendering - frames",			t8-t7);
+		printf("\n");
 	}
 	
 	present();
