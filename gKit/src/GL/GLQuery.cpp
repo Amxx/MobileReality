@@ -1,7 +1,6 @@
 #include "GL/GLQuery.h"
-
-namespace gk {
-
+namespace gk
+{
 std::string OverlapGPUSummary( const std::string &message, const GLCounterState& a, const GLCounterState& b )
 {
     char tmp[1024];
@@ -23,5 +22,4 @@ std::string OverlapCPUSummary( const std::string &message, const GLCounterState&
     
     return std::string(tmp);
 }
-
-}
+};

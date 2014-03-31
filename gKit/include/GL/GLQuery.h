@@ -33,7 +33,6 @@ struct GLCounterState
 std::string OverlapGPUSummary( const std::string &message, const GLCounterState& a, const GLCounterState& b );
 std::string OverlapCPUSummary( const std::string &message, const GLCounterState& a, const GLCounterState& b );
 
-
 //! representation d'une requete.
 class GLQuery : public GLResource
 {

@@ -24,7 +24,7 @@ struct Point {
     Point(int ix, int iy) : x(ix), y(iy) {}
     Point(const Point & p) : x(p.x), y(p.y) {}
 
-    const Point& operator= (const Point & p) { this->x = p.x; this->y = p.y; return *this; }
+    const Point& operator= (const Point & p) { x= p.x; y= p.y; return *this; }
 
     int x, y;
 };
@@ -35,12 +35,25 @@ struct Rect {
     Rect(int ix, int iy, int iw = 0, int ih = 0) : x(ix), y(iy), w(iw), h(ih) {}
     Rect(const Rect & r) : x(r.x), y(r.y), w(r.w), h(r.h) {}
 
-    const Rect& operator= (const Rect & r) { this->x = r.x; this->y = r.y; this->w = r.w; this->h = r.h; return *this; }
+    const Rect& operator= (const Rect & r) { x= r.x; y= r.y; w= r.w; h= r.h; return *this; }
 
     int x, y;
     int w, h;
 
     static const Rect null;
+};
+
+struct RGB8 {
+    RGB8() : r(0), g(0), b(0), a(255) {}
+    RGB8( const unsigned char _r, const unsigned char _g, const unsigned char _b ) : r(_r), g(_g), b(_b), a(255) {}
+    RGB8( const float _r, const float _g, const float _b ) : r(clamp(_r)), g(clamp(_g)), b(clamp(_b)), a(255) {}
+    
+    RGB8( const RGB8& _color ) : r(_color.r), g(_color.g), b(_color.b), a(_color.a) {}
+    RGB8& operator= ( const RGB8& _color ) { r= _color.r; g= _color.g; b= _color.b; a= _color.a; return *this; }
+
+    float clamp ( const float value ) { if(value < 0.f) return 0.f; else return std::min(255.f, value * 255.f); }
+    
+    unsigned char r, g, b, a;
 };
 
 enum ButtonFlags {
@@ -236,6 +249,9 @@ public:
     Rect getGraphRect( const Rect& r, const int *values, const int n, Rect& rg ) const;
     void drawGraph( const Rect& r, const int *values, const int n, const Rect& rg );
 
+    Rect getMatrixRect( const Rect& r, const int n, Rect& rc ) const;
+    void drawMatrix( const Rect& r, const RGB8 *values, const int n, int *selected, int *hovered );
+    
     Rect getButtonRect(const Rect& r, const Rect& text, Rect& rt) const;
     void drawButton(const Rect& r, const char *text, const Rect& rt, bool isDown, bool isHover, bool isFocus, int style);
 
@@ -279,13 +295,14 @@ public:
     int getCanvasSpace() const { return 5; }
 
     // composite
-    void drawText( const Rect& r , const char * text, int nbLines = 1, int caretPos = -1, bool isHover = false, bool isOn = false, bool isFocus = false );
+    void drawText( const Rect& r , const char * text, int nbLines = 0, int caretPos = -1, bool isHover = false, bool isOn = false, bool isFocus = false );
     void drawFrame( const Rect& rect, const Point& corner, bool isHover = false, bool isOn = false, bool isFocus = false );
     void drawBoolFrame( const Rect& rect, const Point& corner, bool isHover = false, bool isOn = false, bool isFocus = false );
 
     // Draw primitive shapes using implementation provided by a subclass
-    virtual void drawString( int x, int y, const char *text, int nbLines, int colorId )= 0;
+    virtual void drawString( const Rect& rect, const char *text, int colorId )= 0;
     virtual void drawRect( const Rect& rect, int fillColorId, int borderColorId )= 0;
+    virtual void drawRGBRect( const Rect& rect, const RGB8 fillColor, const RGB8 borderColor )= 0;
     virtual void drawRoundedRect( const Rect& rect, const Point& corner, int fillColorId, int borderColorId )= 0;
     virtual void drawRoundedRectOutline( const Rect& rect, const Point& corner, int borderColorId )= 0;
     virtual void drawCircle( const Rect& rect, int fillColorId, int borderColorId )= 0;
@@ -360,6 +377,9 @@ public:
     // UI method to draw a time bar from start to stop (> 0 and < 1).
     void doTimebar( const Rect& rect, const char *label, const float start, const float stop );
 
+    // 
+    bool doMatrix( const Rect& rect, const RGB8 *colors, const int numColors, int *selected= NULL, int *hovered= NULL );
+    
     // UI method for rendering and processing a push button
     //
     // rect - optionally provides a location and size for the button

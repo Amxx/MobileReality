@@ -328,6 +328,7 @@ void UIContext::endPanel() {
 void UIContext::doLabel(const Rect & r, const char * text, int style) {
     Rect rt;
     Rect rect = placeRect(m_painter->getLabelRect(r, m_font->getTextRect(text), rt));
+    //~ printf("label place %d,%d %d,%d\n", rect.x, rect.y, rect.w, rect.h);
     m_painter->drawLabel(rect, text, rt, isHover(rect), style);
 }
 
@@ -345,6 +346,40 @@ void UIContext::doTimebar( const Rect& r, const char *text, const float start, c
     Rect rect= placeRect(m_painter->getTimebarRect(r, m_font->getTextRect(text), rt, start, stop, rb));
     m_painter->drawTimebar(rect, text, rt, start, stop, rb);
 }
+
+
+bool UIContext::doMatrix( const Rect& r, const RGB8 *colors, const int numColors, int *selected, int *hovered )
+{
+    Rect rc;
+    Rect rect= placeRect(m_painter->getMatrixRect(r, numColors, rc));
+    
+    int cell= -1;
+    bool focus = hasFocus(rect);
+    if(focus) {
+        int rows= rect.h / rc.h;
+        int cols= rect.w / rc.w;
+        //~ printf("place %d,%d %d,%d, cell %d,%d %d,%d\n", rect.x, rect.y, rect.w, rect.h, rc.x, rc.y, rc.w, rc.h);
+        //~ printf("matrix %d %dx%d\n", numColors, rows, cols);
+        cell= (rect.h - m_currentCursor.y + rect.y) / rc.h * cols + (m_currentCursor.x - rect.x) / rc.w;
+        //~ printf("cell %d\n", cell);
+    }
+    
+    m_painter->drawMatrix(rect, colors, numColors, selected, &cell);
+    
+    if(hovered) *hovered= cell;
+    
+    if(focus) m_uiOnFocus = true; 
+    if(m_mouseButton[0].state & ButtonFlags_End && cell != -1) {
+        if(selected) {
+            if(*selected != cell) *selected= cell;
+            else *selected= -1;
+        }
+        return true;
+    }
+    
+    return false;
+}
+
 
 bool UIContext::doButton(const Rect & r, const char * text, bool * state, int style) {
     Rect rt;
@@ -384,7 +419,7 @@ bool UIContext::doCheckButton(const Rect & r, const char *text, bool *state, int
 
     m_painter->drawCheckButton(rect, text, rt, rc, (state) && (*state), hover, focus, style);
 
-    if (hasFocus(rect)) {
+    if (focus) {
         m_uiOnFocus = true;
     }
 

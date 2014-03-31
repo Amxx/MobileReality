@@ -49,19 +49,19 @@ struct widget_params : public params
         params(),
         program(_program),
         borderId(0),
-        fillId(0)
+        fillId(0),
+        border(), fill(), zones()
     {}
     
     bool operator== ( const widget_params& b ) const
     {
-        if(program != b.program)
-            return false;
-        if(borderId != b.borderId)
-            return false;
-        if(fillId != b.fillId)
-            return false;
-        if(zones != b.zones)
-            return false;
+        
+        if(program != b.program) return false;
+        //~ if(borderId != b.borderId) //~ return false;
+        //~ if(fillId != b.fillId) //~ return false;
+        if(border != b.border) return false;
+        if(fill != b.fill) return false;
+        if(zones != b.zones) return false;
         return true;
     }
     
@@ -119,12 +119,10 @@ struct string_params : public params
     
     bool operator== ( const string_params& b ) const
     {
-        if(program != b.program)
-            return false;
-        if(colorId != b.colorId)
-            return false;
-        if(font != b.font)
-            return false;
+        if(program != b.program) return false;
+        //~ if(colorId != b.colorId) return false;
+        if(color != b.color) return false;
+        if(font != b.font) return false;
         return true;
     }
     
@@ -143,6 +141,7 @@ struct string_params : public params
     }
 };
 
+#if 0
 struct graph_program
 {
     GLuint program;     //!< required, shader program name
@@ -158,9 +157,8 @@ struct graph_param : public params
     
     int colorId;
     gk::glsl::vec4 color;
-    
-    
 };
+#endif
 
 
 }       // namespace GLCore
@@ -178,8 +176,9 @@ public:
     void begin( );
     void end();
     
-    void drawString( int x, int y, const char *text, int nbLines, int colorId );
+    void drawString( const Rect& rect, const char *text, int colorId );
     void drawRect( const Rect& rect, int fillColorId, int borderColorId );
+    void drawRGBRect( const Rect& rect, const RGB8 fillColor, const RGB8 borderColor );
     void drawRoundedRect( const Rect& rect, const Point& corner, int fillColorId, int borderColorId );
     void drawRoundedRectOutline( const Rect& rect, const Point& corner, int borderColorId );
     void drawCircle( const Rect& rect, int fillColorId, int borderColorId );
