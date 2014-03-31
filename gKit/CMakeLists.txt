@@ -110,8 +110,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 		${OPENEXR_LIBRARIES}
 	)
 	
-	list(APPEND CMAKE_CXX_FLAGS_RELEASE "-mtune=native")
-	
 # =======================================================
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 

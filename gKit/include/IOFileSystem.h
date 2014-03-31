@@ -254,7 +254,12 @@ struct IOFileSystem
                 last_char= c;
             }
         }
-
+        
+        // termine la derniere ligne du fichier, si necessaire.
+        //~ if(text.back() != '\n') // c++11
+        if(text.empty() == false && text[text.size() -1] != '\n')
+            text.push_back('\n');
+        
         fclose(in);
         return text;
     }

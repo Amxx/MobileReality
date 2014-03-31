@@ -21,7 +21,9 @@ Image *Image::create( const int _w, const int _h, const int _channels, const uns
     {
         case UNSIGNED_BYTE: pixel_sizeof= sizeof(unsigned char); break;
         case FLOAT: pixel_sizeof= sizeof(float); break;
+        
         default:
+            //~ printf("image: type %d, channels %d\n", _type, _channels);
             assert(0 && "invalid image type");
     }
     

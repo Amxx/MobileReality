@@ -16,8 +16,8 @@
 #endif
 
 #ifdef GLDEBUGGER    
-    #include "Debugger/GLDebugger.h"
-    #include "Debugger/AppDebugger.h"
+    //~ #include "Debugger/GLDebugger.h"
+    //~ #include "Debugger/AppDebugger.h"
     
     #define glDrawArrays(...) gk::AppDebugger::drawArrays(  __VA_ARGS__ )
     #define glDrawElements(...) gk::AppDebugger::.drawElements(  __VA_ARGS__ )

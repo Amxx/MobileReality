@@ -422,7 +422,14 @@ int GLProgram::resources( )
         for(int i= 0; i < buffer_count; i++)
         {
             glGetProgramResourceName(name, GL_SHADER_STORAGE_BLOCK, i, max_length, NULL, bname);
-            MESSAGE("  buffer '%s' index %d\n", bname, i);
+            
+            GLint binding= 0;
+            {
+                GLenum prop[]= { GL_BUFFER_BINDING };
+                glGetProgramResourceiv(name, GL_SHADER_STORAGE_BLOCK, i, 1, prop, 1, NULL, &binding);
+            }
+    
+            MESSAGE("  buffer '%s' index %d, binding %d\n", bname, i, binding);
             
             m_storage_buffers.push_back( 
                 parameter(bname, -1, i, GL_SHADER_STORAGE_BLOCK) );
@@ -433,8 +440,7 @@ int GLProgram::resources( )
                 glGetProgramResourceiv(name, GL_SHADER_STORAGE_BLOCK, i, 1, prop, 1, NULL, &vcount);
             }
         
-            // GLint variables[vcount];
-			std::vector<GLint> variables(vcount);
+            std::vector<GLint> variables(vcount);
             {
                 GLenum prop[]= { GL_ACTIVE_VARIABLES };
                 glGetProgramResourceiv(name, GL_SHADER_STORAGE_BLOCK, i, 1, prop, vcount, NULL, &variables.front());
@@ -484,7 +490,6 @@ int GLProgram::resources( )
             group_max[0], group_max[1], group_max[2], threads);
     }
     #endif
-
 #endif
 
     return 0;

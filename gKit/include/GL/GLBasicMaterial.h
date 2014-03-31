@@ -85,7 +85,7 @@ public:
     static int normalLocation( );
 
     //! utilise un terme ambiant.
-    void useAmbient( const float ka, const VecColor& ambient, GLTexture *texture = GLTexture::null() );
+    void useAmbient( const float ka, const VecColor& ambient, GLTexture *texture= GLTexture::null() );
     //! utilise un terme ambiant.
     void useAmbient( const float ka, const VecColor& ambient, const std::string& texture_filename );
     

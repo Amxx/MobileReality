@@ -1,4 +1,4 @@
-#include "core.hh"
+﻿#include "core.hh"
 
 // ############################################################################
 // #                                  MACROS                                  #
@@ -13,8 +13,7 @@
 
 Core::Core(int argc, char* argv[]) :
 	gk::App(),
-	_cameras(2),
-	_new_method(true)
+	_cameras(2)
 {
 	// ===============================================================
 	// =          C O N F I G U R A T I O N   L O A D I N G          =
@@ -22,8 +21,8 @@ Core::Core(int argc, char* argv[]) :
 	if (argc > 1) _config.load(argv[1]).check();
 	if (_config.general.verbose) _config.display();
 
-	_buildenvmap = _config.general.envmap.type == Options::DYNAMIC;
-	
+	_buildenvmap	= _config.general.envmap.type == Options::DYNAMIC;
+	_newmethod		= true;
 	// ===============================================================
 	// =                   L O A D   S C A N N E R                   =
 	// ===============================================================
@@ -111,6 +110,7 @@ Core::Core(int argc, char* argv[]) :
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	present();
+		
 }
 
 
@@ -178,8 +178,14 @@ int Core::init()
 	else
 		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(3, _config.general.envmap.size.width, _config.general.envmap.size.height);
 
-	_envmap.init(	static_cast<gk::GLProgram*>			(_GLResources["prg:cuberendering"]),
-								static_cast<gk::GLTexture*>			(_GLResources["tex:envmap"])	);
+	_envmap.init(	getGLResource<gk::GLProgram>("prg:cuberendering"),
+								getGLResource<gk::GLTexture>("tex:envmap")					);
+	
+	// ===============================================================
+	// =                    E A M L E S S   C U B E                  =
+	// ===============================================================
+	_GLResources["spl:linear"]				= gk::createLinearSampler();
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	
 	// ===============================================================
 	// =                    C R E A T E   M E S H                    =
@@ -215,12 +221,11 @@ int Core::quit()
 
 
 
+#define 		NEWCHRONO(X)		std::chrono::steady_clock::time_point X = std::chrono::steady_clock::now();
 
 
 int Core::draw()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
 	// ===============================================================
 	// =                        C O N T E X T                        =
 	// ===============================================================
@@ -229,9 +234,11 @@ int Core::draw()
 					bool				position_fresh		= false;
 	static	int					position_duration	= 0;												// Persistent : Persistency duration
 	
+	
 	// ===============================================================
 	// =               U S E R   I N T E R A C T I O N               =
 	// ===============================================================
+	NEWCHRONO(t1)
 	processKeyboardEvent();
 	int x, y;
 	unsigned int button= SDL_GetRelativeMouseState(&x, &y);
@@ -242,26 +249,28 @@ int Core::draw()
 	// ===============================================================
 	// =                 G R A B I N G   I M A G E S                 =
 	// ===============================================================
+	NEWCHRONO(t2)
 	if (_config.devices.front.enable)
 	{
 		_cameras[0]->grabFrame();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:frame0"])->target, _GLResources["tex:frame0"]->name);
-		glTexSubImage2D(static_cast<gk::GLTexture*>(_GLResources["tex:frame0"])->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
+		glActiveTexture	(GL_TEXTURE0);
+		glBindTexture		(getGLResource<gk::GLTexture>("tex:frame0")->target, _GLResources["tex:frame0"]->name);
+		glTexSubImage2D	(getGLResource<gk::GLTexture>("tex:frame0")->target, 0, 0, 0, _cameras[0]->frame()->width, _cameras[0]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[0]->frame()->imageData);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	if (_config.devices.back.enable)
 	{
 		_cameras[1]->grabFrame();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:frame1"])->target, _GLResources["tex:frame1"]->name);
-		glTexSubImage2D(static_cast<gk::GLTexture*>(_GLResources["tex:frame1"])->target, 0, 0, 0, _cameras[1]->frame()->width, _cameras[1]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[1]->frame()->imageData);
+		glActiveTexture	(GL_TEXTURE0);
+		glBindTexture		(getGLResource<gk::GLTexture>("tex:frame1")->target, _GLResources["tex:frame1"]->name);
+		glTexSubImage2D	(getGLResource<gk::GLTexture>("tex:frame1")->target, 0, 0, 0, _cameras[1]->frame()->width, _cameras[1]->frame()->height, GL_BGR, GL_UNSIGNED_BYTE, _cameras[1]->frame()->imageData);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	
 	// ===============================================================
 	// =                    P O S I T I O N I N G                    =
 	// ===============================================================	
+	NEWCHRONO(t3)
 	if (_config.general.localisation.type == Options::DYNAMIC)
 		for (Symbol& symbol : _scanner->scan(_cameras[0]->frame()))
 			try {
@@ -280,10 +289,11 @@ int Core::draw()
 	// ===============================================================
 	// =                B U I L D I N G   E N V M A P                =
 	// ===============================================================
+	NEWCHRONO(t4)
 	if (_buildenvmap && position_fresh)
 	{
-		if (_config.devices.back.enable)	_envmap.cuberender(_cameras[1], view * model, static_cast<gk::GLTexture*>(_GLResources["tex:frame1"]));
-		if (_config.general.envmap.dual)	_envmap.cuberender(_cameras[0], view * model, static_cast<gk::GLTexture*>(_GLResources["tex:frame0"]));
+		if (_config.devices.back.enable)	_envmap.cuberender(_cameras[1], view * model, getGLResource<gk::GLTexture>("tex:frame1"));
+		if (_config.general.envmap.dual)	_envmap.cuberender(_cameras[0], view * model, getGLResource<gk::GLTexture>("tex:frame0"));
 		_envmap.generateMipMap();
 	}
 
@@ -292,31 +302,38 @@ int Core::draw()
 	// ===============================================================
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glViewport(0, 0, windowWidth(), windowHeight());
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	// ===============================================================
 	// =               B A C K G R O U N D   F R A M E               =
 	// ===============================================================
+	NEWCHRONO(t5)
 	if (_config.general.rendering.background)
 	{
 		glClear(GL_DEPTH_BUFFER_BIT);	
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:frame0"])->target, _GLResources["tex:frame0"]->name);
+		glBindTexture(getGLResource<gk::GLTexture>("tex:frame0")->target, _GLResources["tex:frame0"]->name);
 		glUseProgram(_GLResources["prg:background"]->name);
-		static_cast<gk::GLProgram*>(_GLResources["prg:background"])->sampler("frame") = 0;
+		getGLResource<gk::GLProgram>("prg:background")->sampler("frame") = 0;
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 	
 	// ===============================================================
 	// =                S C E N E   R E N D E R I N G                =
 	// ===============================================================
+	NEWCHRONO(t6)
 	if (_config.general.rendering.scene && (_config.general.localisation.type == Options::DEBUG || (position_duration && position_duration--)))
 	{
 		glClear(GL_DEPTH_BUFFER_BIT);
+		
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(getGLResource<gk::GLTexture>("tex:envmap")->target, _GLResources["tex:envmap"]->name);
+		glBindSampler(0, _GLResources["spl:linear"]->name);
+				
 		if (!_config.object.visibility.empty())
 		{
 			glActiveTexture(GL_TEXTURE0+1);
-			glBindTexture(static_cast<gk::GLTexture*>(_GLResources["tex:visibility"])->target, _GLResources["tex:visibility"]->name);
+			glBindTexture(getGLResource<gk::GLTexture>("tex:visibility")->target, _GLResources["tex:visibility"]->name);
 		}
 		
 		gk::Transform		scale	= gk::Scale(_config.object.scale);
@@ -334,29 +351,45 @@ int Core::draw()
 		}
 		gk::Transform mvp = proj * mv;
 		
-		glUseProgram(_GLResources["prg:materialrendering"]->name);  
-		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("new_method")			= _new_method;
-		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("mvMatrix")				= mv.matrix();
-		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("mvMatrixInv")		= mv.inverseMatrix();		
-		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("mvpMatrix")			= mvp.matrix();
-		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("kd")							= _config.object.material.kd;
-		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("ks")							= _config.object.material.ks;
-		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("ns")							= _config.object.material.ns;
-		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->uniform("usevisibility")	= !_config.object.visibility.empty();
-		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->sampler("envmap")					= 0;
-		static_cast<gk::GLProgram*>(_GLResources["prg:materialrendering"])->sampler("visibility")			= 1;
+		glUseProgram(_GLResources["prg:materialrendering"]->name);
+		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("new_method")		= _newmethod;
+		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("mvMatrix")			= mv.matrix();
+		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("mvMatrixInv")		= mv.inverseMatrix();		
+		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("mvpMatrix")			= mvp.matrix();
+		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("kd")						= _config.object.material.kd;
+		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("ks")						= _config.object.material.ks;
+		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("ns")						= _config.object.material.ns;
+		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("usevisibility")	= !_config.object.visibility.empty();
+		getGLResource<gk::GLProgram>("prg:materialrendering")->sampler("envmap")				= 0;
+		getGLResource<gk::GLProgram>("prg:materialrendering")->sampler("visibility")		= 1;
 		_mesh->draw();
 	}
 	
 	// ===============================================================
-	// =                  F R A M E   D I S P L A Y                  =
+	// =                 F R A M E S   D I S P L A Y                 =
 	// ===============================================================
+	NEWCHRONO(t7)
 	if (_config.general.rendering.view)
 	{
 		if (_config.devices.front.enable)	cv::imshow("camera 0", cv::Mat(_cameras[0]->frame()));
 		if (_config.devices.back.enable)	cv::imshow("camera 1", cv::Mat(_cameras[1]->frame()));
 	}
 	
+	// ===============================================================
+	// =                         T I M E R S                         =
+	// ===============================================================
+	NEWCHRONO(t8)
+	
+	if (_config.general.verbose > 1)
+	{
+		printf("User interaction:       %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count());
+		printf("Grabbing frames:        %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t3-t2).count());
+		printf("Positionning:           %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t4-t3).count());
+		printf("Bilding EnvMap:         %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t5-t4).count());
+		printf("Rendering - background: %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t6-t5).count());
+		printf("Rendering - scene:      %8d µs\n",		std::chrono::duration_cast<std::chrono::microseconds>(t7-t6).count());
+		printf("Rendering - frames:     %8d µs\n\n",	std::chrono::duration_cast<std::chrono::microseconds>(t8-t7).count());
+	}
 	
 	present();
 	cv::waitKey(30);
@@ -389,8 +422,8 @@ void Core::processKeyboardEvent()
 	if (key('m'))
 	{
 		key('m') = 0;
-		_new_method = !_new_method;
-		if (_config.general.verbose) printf("- switch to %s methode\n", (_new_method?std::string("new"):std::string("old")).c_str());
+		_newmethod = !_newmethod;
+		if (_config.general.verbose) printf("- switch to %s methode\n", (_newmethod?std::string("new"):std::string("old")).c_str());
 	}
 }
 
@@ -399,7 +432,7 @@ void Core::processKeyboardEvent()
 
 
 void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
-{
+{	
 	if (event.state == SDL_PRESSED)
 		switch (event.keysym.sym)
 		{
@@ -409,6 +442,16 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				std::stringstream path;
 				path << "data/view/screenshot_" << now << ".png";
 				gk::writeFramebuffer(path.str());
+				break;
+			}
+			case SDLK_F2:
+			{
+				time_t now = time(0);
+				std::stringstream path;
+				path << "data/view/envmap_" << now << "_%03d.png";
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(getGLResource<gk::GLTexture>("tex:envmap")->target, _GLResources["tex:envmap"]->name);
+				gk::ImageIO::writeImageArray(path.str(), getGLResource<gk::GLTexture>("tex:envmap")->imageArray(0));
 				break;
 			}
 			case SDLK_F5:

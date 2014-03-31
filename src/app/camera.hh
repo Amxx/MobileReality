@@ -19,7 +19,7 @@ class Camera : public VideoDevice, public Calibration
 		Camera(VideoDevice*, cv::Matx44f, std::string = "");
 		
 		// VideoDevice Methods
-		bool				open(int idx = 0)								{ _device->open(idx); 							}
+		bool				open(int idx = 0)								{ return _device->open(idx); 				}
 		void				close()													{ _device->close();									}
 		bool 				isopen() 												{ return _device->isopen();					}
 		void 				grabFrame()											{ _device->grabFrame();							}

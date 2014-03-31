@@ -56,6 +56,7 @@ bool uniform_check( ProgramName& uniform, int size, GLenum type )
     return true;
 }
 
+
 ProgramName& ProgramName::operator= ( const bool x )
 {
     if(uniform_check(*this, 1, GL_BOOL) == false)

@@ -180,9 +180,10 @@ GLTexture *GLTexture::createTextureCube( const int _unit,
     create(_unit, GL_TEXTURE_CUBE_MAP, _width, _height, 1, _format);
     if(name == 0)
         return this;
-		
-		std::vector<unsigned int> zeros(_width * _height * 4, 0);
-		
+    
+    // alloue un buffer assez gros pour tous les formats
+    std::vector<unsigned int> zeros(width * height * 4, 0);
+    
     for(unsigned int face= 0; face < 6; face++)
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, 
             format.internal, width, height, 0,
@@ -328,7 +329,7 @@ Image *GLTexture::image( const int _unit, const GLenum _target, const int _level
             channels= 2;
             glchannels= GL_RG;
             break;
-            
+        
         case GL_RGB:
         case GL_RGB8:
         case GL_RGB16F:
@@ -383,12 +384,12 @@ Image *GLTexture::image( const int _unit, const GLenum _target, const int _level
         case GL_RG16UI:
         case GL_RGB16UI:
         case GL_RGBA16UI:
-            
+        
         case GL_R32UI:
         case GL_RG32UI:
         case GL_RGB32UI:
         case GL_RGBA32UI:
-            
+        
         case GL_DEPTH_COMPONENT:
         case GL_DEPTH_COMPONENT24:
         case GL_DEPTH_COMPONENT32:
@@ -401,7 +402,7 @@ Image *GLTexture::image( const int _unit, const GLenum _target, const int _level
             assert(0 && "invalid texture format");
     }
     
-    Image *image= (new Image())->create(std::max(1, width / (1<< _level)), std::max(1, height / (1<< _level)), std::max(1, depth / (1<< _level)), channels, type);
+    Image *image= (new Image())->create(std::max(1, width / (1<< _level)), std::max(1, height / (1<< _level)), channels, type);
     if(image == NULL)
         return NULL;
     
@@ -410,8 +411,8 @@ Image *GLTexture::image( const int _unit, const GLenum _target, const int _level
     
     #ifndef NDEBUG
     {
-        GLint w= 0; glGetTexLevelParameteriv(target, _level, GL_TEXTURE_WIDTH, &w);
-        GLint h= 0; glGetTexLevelParameteriv(target, _level, GL_TEXTURE_HEIGHT, &h);
+        GLint w= 0; glGetTexLevelParameteriv(_target, _level, GL_TEXTURE_WIDTH, &w);
+        GLint h= 0; glGetTexLevelParameteriv(_target, _level, GL_TEXTURE_HEIGHT, &h);
         if(w != image->width || h != image->height)
             ERROR("GetTexImage: wrong dimensions %dx%d, level %d, %dx%d\n", image->width, image->height, _level, w, h);
     }

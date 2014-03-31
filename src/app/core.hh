@@ -2,6 +2,9 @@
 #define CORE_HH
 
 #include <iostream>
+#include <ctime>
+#include <ratio>
+#include <chrono>
 
 // =================================
 // =   G K I T   I N C L U D E S   =
@@ -42,12 +45,13 @@ class Core : public gk::App
 		EnvMap																		_envmap;
 		Scanner*																	_scanner;
 				
-		// Object
+		// OpenGL objects
 		gk::GLBasicMesh*													_mesh;
 		std::map<std::string,	gk::GLResource*>		_GLResources;
+		template<typename T> T*										getGLResource(const std::string&);
 	
 		// Status
-		bool																			_new_method;
+		bool																			_newmethod;
 		bool																			_buildenvmap;
 		gk::Orbiter																_debugviewpoint;
 		
@@ -65,5 +69,11 @@ class Core : public gk::App
 		void processMouseButtonEvent(SDL_MouseButtonEvent&);
 		void processMouseMotionEvent(SDL_MouseMotionEvent&);
 };
+
+
+
+
+template<typename T> T* Core::getGLResource(const std::string& str) { return static_cast<T*>(_GLResources[str.c_str()]); }
+
 
 #endif

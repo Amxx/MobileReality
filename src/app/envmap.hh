@@ -10,11 +10,10 @@
 class EnvMap
 {
 	private:
-		gk::GLFramebuffer*	_framebuffer;
 		gk::GLProgram*			_program;
 		gk::GLTexture*			_envmaptexture;
+		gk::GLFramebuffer*	_framebuffer;
 	
-
 	public:
 		EnvMap();
 		~EnvMap();

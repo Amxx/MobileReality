@@ -16,32 +16,14 @@ namespace gk {
 //! \ingroup OpenGL.
 struct SourceSection
 {
-    std::string definitions;
-    std::string source;
-    IOFile file;
+    std::string definitions;    //!< #define USE_IT
+    std::string source;         //!< contenu du fichier
+    std::string build;          //!< texte pre a compiler
+    IOFile file;                //!< infos sur le fichier
 
-    SourceSection( )
-        :
-        definitions(),
-        source(),
-        file()
-    {}
-    
-    SourceSection( const std::string& filename )
-        :
-        definitions(),
-        source(),
-        file()
-    {
-        load(filename);
-    }
-    
-    SourceSection( const IOFile& _file, const std::string& _source )
-        :
-        definitions(),
-        source(_source),
-        file(_file)
-    {}
+    SourceSection( ) : definitions(), source(), build(), file() {}
+    SourceSection( const IOFile& _file, const std::string& _source ) : definitions(), source(_source), build(), file(_file) {}
+    SourceSection( const std::string& filename ) : definitions(), source(), build(), file() { load(filename); }
     
     //! definit une valeur : #define what value.
     SourceSection& define( const std::string& what, const std::string& value= "" )
@@ -60,13 +42,15 @@ struct SourceSection
     {
         file= IOFile(filename);
         source= file.readText();
+        build.clear();
         return *this;
     }
     
     //! recharge le fichier texte, si necessaire.
     SourceSection& reload( )
     {
-        file.reloadText(source);
+        if(file.reloadText(source) > 0)
+            build.clear();
         return *this;
     }
 };
@@ -79,18 +63,24 @@ class GLCompiler
     GLCompiler( const GLCompiler& );
     GLCompiler& operator= ( const GLCompiler& );
     
+    //! construit le source pret a compiler d'un shader.
+    std::string build_source( unsigned int shader );
+    
 public:
     GLProgram *program;
     std::string program_label;
 
-    SourceSection common;
+    std::vector<SourceSection> includes;
     std::vector<SourceSection> sources;
-
+    
     GLCompiler( const std::string& label );
     ~GLCompiler( );
     
     //! charge un source commun a tous les shaders du program. en gros un fichier include.
     GLCompiler& loadCommon( const std::string& filename );
+    
+    //! ajoute un source commun a tous les shaders du program. 
+    GLCompiler& include( const std::string& filename );
     
     //! charge un seul fichier contenant les sources de tous les shaders a compiler.
     //! le source de chaque shader est defini par une directive du pre processeur. VERTEX_SHADER, FRAGMENT_SHADER, GEOMETRY_SHADER, etc.

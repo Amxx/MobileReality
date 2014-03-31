@@ -19,5 +19,5 @@
 <Image_Size>
   640 480</Image_Size>
 <Root_Mean_Square>2.5982672595193285e-01</Root_Mean_Square>
-<Fisheye_Radius>220.</Fisheye_Radius>
+<Fisheye_Radius>200.</Fisheye_Radius>
 </opencv_storage>

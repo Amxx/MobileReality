@@ -18,7 +18,9 @@ add_subdirectory(gKit)
 # =====================================================================
 # =																FLAGS																=
 # =====================================================================
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native")
+list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
+add_definitions(-march=native -O3)
+add_definitions(-W -pipe)
 
 # =====================================================================
 # =							SETTING MODULES LIST AND BUILD OPTIONS								=

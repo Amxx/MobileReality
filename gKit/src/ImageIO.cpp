@@ -409,7 +409,8 @@ int writeImageArray( const std::string& format, ImageArray *array )
         if(writeImage(tmp, array->images[i]) < 0)
             return -1;
     }
-
+    
+    MESSAGE("writing '%s'... %d images. done\n", format.c_str(), array->images.size());
     return 0;
 }
 

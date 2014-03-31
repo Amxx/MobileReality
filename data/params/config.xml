@@ -6,9 +6,9 @@
 		<file>data/objects/sphere.obj</file>
 		<scale>2.5</scale>
 		<material>
-			<kd>0.0</kd>
-			<ks>1.0</ks>
-			<ns>1000000.0</ns>
+			<kd>1.0</kd>
+			<ks>0.4</ks>
+			<ns>1024.0</ns>
 		</material>
 		<!--<visibility>data/objects/bigguy_ambient.png</visibility>-->
 	</object>
@@ -16,13 +16,13 @@
 	<!-- #################################### Devices options ##################################### -->
 	<devices>
 		<front>
-			<enable>on</enable>																						<!-- on | off									-->
-			<id>1</id>																										<!-- [int] | auto | manual		-->
+			<enable>off</enable>																						<!-- on | off									-->
+			<id>0</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
-			<enable>on</enable>																						<!-- on | off									-->
-			<id>0</id>																										<!-- [int] | auto | manual		-->
+			<enable>off</enable>																						<!-- on | off									-->
+			<id>1</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/c910-fisheye.xml</params>
 		</back>
 	</devices>
@@ -36,7 +36,7 @@
 	<!-- ######################### General parameters of the application ########################## -->
 	<generalParameters>
 	
-		<verbose>on</verbose>																						<!-- on | off									-->
+		<verbose>low</verbose>																					<!-- [int] | off | low | high -->
 	
 		<defaultValues>
 			<brightness>128</brightness>																	<!-- -1 for auto							-->
@@ -48,7 +48,7 @@
 			<type>dynamic</type>																					<!-- dynamic | debug					-->
 			<size>256 256</size>
 			<dual>off</dual>																							<!-- on | off									-->
-			<path>data/envmap/1/%03d.jpg</path>
+			<path>data/envmap/3/%03d.jpg</path>
 		</envmap>
 		
 		<localisation>

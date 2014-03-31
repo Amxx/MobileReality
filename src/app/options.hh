@@ -80,8 +80,8 @@ namespace Options
 			std::string	scanner;
 			std::string	video;
 		};
-		General() : verbose(false), defaultValues(), envmap(), localisation(), rendering(), modules() {}
-		bool					verbose;
+		General() : verbose(0), defaultValues(), envmap(), localisation(), rendering(), modules() {}
+		int						verbose;
 		DefaultValues	defaultValues;
 		Envmap				envmap;
 		Localisation	localisation;

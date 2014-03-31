@@ -2,8 +2,10 @@
 #ifndef _GLSL_UNIFORMS_H
 #define _GLSL_UNIFORMS_H
 
-#include "Vec.h"
+#include <cstdio>
 #include <vector>
+
+#include "Vec.h"
 
 namespace gk {
 
@@ -11,18 +13,8 @@ namespace gk {
 //! \ingroup OpenGL.
 namespace glsl {        // std140 / 430
 
-#ifdef _MSC_VER   // visual studio
+#ifdef _MSC_VER   // visual studio >= 2012 necessaire
 # define ALIGN(...) __declspec(align(__VA_ARGS__))
-//# define ALIGN(...) 
-
-//// marche pas
-//// cf http://stackoverflow.com/a/9410016
-//template<class T, class Alloc>
-//void resize( std::vector<T, Alloc>& v, typename std::vector<T, Alloc>::size_type new_size, T const& val )
-//{
-//  if (v.size() < new_size) v.insert(v.end(), new_size - v.size(), val);
-//  else if (new_size < v.size()) v.erase(v.begin() + new_size, v.end());
-//}
 
 #else   // gcc, clang, icc
 # define ALIGN(...) __attribute__((aligned(__VA_ARGS__)))
@@ -44,8 +36,8 @@ struct ALIGN(4) gscalar
 
     bool operator== ( const T& b ) { return (value == b); }
     bool operator!= ( const T& b ) { return !((*this) == b); }
-    bool operator== ( const gscalar<T>& b ) { return (value == b.value); }
-    bool operator!= ( const gscalar<T>& b ) { return !((*this) == b.value); }
+    //~ bool operator== ( const gscalar<T>& b ) const{ return (value == b.value); }
+    //~ bool operator!= ( const gscalar<T>& b ) const { return !((*this) == b); }
 };
 
 //! vec2, ivec2, uvec2, bvec2
@@ -61,8 +53,8 @@ struct ALIGN(8) gvec2
 
     operator const T *( ) const { return &x.value; }
     operator T *( ) { return &x.value; }
-    bool operator== ( const T& b ) { return (x == b.x) && (y == b.y); }
-    bool operator!= ( const T& b ) { return !((*this) == b); }
+    bool operator== ( const gvec2<T>& b ) const { return (x == b.x) && (y == b.y); }
+    bool operator!= ( const gvec2<T>& b ) const { return !((*this) == b); }
 };
 
 //! vec3, ivec3, uvec3, bvec3
@@ -80,8 +72,8 @@ struct ALIGN(16) gvec3
 
     operator const T *( ) const { return &x.value; }
     operator T *( ) { return &x.value; }
-    bool operator== ( const T& b ) { return (x == b.x) && (y == b.y) && (z == b.z); }
-    bool operator!= ( const T& b ) { return !((*this) == b); }
+    bool operator== ( const gvec3<T>& b ) const { return (x == b.x) && (y == b.y); }
+    bool operator!= ( const gvec3<T>& b ) const { return !((*this) == b); }
 };
 
 //! vec4, ivec4, uvec4, bvec4
@@ -101,8 +93,8 @@ struct ALIGN(16) gvec4
 
     operator const T *( ) const { return &x.value; }
     operator T *( ) { return &x.value; }
-    bool operator== ( const T& b ) { return (x == b.x) && (y == b.y) && (z == b.z) && (w == b.w); }
-    bool operator!= ( const T& b ) { return !((*this) == b); }
+    bool operator== ( const gvec4<T>& b ) const { return (x == b.x) && (y == b.y); }
+    bool operator!= ( const gvec4<T>& b ) const { return !((*this) == b); }
 };
 
 

@@ -11,7 +11,7 @@ GLCompiler::GLCompiler( const std::string& label )
     :
     program(GLProgram::null()),
     program_label(label),
-    common(),
+    includes(),
     sources(GLProgram::SHADERTYPE_LAST)
 {}
     
@@ -19,11 +19,21 @@ GLCompiler::~GLCompiler( ) {}
 
 GLCompiler& GLCompiler::loadCommon( const std::string& filename )
 {
-    if(filename.empty() == true)
-        return *this;
-    common.load(filename);
+    if(filename.empty() == true) return *this;
+    
+    includes.push_back( SourceSection(filename) );
     return *this;
 }
+
+
+GLCompiler& GLCompiler::include( const std::string& filename )
+{
+    if(filename.empty() == true) return *this;
+    
+    includes.push_back( SourceSection(filename) );
+    return *this;
+}
+
 
 GLCompiler& GLCompiler::load( const std::string& filename )
 {
@@ -226,8 +236,8 @@ int getLine( std::string& buffer, const std::string& source, int& string_id, int
         return 0;       // trouve
     
     // non trouve, iteration sur les sources
-    if(source.size() > 0 && source[source.size() -1] != '\n')
-        line++;
+    //~ if(source.empty() == false && source[source.size() -1] != '\n')
+        //~ line++;
         
     string_id++;
     line_id= line_id - line +1;
@@ -235,24 +245,8 @@ int getLine( std::string& buffer, const std::string& source, int& string_id, int
 }
     
 static
-void printErrors( const char *log, const SourceSection& common, const SourceSection& source, const std::string& version )
+void printErrors( const char *log, const SourceSection& source )
 {
-    const char *files[]= {
-        "version",
-        "common definitions",
-        common.file.filename.c_str(),
-        "shader definitions",
-        source.file.filename.c_str()
-    };
-    
-    const char *strings[]= {
-        version.c_str(),
-        common.definitions.c_str(),
-        common.source.c_str(),
-        source.definitions.c_str(),
-        source.source.c_str()
-    };
-    
     // affiche la ligne du source + l'erreur associee
     int last_string= -1;
     int last_line= -1;
@@ -260,46 +254,73 @@ void printErrors( const char *log, const SourceSection& common, const SourceSect
     for(int i= 0; log[i] != 0; i++)
     {
         int string_id= 0, line_id= 0, position= 0;
-        if(sscanf(&log[i], "%d ( %d ) %n", &string_id, &line_id, &position) == 2        // nvidia syntax
+        if(sscanf(&log[i], "%d ( %d ) : %n", &string_id, &line_id, &position) == 2        // nvidia syntax
         || sscanf(&log[i], "ERROR : %d : %d %n", &string_id, &line_id, &position) == 2  // ati syntax
         || sscanf(&log[i], "WARNING : %d : %d %n", &string_id, &line_id, &position) == 2)  // ati syntax
         {
             if(string_id != last_string || line_id != last_line)
             {
                 MESSAGE("\n");
-                // affiche la ligne correspondante dans le source
-                std::string line;
-                for(unsigned int k= 0; k < 5; k++)
-                    if(getLine(line, strings[k], string_id, line_id) == 0)
-                    {
-                        MESSAGE("%s\n", line.c_str());
-                        break;
-                    }
+                std::string line; 
+                if(getLine(line, source.build, string_id, line_id) == 0)        // affiche la ligne correspondante dans le source
+                    MESSAGE("%s\n", line.c_str());
             }
-            
-            if(string_id < 5)
-                // affiche la localisation fichier/ligne de l'erreur 
-                MESSAGE("%s:%d", files[string_id], line_id);
-            else
-                // afficher la ligne complete en cas d'erreur d'intrepretation du message d'erreur ...
-                position= 0;
         }
-        else
-            // afficher la ligne complete en cas d'erreur d'intrepretation du message d'erreur ...
-            position= 0;
         
         // affiche l'erreur
-        for(i+= position; log[i] != 0; i++)
-        //~ for(; log[i] != 0; i++)
+        //~ for(i+= position; log[i] != 0; i++)
+        for(; log[i] != 0; i++)
         {
-            MESSAGE("%c", log[i]);
-            if(log[i] == '\n')
-                break;
+            //~ MESSAGE("%c", log[i]);
+            printf("%c", log[i]);
+            if(log[i] == '\n') break;
         }
         
         last_string= string_id;
         last_line= line_id;
     }
+}
+
+
+std::string GLCompiler::build_source( unsigned int shader )
+{
+    if(shader >= GLProgram::SHADERTYPE_LAST) return "";
+    if(sources[shader].source.empty()) return "";
+    
+    // extraire la directive version 
+    std::string version;
+    {
+        unsigned long int b= sources[shader].source.find("#version");
+        if(b != std::string::npos)
+        {
+            unsigned long int e= sources[shader].source.find('\n', b);   // fin de ligne normalisee, cf IOFilesystem::readText()
+            if(e != std::string::npos)
+            {
+                version= sources[shader].source.substr(0, e +1);
+                sources[shader].source.erase(0, e +1);
+                
+                if(sources[shader].source.find("#version") != std::string::npos)
+                    ERROR("found several #version directives. failed.\n");
+            }
+        }
+        else
+            ERROR("no #version directive found. failed.\n");
+    }
+    
+    // prepare le texte complet : version, defines, source
+    std::string text;
+    text.append(version);                               // version
+    
+    for(unsigned int i= 0; i < includes.size(); i++)    // defines
+        text.append(includes[i].definitions);
+    text.append(sources[shader].definitions);           // defines
+    
+    for(unsigned int i= 0; i < includes.size(); i++)    // includes
+        text.append(includes[i].source);
+    text.append(sources[shader].source);                // sources
+    
+    //~ printf("shader %d: source:\n%s\n", shader, text.c_str());
+    return text;
 }
 
 
@@ -325,34 +346,10 @@ GLProgram *GLCompiler::make( )
     bool errors= false;
     for(unsigned int i= 0; i < GLProgram::SHADERTYPE_LAST; i++)
     {
-        if(sources[i].source.empty())
-            continue;
+        if(sources[i].source.empty()) continue;
         
-        // extraire la version du shader...
-        std::string version;
-        {
-            unsigned long int b= sources[i].source.find("#version");
-            if(b != std::string::npos)
-            {
-                unsigned long int e= sources[i].source.find('\n', b);   // fin de ligne normalisee, cf IOFilesystem::readText()
-                if(e != std::string::npos)
-                {
-                    version= sources[i].source.substr(0, e +1);
-                    sources[i].source.erase(0, e +1);
-                    
-                    DEBUGLOG("version: %s\n", version.c_str());
-                }
-            }
-        }
-    
-        // ... et la copier en premiere ligne avant les autres definitions
-        const char *strings[]= {
-            version.c_str(),
-            common.definitions.c_str(),
-            common.source.c_str(),
-            sources[i].definitions.c_str(),
-            sources[i].source.c_str()
-        };
+        // construit le source
+        sources[i].build= build_source(i);
         
         // cree le program
         if(program == GLProgram::null())
@@ -368,7 +365,8 @@ GLProgram *GLCompiler::make( )
         }
         
         // compile le shader
-        glShaderSource(shader, 5, strings, NULL);
+        const char *text[]= { sources[i].build.c_str() };
+        glShaderSource(shader, 1, text, NULL);
         glCompileShader(shader);
         
         GLint status= 0;
@@ -383,7 +381,7 @@ GLProgram *GLCompiler::make( )
                 char *log= new char[length +1];
                 glGetShaderInfoLog(shader, length, NULL, log);
                 ERROR("error compiling %s shader:\n", GLProgram::labels[i]);
-                printErrors(log, common, sources[i], version);
+                printErrors(log, sources[i]);
                 ERROR("shader defines:\n%s\n", sources[i].definitions.c_str());
                 delete [] log;
             }

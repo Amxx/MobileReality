@@ -456,9 +456,6 @@ public:
             std::max( p1.z, p2.z ) );
     }
     
-    friend inline std::ostream &
-    operator<<( std::ostream &os, const BBox &b );
-    
     void print( ) const
     {
         printf("[ %.10f %.10f %.10f ] x [ %.10f %.10f %.10f ] ", 
@@ -587,12 +584,6 @@ public:
     {
         return (pMin[axis] + pMax[axis]) * .5f;
     }
-    
-    //~ //! renvoie le centre de la boite
-    //~ void getCenter( Point& center ) const
-    //~ {
-        //~ center= getCenter();
-    //~ }
     
     //! renvoie le volume de l'aabox.
     float Volume( ) const
