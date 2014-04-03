@@ -166,19 +166,19 @@ int Core::init()
 	// ===============================================================
 	gk::programPath("install/shaders");
 	
-	_GLResources["prg:background"]				= gk::createProgram("background.glsl");
-	_GLResources["prg:backgroundenvmap"]	= gk::createProgram("backgroundenvmap.glsl");
-	_GLResources["prg:cuberendering"]			= gk::createProgram("cuberendering.glsl");
-	_GLResources["prg:materialrendering"]	= gk::createProgram("materialrendering.glsl");
+	_GLResources["prg:background_frame"]	= gk::createProgram("app_background_frame.glsl");
+	_GLResources["prg:background_envmap"]	= gk::createProgram("app_background_cubemap.glsl");
+	_GLResources["prg:build_cubemap"]			= gk::createProgram("app_build_cubemap.glsl");
+	_GLResources["prg:rendering"]	= gk::createProgram("app_rendering.glsl");
 	
-	if (_GLResources["prg:background"]				== gk::GLProgram::null())	return -1;
-	if (_GLResources["prg:backgroundenvmap"]	== gk::GLProgram::null())	return -1;
-	if (_GLResources["prg:cuberendering"]			== gk::GLProgram::null())	return -1;
-	if (_GLResources["prg:materialrendering"]	== gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:background_frame"]				== gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:background_envmap"]	== gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:build_cubemap"]			== gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:rendering"]	== gk::GLProgram::null())	return -1;
 	
-	glBindAttribLocation(_GLResources["prg:materialrendering"]->name,	0, "position");
-	glBindAttribLocation(_GLResources["prg:materialrendering"]->name,	1, "normal");
-	glBindAttribLocation(_GLResources["prg:materialrendering"]->name,	2, "texcoord");
+	glBindAttribLocation(_GLResources["prg:rendering"]->name,	0, "position");
+	glBindAttribLocation(_GLResources["prg:rendering"]->name,	1, "normal");
+	glBindAttribLocation(_GLResources["prg:rendering"]->name,	2, "texcoord");
 		
 	// ===============================================================
 	// =                C R E A T E   T E X T U R E S                =
@@ -196,7 +196,7 @@ int Core::init()
 	else
 		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(3, _config.general.envmap.size.width, _config.general.envmap.size.height);
 
-	_envmap.init(	getGLResource<gk::GLProgram>("prg:cuberendering"),
+	_envmap.init(	getGLResource<gk::GLProgram>("prg:build_cubemap"),
 								getGLResource<gk::GLTexture>("tex:envmap")					);
 	
 	// ===============================================================
@@ -359,8 +359,8 @@ int Core::draw()
 			{
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(getGLResource<gk::GLTexture>("tex:frame0")->target, _GLResources["tex:frame0"]->name);
-				glUseProgram(_GLResources["prg:background"]->name);
-				getGLResource<gk::GLProgram>("prg:background")->sampler("frame") = 0;
+				glUseProgram(_GLResources["prg:background_frame"]->name);
+				getGLResource<gk::GLProgram>("prg:background_frame")->sampler("frame") = 0;
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 				break;
 			}
@@ -369,9 +369,9 @@ int Core::draw()
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(getGLResource<gk::GLTexture>("tex:envmap")->target, _GLResources["tex:envmap"]->name);
 				glBindSampler(0, _GLResources["spl:linear"]->name);
-				glUseProgram(_GLResources["prg:backgroundenvmap"]->name);
-				getGLResource<gk::GLProgram>("prg:backgroundenvmap")->uniform("reproject")	= mvp.inverseMatrix();
-				getGLResource<gk::GLProgram>("prg:backgroundenvmap")->sampler("envmap")			= 0;
+				glUseProgram(_GLResources["prg:background_envmap"]->name);
+				getGLResource<gk::GLProgram>("prg:background_envmap")->uniform("reproject")	= mvp.inverseMatrix();
+				getGLResource<gk::GLProgram>("prg:background_envmap")->sampler("envmap")			= 0;
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 				break;
 			}
@@ -397,17 +397,17 @@ int Core::draw()
 			glBindTexture(getGLResource<gk::GLTexture>("tex:visibility")->target, _GLResources["tex:visibility"]->name);
 		}
 		
-		glUseProgram(_GLResources["prg:materialrendering"]->name);
-		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("new_method")		= _newmethod;
-		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("mvMatrix")			= mv.matrix();
-		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("mvMatrixInv")		= mv.inverseMatrix();		
-		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("mvpMatrix")			= mvp.matrix();
-		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("kd")						= _config.object.material.kd;
-		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("ks")						= _config.object.material.ks;
-		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("ns")						= _config.object.material.ns;
-		getGLResource<gk::GLProgram>("prg:materialrendering")->uniform("usevisibility")	= !_config.object.visibility.empty();
-		getGLResource<gk::GLProgram>("prg:materialrendering")->sampler("envmap")				= 0;
-		getGLResource<gk::GLProgram>("prg:materialrendering")->sampler("visibility")		= 1;
+		glUseProgram(_GLResources["prg:rendering"]->name);
+		getGLResource<gk::GLProgram>("prg:rendering")->uniform("new_method")		= _newmethod;
+		getGLResource<gk::GLProgram>("prg:rendering")->uniform("mvMatrix")			= mv.matrix();
+		getGLResource<gk::GLProgram>("prg:rendering")->uniform("mvMatrixInv")		= mv.inverseMatrix();		
+		getGLResource<gk::GLProgram>("prg:rendering")->uniform("mvpMatrix")			= mvp.matrix();
+		getGLResource<gk::GLProgram>("prg:rendering")->uniform("kd")						= _config.object.material.kd;
+		getGLResource<gk::GLProgram>("prg:rendering")->uniform("ks")						= _config.object.material.ks;
+		getGLResource<gk::GLProgram>("prg:rendering")->uniform("ns")						= _config.object.material.ns;
+		getGLResource<gk::GLProgram>("prg:rendering")->uniform("usevisibility")	= !_config.object.visibility.empty();
+		getGLResource<gk::GLProgram>("prg:rendering")->sampler("envmap")				= 0;
+		getGLResource<gk::GLProgram>("prg:rendering")->sampler("visibility")		= 1;
 		_mesh->draw();
 	}
 	

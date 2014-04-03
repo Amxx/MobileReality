@@ -20,7 +20,7 @@ add_subdirectory(gKit)
 # =====================================================================
 list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
 add_definitions(-march=native -O3)
-add_definitions(-W -pipe)
+add_definitions(-W -g -pipe)
 
 # =====================================================================
 # =							SETTING MODULES LIST AND BUILD OPTIONS								=
@@ -53,6 +53,7 @@ endforeach(module ${MODULES})
 # =====================================================================
 
 add_subdirectory(src/app)
+add_subdirectory(src/precompute)
 add_subdirectory(src/shaders)
 
 

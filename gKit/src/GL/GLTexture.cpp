@@ -402,7 +402,7 @@ Image *GLTexture::image( const int _unit, const GLenum _target, const int _level
             assert(0 && "invalid texture format");
     }
     
-    Image *image= (new Image())->create(std::max(1, width / (1<< _level)), std::max(1, height / (1<< _level)), channels, type);
+    Image *image= (new Image())->create(std::max(1, width / (1<< _level)), std::max(1, height / (1<< _level)), std::max(1, depth / (1<< _level)), channels, type);
     if(image == NULL)
         return NULL;
     

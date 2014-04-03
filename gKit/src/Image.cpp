@@ -37,31 +37,31 @@ Image *Image::create( const int _w, const int _h, const int _channels, const uns
 }
 
 //! construction d'une image de dimension wxhxd. 
-//~ Image *Image::create( const int _w, const int _h, const int _d, const int _channels, const unsigned int _type, const unsigned int _length, void *_data )
-//~ {
-    //~ width= _w;
-    //~ height= _h;
-    //~ depth= _d;
-    //~ channels= _channels;
-    //~ type= _type;
-    //~ released= false;
+Image *Image::create( const int _w, const int _h, const int _d, const int _channels, const unsigned int _type, const unsigned int _length, void *_data )
+{
+    width= _w;
+    height= _h;
+    depth= _d;
+    channels= _channels;
+    type= _type;
+    released= false;
     
-    //~ switch(type)
-    //~ {
-        //~ case UNSIGNED_BYTE: pixel_sizeof= sizeof(unsigned char); break;
-        //~ case FLOAT: pixel_sizeof= sizeof(float); break;
-        //~ default:
-            //~ assert(0 && "invalid image type");
-    //~ }
+    switch(type)
+    {
+        case UNSIGNED_BYTE: pixel_sizeof= sizeof(unsigned char); break;
+        case FLOAT: pixel_sizeof= sizeof(float); break;
+        default:
+            assert(0 && "invalid image type");
+    }
     
-    //~ int length= width * height * depth * pixel_sizeof * channels;
-    //~ if(_length > 0) length= _length;
-    //~ data= new unsigned char[length];
-    //~ if(_data != NULL)
-        //~ memcpy(data, _data, length);
+    int length= width * height * depth * pixel_sizeof * channels;
+    if(_length > 0) length= _length;
+    data= new unsigned char[length];
+    if(_data != NULL)
+        memcpy(data, _data, length);
     
-    //~ return this;
-//~ }
+    return this;
+}
 
 Image *Image::reference( Image *image, const unsigned int offset, const int _width, const int _height, const int _depth )
 {

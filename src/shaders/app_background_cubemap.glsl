@@ -26,8 +26,8 @@ out				vec4				fragment_color;
 
 void main()
 {
-	vec3 azimut = mat3(reproject) * vec3(texcoords, 1.0);
-	fragment_color = texture(envmap, azimut);
+	vec3 azimut			= mat3(reproject) * vec3(texcoords, 1.0);
+	fragment_color	= texture(envmap, azimut);
 }
 
 #endif

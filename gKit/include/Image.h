@@ -165,7 +165,7 @@ public:
     Image *create( const int _w, const int _h, const int _channels, const unsigned int _type, const unsigned int _length= 0, void *_data= NULL );
     
     //! construction d'une image de dimension wxhxd. 
-    //~ Image *create( const int _w, const int _h, const int _d, const int _channels, const unsigned int _type, const unsigned int _length= 0, void *_data= NULL );
+    Image *create( const int _w, const int _h, const int _d, const int _channels, const unsigned int _type, const unsigned int _length= 0, void *_data= NULL );
     
     Image *reference( Image *image, const unsigned int offset= 0u, const int width= 0, const int height= 0, const int depth= 0 );
     

@@ -1,0 +1,44 @@
+#version 140
+
+#ifdef VERTEX_SHADER
+uniform		mat4				mvp;
+uniform		mat4				mv;
+
+in				vec3				position;
+in				vec3				texcoord;
+in				vec3				normal;
+
+out				vec3				vertex_position;
+out				vec3				vertex_texcoord;
+out				vec3				vertex_normal;
+
+void main()
+{
+	gl_Position			= mvp * vec4(position, 1.0);
+	vertex_position	=	position;
+	vertex_texcoord	=	texcoord;
+	vertex_normal		=	normal;
+}
+#endif
+
+
+
+
+#ifdef FRAGMENT_SHADER
+uniform		sampler2D		ambiant;
+uniform		mat4				mvp;
+uniform		mat4				mv;
+
+in				vec3				vertex_position;
+in				vec3				vertex_texcoord;
+in				vec3				vertex_normal;
+
+out				vec4				fragment_color;
+
+void main() 
+{	
+	fragment_color = texture(ambiant, vertex_texcoord.st);
+	//fragment_color = vec4(1.0, 1.0, 1.0, 1.0);
+}
+#endif
+
