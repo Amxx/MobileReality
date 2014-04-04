@@ -34,15 +34,13 @@ class Core : public gk::App
 		std::string							objectPath;
 		
 		gk::GLBasicMesh*				object;
-		gk::GLFramebuffer*			framebuffer;
+		gk::GLFramebuffer*			framebufferLight;
+		gk::GLFramebuffer*			framebufferAmbiant;
 	
 		gk::GLProgram*					programLight;
 		gk::GLProgram*					programAmbiant;
 		gk::GLProgram*					programViewer;
-	
-		gk::GLTexture*					textureLight;
-		gk::GLTexture*					textureAmbiant;
-		
+			
 		gk::Orbiter							orbiter;
 	
 	
@@ -53,12 +51,11 @@ class Core : public gk::App
 	
     int init();
     int quit();
+		
+		int compute();
     int draw();
 	
 		void processKeyboardEvent(SDL_KeyboardEvent&);
-		void processWindowResize(SDL_WindowEvent&);
-		void processMouseButtonEvent(SDL_MouseButtonEvent&);
-		void processMouseMotionEvent(SDL_MouseMotionEvent&);
 };
 
 #endif

@@ -2,7 +2,8 @@
 
 
 #define			SIZE					1024
-#define			COUNT					1
+#define			COUNT					1000
+#define			DISTANCE			3
 
 // ############################################################################
 // #                                  MACROS                                  #
@@ -24,7 +25,6 @@ std::string formatTimer(duration dt)
 	return std::string(buffer);
 }
 
-static gk::Transform bias( {0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.5, 1.0}	);
 
 // ############################################################################
 // #                                 METHODS                                  #
@@ -35,14 +35,31 @@ Core::Core(int argc, char* argv[]) :
 {
 	srand48(time(0));
 	
-	
 	if (argc<2) { printf("[ERROR] #1\n"); exit(0); }
 	objectPath = argv[1];
 	
 	gk::AppSettings settings;
 	settings.setGLVersion(3,1);
 	if(createWindow(800, 600, settings) < 0) closeWindow();
-	
+}
+
+
+// ############################################################################
+
+
+Core::~Core()
+{
+}
+
+
+// ############################################################################
+
+
+int Core::init()
+{	
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glBlendFunc(GL_ONE, GL_ONE);
+	glBlendEquation(GL_FUNC_ADD);
 	
 	
 	gk::programPath("install/shaders");
@@ -65,17 +82,8 @@ Core::Core(int argc, char* argv[]) :
 	glBindAttribLocation(programViewer->name,	1, "normal");
 	glBindAttribLocation(programViewer->name,	2, "texcoord");
 	
-	
-	textureLight			=	(new gk::GLTexture())->createTexture2D(0, SIZE, SIZE);	
-	textureAmbiant		= (new gk::GLTexture())->createTexture2D(1, SIZE, SIZE);
-	framebuffer				=	(new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT);
-	
-	glBindTexture(textureLight->target, textureLight->name);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	
+	framebufferLight		=	(new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT | gk::GLFramebuffer::DEPTH_BIT, gk::TextureRGBA32F);
+	framebufferAmbiant	=	(new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT | gk::GLFramebuffer::DEPTH_BIT, gk::TextureRGBA32F);
 	
 	gk::Mesh *mesh = gk::MeshIO::readOBJ(objectPath);
 	if (mesh == nullptr) { printf("[ERROR] #5\n"); exit(1); }
@@ -87,94 +95,10 @@ Core::Core(int argc, char* argv[]) :
 	orbiter = gk::Orbiter(mesh->box);
 	delete mesh;
 	
-	
-}
-
-
-// ############################################################################
-
-
-Core::~Core()
-{
-}
-
-
-// ############################################################################
-
-
-int Core::init()
-{
-	glDisable(GL_CULL_FACE);
-	glBlendFunc(GL_ONE, GL_ONE);
-	glBlendEquation(GL_FUNC_ADD);
-	
-	glClearColor(0.0, 0.0, 0.0, 1.0);	
-	
-	// --------------------------------------------------------------------------
-	timer begin = NOW();
-	// --------------------------------------------------------------------------
-	
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->name);
-	glViewport(0, 0, framebuffer->width, framebuffer->height);
-	
-	
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(textureAmbiant->target, 0);	
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,  GL_TEXTURE_2D, textureAmbiant->name, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	
-	for (const Light& light : makelights(COUNT, 50))
-	{
-		gk::Transform modelview	= gk::LookAt(light.position, gk::Point(0.0, 0.0, 0.0), gk::Vector(0.0, 1.0, 0.0));
-		gk::Transform proj			= gk::Perspective(45.f, (float) framebuffer->width/framebuffer->height, 1.f, 1000.f);
-		
-		
-		glDisable(GL_BLEND);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(textureLight->target, 0);
-		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureLight->name, 0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		
-		glUseProgram(programLight->name);
-		programLight->uniform("mvp")					= ( proj * modelview ).matrix();
-		object->draw();
-
-		
-		glEnable(GL_BLEND);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(textureAmbiant->target, 0);	
-		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureAmbiant->name, 0);
-		glBindTexture(textureLight->target, textureLight->name);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		
-		glUseProgram(programAmbiant->name);
-		programAmbiant->uniform("mv")					= (        modelview ).matrix();
-		programAmbiant->uniform("mvp")				= ( proj * modelview ).matrix();
-		programAmbiant->sampler("light_map")	= 0;
-		programAmbiant->uniform("idx")				= (int) light.id;
-		programAmbiant->uniform("light_nb")		= (int) COUNT;
-		object->draw();
-		
-		gk::ImageIO::writeImage("debug.png", textureLight->image(0));
-		
-	}	
-	
-
-
-	
-	// --------------------------------------------------------------------------
-	timer end = NOW();
-	std::cout << "Ambiant texture computed in " << formatTimer(end - begin) << std::endl;
-	// --------------------------------------------------------------------------
-		
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(textureAmbiant->target, textureAmbiant->name);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	compute();
 	
 	return 1;
-}
-  
+}  
 
 // ############################################################################
 
@@ -185,7 +109,82 @@ int Core::quit()
 }
 
 
+// ############################################################################
 
+
+int Core::compute()
+{
+	// --------------------------------------------------------------------------
+	timer begin = NOW();
+	// --------------------------------------------------------------------------
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->target,	0);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebufferAmbiant->name);
+	glViewport(0, 0, framebufferAmbiant->width, framebufferAmbiant->height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	for (const Light& light : makelights(COUNT, DISTANCE*orbiter.size))
+	{
+		gk::Transform modelview	= gk::LookAt(light.position, gk::Point(0.0, 0.0, 0.0), gk::Vector(0.0, 1.0, 0.0));
+		gk::Transform proj			= gk::Orthographic( -orbiter.size/2,
+																								+orbiter.size/2,
+																								-orbiter.size/2,
+																								+orbiter.size/2, 
+																								(DISTANCE-1)*orbiter.size,
+																								(DISTANCE+1)*orbiter.size);
+		
+		// --------------------------------------------------------------------------
+
+		glDisable(GL_BLEND);
+		glEnable(GL_CULL_FACE);
+		
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(framebufferLight->texture(gk::GLFramebuffer::COLOR0)->target, 0);
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, framebufferLight->name);
+		glViewport(0, 0, framebufferLight->width, framebufferLight->height);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+		glUseProgram(programLight->name);
+		programLight->uniform("mvp")					= ( proj * modelview ).matrix();
+		object->draw();
+	
+		// --------------------------------------------------------------------------
+		
+		glEnable(GL_BLEND);
+		glDisable(GL_CULL_FACE);
+		
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->target,	0);
+		glBindTexture(framebufferLight->texture(gk::GLFramebuffer::COLOR0)->target,		framebufferLight->texture(gk::GLFramebuffer::COLOR0)->name);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, framebufferAmbiant->name);
+		glViewport(0, 0, framebufferAmbiant->width, framebufferAmbiant->height);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		
+		glUseProgram(programAmbiant->name);
+		programAmbiant->uniform("mv")					= (        modelview ).matrix();
+		programAmbiant->uniform("mvp")				= ( proj * modelview ).matrix();
+		programAmbiant->sampler("light_map")	= 0;
+		programAmbiant->uniform("light_nb")		= (int) COUNT;
+		object->draw();
+		
+		// --------------------------------------------------------------------------		
+		if (COUNT == 1) gk::ImageIO::writeImage("debug.png", framebufferLight->texture(gk::GLFramebuffer::COLOR0)->image(0));
+	}
+	
+	// --------------------------------------------------------------------------
+	timer end = NOW();
+	std::cout << "Ambiant texture computed in " << formatTimer(end - begin) << std::endl;
+	// --------------------------------------------------------------------------
+		
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->target, framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->name);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	
+}
 
 
 // ############################################################################
@@ -199,22 +198,21 @@ int Core::draw()
   else if (button & SDL_BUTTON(2))	orbiter.move(float(x) / float(windowWidth()), float(y) / float(windowHeight()));
 	else if (button & SDL_BUTTON(3))	orbiter.move(x);
 	
-	glEnable(GL_CULL_FACE);
+	
 	glDisable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
 	
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glViewport(0, 0, windowWidth(), windowHeight());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(textureAmbiant->target, textureAmbiant->name);
+	glBindTexture(framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->target, framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->name);
 	
 	gk::Transform modelview	= orbiter.view();
-	gk::Transform proj			= gk::Perspective(45.f, (float) windowWidth()/windowHeight(), 0.1f, 1000000.f);
+	gk::Transform proj			= orbiter.projection(windowWidth(), windowHeight());
 	
 	glUseProgram(programViewer->name);
-//programViewer->uniform("mv")	= (        modelview ).matrix();
 	programViewer->uniform("mvp")	= ( proj * modelview ).matrix();
 	programViewer->sampler("ambiant")	= 0;
 	object->draw();
@@ -223,19 +221,6 @@ int Core::draw()
 	
 	return 1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // ############################################################################
@@ -253,7 +238,7 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 			}
 			case SDLK_F1:
 			{
-				init();
+				compute();
 				break;
 			}
 			case SDLK_F2:
@@ -261,51 +246,12 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				std::stringstream path;
 				path << objectPath << ".ambiant.png";
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(textureAmbiant->target, textureAmbiant->name);
-				gk::ImageIO::writeImage(path.str(), textureAmbiant->image(0));
+				glBindTexture(framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->target, framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->name);
+				gk::ImageIO::writeImage(path.str(), framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->image(0));
 				break;
 			}
 		}
 }
 
 
-
-
-
 // ############################################################################
-
-
-
-
-
-void Core::processWindowResize(SDL_WindowEvent &event)
-{
-}
-
-
-
-
-
-// ############################################################################
-
-
-
-
-
-void Core::processMouseButtonEvent(SDL_MouseButtonEvent &event)
-{	
-}
-
-
-
-
-
-// ############################################################################
-
-
-
-
-
-void Core::processMouseMotionEvent(SDL_MouseMotionEvent &event)
-{
-}	

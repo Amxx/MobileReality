@@ -3,14 +3,14 @@
 	
 	<!-- ######################################### Object ######################################### -->
 	<object>
-		<file>data/objects/sphere.obj</file>
+		<file>data/objects/bigguy.obj</file>
 		<scale>2.5</scale>
 		<material>
-			<kd>0.0</kd>
-			<ks>1.0</ks>
-			<ns>1000000.0</ns>
+			<kd>1.0</kd>
+			<ks>0.2</ks>
+			<ns>100000.0</ns>
 		</material>
-		<!--<visibility>data/objects/bigguy_ambient.png</visibility>-->
+		<visibility>data/objects/bigguy_ambient.png</visibility>
 	</object>
 	
 	<!-- #################################### Devices options ##################################### -->
@@ -48,7 +48,7 @@
 			<type>dynamic</type>																					<!-- dynamic | debug					-->
 			<size>256 256</size>
 			<dual>off</dual>																							<!-- on | off									-->
-			<path>data/envmap/0/%03d.jpg</path>
+			<path>data/envmap/6/%03d.jpg</path>
 		</envmap>
 		
 		<localisation>
@@ -63,7 +63,7 @@
 		
 		<modules>
 			<scanner>install/share/libscanner_zbar.so</scanner>
-			<video>install/share/libvideodevice_opencv.so</video>
+			<video>install/share/libvideodevice_uvc.so</video>
 		</modules>
 		
 	</generalParameters>
