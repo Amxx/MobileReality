@@ -19,7 +19,7 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 
-uniform		sampler2D		ambiant;
+uniform		sampler2D		ambient;
 uniform		int					light_nb;
 in				vec2				texcoords;
 out				vec4				fragment_color;
@@ -27,7 +27,8 @@ out				vec4				fragment_color;
 void main()
 {
 	float n					= 4.0 / light_nb;
-	fragment_color	= vec4( texture(ambiant, texcoords).rgb * n, 1.0 );
+	vec4	c					= texture(ambient, texcoords);
+	fragment_color	= vec4( c.rgb * n, c.a );
 }
 
 

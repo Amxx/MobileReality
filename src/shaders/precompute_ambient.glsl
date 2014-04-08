@@ -241,7 +241,7 @@ void main()
 	float bias					= 0.005*tan(acos(value));
 
 	if ( coords.z <= depth+bias )	fragment_color = vec4(value, value, value, 1.0);
-	else													fragment_color = vec4(0.0,   0.0,   0.0,   1.0);
+	else													fragment_color = vec4(0.0,   0.0,   0.0,   0.0);
 }
 
 #endif

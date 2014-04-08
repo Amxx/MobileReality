@@ -36,12 +36,12 @@ class Core : public gk::App
 		
 		gk::GLBasicMesh*				object;
 		gk::GLFramebuffer*			framebufferLight;
-		gk::GLFramebuffer*			framebufferAmbiant;
+		gk::GLFramebuffer*			framebufferAmbient;
 		gk::GLFramebuffer*			framebufferBlender;
 		gk::GLFramebuffer*			framebufferClamp;
 	
 		gk::GLProgram*					programLight;
-		gk::GLProgram*					programAmbiant;
+		gk::GLProgram*					programAmbient;
 		gk::GLProgram*					programBlender;
 		gk::GLProgram*					programClamp;
 		gk::GLProgram*					programViewer;

@@ -25,7 +25,7 @@ out				vec4				fragment_color;
 
 void main()
 {
-	fragment_color	= vec4( clamp(texture(input, texcoords).rgb, 0.f, 1.f), 1.0 );
+	fragment_color	= vec4( clamp(texture(input, texcoords).rgba, 0.f, 1.f) );
 }
 
 

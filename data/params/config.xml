@@ -7,8 +7,8 @@
 		<scale>2.5</scale>
 		<material>
 			<kd>1.0</kd>
-			<ks>0.0</ks>
-			<ns>100000.0</ns>
+			<ks>0.2</ks>
+			<ns>10000.0</ns>
 		</material>
 		<!--<visibility>data/objects/bigguy_ambient.png</visibility>-->
 		<visibility>data/objects/bigguy.obj.ambiant.png</visibility>

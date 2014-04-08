@@ -2,7 +2,7 @@
 
 
 #define			SIZE					1024
-#define			COUNT					1000
+#define			COUNT					100
 // ############################################################################
 // #                                  MACROS                                  #
 // ############################################################################
@@ -68,11 +68,11 @@ int Core::init()
 	glBindAttribLocation(programLight->name,	1, "normal");
 	glBindAttribLocation(programLight->name,	2, "texcoord");
 	
-	programAmbiant = gk::createProgram("precompute_ambiant.glsl");
-	if (programAmbiant == gk::GLProgram::null()) { printf("[ERROR] #3\n"); exit(1); }
-	glBindAttribLocation(programAmbiant->name,	0, "position");
-	glBindAttribLocation(programAmbiant->name,	1, "normal");
-	glBindAttribLocation(programAmbiant->name,	2, "texcoord");
+	programAmbient = gk::createProgram("precompute_ambient.glsl");
+	if (programAmbient == gk::GLProgram::null()) { printf("[ERROR] #3\n"); exit(1); }
+	glBindAttribLocation(programAmbient->name,	0, "position");
+	glBindAttribLocation(programAmbient->name,	1, "normal");
+	glBindAttribLocation(programAmbient->name,	2, "texcoord");
 
 	programBlender = gk::createProgram("precompute_blender.glsl");
 	if (programBlender == gk::GLProgram::null()) { printf("[ERROR] #4\n"); exit(1); }
@@ -88,7 +88,7 @@ int Core::init()
 	
 	
 	framebufferLight		=	(new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT | gk::GLFramebuffer::DEPTH_BIT, gk::TextureRGBA32F);
-	framebufferAmbiant	=	(new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT | gk::GLFramebuffer::DEPTH_BIT, gk::TextureRGBA32F);
+	framebufferAmbient	=	(new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT | gk::GLFramebuffer::DEPTH_BIT, gk::TextureRGBA32F);
 	framebufferBlender	=	(new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT | gk::GLFramebuffer::DEPTH_BIT, gk::TextureRGBA32F);
 	framebufferClamp		=	(new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT | gk::GLFramebuffer::DEPTH_BIT, gk::TextureRGBA32F);
 	
@@ -104,7 +104,7 @@ int Core::init()
 	
 	compute();
 	
-	return 1;
+	return 0; // 1 for viewer
 }  
 
 // ############################################################################
@@ -161,20 +161,20 @@ int Core::compute()
 		glDisable(GL_CULL_FACE);
 		
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->target,	0);
+		glBindTexture(framebufferAmbient->texture(gk::GLFramebuffer::COLOR0)->target,	0);
 		glBindTexture(framebufferLight->texture(gk::GLFramebuffer::COLOR0)->target,		framebufferLight->texture(gk::GLFramebuffer::COLOR0)->name);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		
-		glBindFramebuffer(GL_FRAMEBUFFER, framebufferAmbiant->name);
-		glViewport(0, 0, framebufferAmbiant->width, framebufferAmbiant->height);
+		glBindFramebuffer(GL_FRAMEBUFFER, framebufferAmbient->name);
+		glViewport(0, 0, framebufferAmbient->width, framebufferAmbient->height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		glUseProgram(programAmbiant->name);
-		programAmbiant->uniform("height")			= (float) framebufferAmbiant->height;
-		programAmbiant->uniform("width")			= (float) framebufferAmbiant->width;
-		programAmbiant->uniform("mv")					= (        modelview ).matrix();
-		programAmbiant->uniform("mvp")				= ( proj * modelview ).matrix();
-		programAmbiant->sampler("light_map")	= 0;
+		glUseProgram(programAmbient->name);
+		programAmbient->uniform("height")			= (float) framebufferAmbient->height;
+		programAmbient->uniform("width")			= (float) framebufferAmbient->width;
+		programAmbient->uniform("mv")					= (        modelview ).matrix();
+		programAmbient->uniform("mvp")				= ( proj * modelview ).matrix();
+		programAmbient->sampler("light_map")	= 0;
 		object->draw();
 		
 		// --------------------------------------------------------------------------		
@@ -184,7 +184,7 @@ int Core::compute()
 		
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(framebufferBlender->texture(gk::GLFramebuffer::COLOR0)->target,	0);
-		glBindTexture(framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->target,	framebufferAmbiant->texture(gk::GLFramebuffer::COLOR0)->name);
+		glBindTexture(framebufferAmbient->texture(gk::GLFramebuffer::COLOR0)->target,	framebufferAmbient->texture(gk::GLFramebuffer::COLOR0)->name);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, framebufferBlender->name);
@@ -192,7 +192,7 @@ int Core::compute()
 		glClear(GL_DEPTH_BUFFER_BIT);
 		
 		glUseProgram(programBlender->name);
-		programBlender->sampler("ambiant")		= 0;
+		programBlender->sampler("ambient")		= 0;
 		programBlender->uniform("light_nb")		= (int) COUNT;
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		
@@ -216,37 +216,34 @@ int Core::compute()
 	
 	// --------------------------------------------------------------------------
 	timer end = NOW();
-	std::cout << "Ambiant texture computed in " << formatTimer(end - begin) << std::endl;
+	std::cout << "Ambient texture computed in " << formatTimer(end - begin) << std::endl;
 	// --------------------------------------------------------------------------
 		
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(framebufferClamp->texture(gk::GLFramebuffer::COLOR0)->target, framebufferClamp->texture(gk::GLFramebuffer::COLOR0)->name);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	
-	gk::Image* finalAmbiant = framebufferClamp->texture(gk::GLFramebuffer::COLOR0)->image(0);
+	gk::Image* finalAmbient = framebufferClamp->texture(gk::GLFramebuffer::COLOR0)->image(0);
+	
 	float r=0, g=0, b=0, n=0;
-	for (int i=0; i<finalAmbiant->width; ++i)
-		for (int j=0; j<finalAmbiant->height; ++j)
+	for (int i=0; i<finalAmbient->width; ++i)
+		for (int j=0; j<finalAmbient->height; ++j)
 		{
-			gk::VecColor c = finalAmbiant->pixel(i,j);
-			if (c.r == 0.f && c.g == 0.f && c.b == 0.f) continue;
-			r += c.r; g += c.g; b += c.b; n++;
+			gk::VecColor c = finalAmbient->pixel(i,j);
+			if (c.a != 0.f) { r += c.r; g += c.g; b += c.b; n++; }
 		}
-
-	std::cout << "samples : " << n << std::endl;
 
 	gk::VecColor m = gk::VecColor(r/n, g/n, b/n, 1.f);
-	for (int i=0; i<finalAmbiant->width; ++i)
-		for (int j=0; j<finalAmbiant->height; ++j)
+	for (int i=0; i<finalAmbient->width; ++i)
+		for (int j=0; j<finalAmbient->height; ++j)
 		{
-			gk::VecColor c = finalAmbiant->pixel(i,j);
-			if (c.r != 0.f || c.g != 0.f || c.b != 0.f) continue;
-			finalAmbiant->setPixel(i,j, m);
+			gk::VecColor c = finalAmbient->pixel(i,j);
+			if (c.a == 0.f) { finalAmbient->setPixel(i,j, m); }
 		}
-
+		
 	std::stringstream path;
-	path << objectPath << ".ambiant.png";
-	gk::ImageIO::writeImage(path.str(), finalAmbiant);
+	path << objectPath << ".ambient.png";
+	gk::ImageIO::writeImage(path.str(), finalAmbient);
 				
 		
 //	if (COUNT == 1) gk::ImageIO::writeImage("debug_blended.png", framebufferBlender->texture(gk::GLFramebuffer::COLOR0)->image(0));
