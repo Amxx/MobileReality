@@ -23,22 +23,27 @@ void main()
 #ifdef FRAGMENT_SHADER
 
 uniform		sampler2D		frame;
-uniform		float				radius;
-
 uniform		mat4				reproject;
+uniform		vec3				cam_pos;
+uniform		float				cam_rad;
+uniform		float				sce_rad;
+
 in				vec3				position;
 out				vec4				fragment_color;
 
 void main()
 {
-	vec4 cubecoords	= reproject * vec4(normalize(position), 1.0);
+	vec4 cubecoords;
+	if (sce_rad > 0.f)	cubecoords = reproject * vec4(normalize(normalize(position).xyz*sce_rad-cam_pos.xyz), 1.0 );
+	else								cubecoords = reproject * vec4(normalize(          position                         ), 1.0 );	
+	
 	if (cubecoords.z <= 0.0) discard;
 	
 	vec2 coords				= vec2(cubecoords.x / cubecoords.z, cubecoords.y / cubecoords.z);
 	vec2 centercoords	=	coords - vec2(320, 240);
 	
-	if (abs(centercoords.x) > 320 || abs(centercoords.y) > 240)						discard;
-	if (radius >= 0.0 && dot(centercoords, centercoords) > radius*radius)	discard;
+	if (abs(centercoords.x) > 320 || abs(centercoords.y) > 240)								discard;
+	if (cam_rad >= 0.0 && dot(centercoords, centercoords) > cam_rad*cam_rad)	discard;
 	
 	fragment_color = texture(frame, coords/vec2(640,480));
 }

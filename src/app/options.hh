@@ -64,8 +64,9 @@ namespace Options
 		};
 		struct Localisation
 		{
-			Localisation() : type(DYNAMIC) {};
+			Localisation() : type(DYNAMIC), size(0.f) {};
 			Type				type;
+			float				size;
 		};
 		struct Rendering
 		{

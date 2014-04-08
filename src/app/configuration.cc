@@ -64,6 +64,7 @@ Configuration& Configuration::load(const std::string& path)
 	general.envmap.dual						= !strcmp(((std::string) fs["generalParameters"]["envmap"]["dual"]).c_str(), "on");
 	if (!fs["generalParameters"]["envmap"]["path"].empty())											fs["generalParameters"]["envmap"]["path"]														>>	general.envmap.path;
 	general.localisation.type			= strcmp(((std::string) fs["generalParameters"]["localisation"]["type"]).c_str(), "debug")?Options::DYNAMIC:Options::DEBUG;
+	if (!fs["generalParameters"]["localisation"]["size"].empty())								fs["generalParameters"]["localisation"]["size"]											>>	general.localisation.size;	
 	general.rendering.background	= strcmp(((std::string) fs["generalParameters"]["rendering"]["background"]).c_str(), "off");
 	general.rendering.scene				= strcmp(((std::string) fs["generalParameters"]["rendering"]["scene"]).c_str(), "off");
 	general.rendering.view				= strcmp(((std::string) fs["generalParameters"]["rendering"]["view"]).c_str(), "off");
@@ -124,6 +125,7 @@ const Configuration& Configuration::display() const
 	printf("│ general.envmap.dual               : %-31s │\n",												(general.envmap.dual?std::string("on"):std::string("off")).c_str());
 	printf("│ general.envmap.path               : %-31s │\n",												format(general.envmap.path, 31, 8).c_str());
 	printf("│ general.localisation.type         : %-31s │\n",												(general.localisation.type?std::string("dynamic"):std::string("debug")).c_str());
+	printf("│ general.localisation.size         : %-31f │\n",												general.localisation.size);
 	printf("│ general.rendering.background      : %-31s │\n",												(general.rendering.background?std::string("on"):std::string("off")).c_str());
 	printf("│ general.rendering.scene           : %-31s │\n",												(general.rendering.scene?std::string("on"):std::string("off")).c_str());
 	printf("│ general.rendering.view            : %-31s │\n",												(general.rendering.view?std::string("on"):std::string("off")).c_str());

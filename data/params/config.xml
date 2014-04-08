@@ -3,34 +3,33 @@
 	
 	<!-- ######################################### Object ######################################### -->
 	<object>
-		<file>data/objects/bigguy.obj</file>
-		<scale>2.5</scale>
+		<file>data/objects/sphere.obj</file>
+		<scale>5.5</scale>
 		<material>
-			<kd>1.0</kd>
-			<ks>0.2</ks>
-			<ns>10000.0</ns>
+			<kd>0.0</kd>
+			<ks>1.0</ks>
+			<ns>1000000.0</ns>
 		</material>
-		<!--<visibility>data/objects/bigguy_ambient.png</visibility>-->
-		<visibility>data/objects/bigguy.obj.ambiant.png</visibility>
+		<!--<visibility>data/objects/bigguy_ambient_HD.png</visibility>-->
 	</object>
 	
 	<!-- #################################### Devices options ##################################### -->
 	<devices>
 		<front>
-			<enable>off</enable>																						<!-- on | off									-->
-			<id>0</id>																										<!-- [int] | auto | manual		-->
+			<enable>on</enable>																						<!-- on | off									-->
+			<id>1</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
-			<enable>off</enable>																						<!-- on | off									-->
-			<id>1</id>																										<!-- [int] | auto | manual		-->
+			<enable>on</enable>																						<!-- on | off									-->
+			<id>0</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/c910-fisheye.xml</params>
 		</back>
 	</devices>
 	
 	<!-- ################################## Markers description ################################### -->
 	<markers>
-		<size>3.0</size>
+		<size>6.0</size>
 		<scale>0.786667</scale>
 	</markers>
 	
@@ -54,6 +53,7 @@
 		
 		<localisation>
 			<type>dynamic</type>																					<!-- dynamic | debug					-->
+			<size>400.0</size>																						<!-- [float] (0 for infinity) -->
 		</localisation>		
 		
 		<rendering>

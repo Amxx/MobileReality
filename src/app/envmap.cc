@@ -29,19 +29,25 @@ void EnvMap::init(gk::GLProgram* p, gk::GLTexture* t)
 	generateMipMap();
 }
 
-void EnvMap::cuberender(Camera* camera, const gk::Transform& mv, gk::GLTexture* texture)
+void EnvMap::cuberender(Camera* camera, const gk::Transform& view, gk::GLTexture* texture, float scene_radius)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer->name);
 	glViewport(0, 0, _framebuffer->width, _framebuffer->height);
-	gk::Matrix4x4 reproject = gk::Matrix4x4::mul( cv2gkit(camera->A() * toGL * Matx44to33(camera->orientation())).matrix(), mv.normalMatrix() );
+	
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(_envmaptexture->target, 0);
 	glBindTexture(texture->target, texture->name);
 	
+	gk::Matrix4x4		reproject = gk::Matrix4x4::mul( cv2gkit(camera->A() * toGL * Matx44to33(camera->orientation())).matrix(), view.normalMatrix() );
+	gk::Point				cam_pos		=	view.inverse()(gk::Point(0,0,0));
+	
 	glUseProgram(_program->name);
 	_program->sampler("frame")			= 0;
 	_program->uniform("reproject")	= reproject;
-	_program->uniform("radius")			= (float) camera->radius();
+	_program->uniform("cam_pos")		= cam_pos;
+	_program->uniform("cam_rad")		= (float) camera->radius();
+	_program->uniform("sce_rad")		= (float) scene_radius;
+	
 	for (int i=0; i<6; ++i)
 	{
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _envmaptexture->name, 0);
