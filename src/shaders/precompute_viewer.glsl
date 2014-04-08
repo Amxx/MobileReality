@@ -1,4 +1,4 @@
-#version 140
+#version 330
 
 #ifdef VERTEX_SHADER
 uniform		mat4				mvp;
@@ -25,7 +25,7 @@ void main()
 
 
 #ifdef FRAGMENT_SHADER
-uniform		sampler2D		ambiant;
+uniform		sampler2D		blended;
 uniform		mat4				mvp;
 uniform		mat4				mv;
 
@@ -37,8 +37,7 @@ out				vec4				fragment_color;
 
 void main() 
 {	
-	fragment_color = texture(ambiant, vertex_texcoord.st);
-	//fragment_color = vec4(1.0, 1.0, 1.0, 1.0);
+	fragment_color = texture(blended, vertex_texcoord.st);
 }
 #endif
 

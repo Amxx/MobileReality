@@ -12,6 +12,7 @@
 // =   G K I T   I N C L U D E S   =
 // =================================
 #include "App.h"
+#include "Image.h"
 #include "ImageIO.h"
 #include "Mesh.h"
 #include "MeshIO.h"
@@ -36,9 +37,13 @@ class Core : public gk::App
 		gk::GLBasicMesh*				object;
 		gk::GLFramebuffer*			framebufferLight;
 		gk::GLFramebuffer*			framebufferAmbiant;
+		gk::GLFramebuffer*			framebufferBlender;
+		gk::GLFramebuffer*			framebufferClamp;
 	
 		gk::GLProgram*					programLight;
 		gk::GLProgram*					programAmbiant;
+		gk::GLProgram*					programBlender;
+		gk::GLProgram*					programClamp;
 		gk::GLProgram*					programViewer;
 			
 		gk::Orbiter							orbiter;
