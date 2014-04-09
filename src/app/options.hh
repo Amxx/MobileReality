@@ -13,18 +13,10 @@ namespace Options
 	};
 	struct Object
 	{
-		struct Material
-		{
-			Material() : kd(0.8f), ks(0.2f), ns(128.f) {}
-			float				kd;
-			float				ks;
-			float				ns;
-		};
-		Object() : file("cube.obj"), scale(1.f), material(), visibility("") {}
+		
+		Object() : file("cube.obj"), scale(1.f) {}
 		std::string		file;
 		float					scale;
-		Material			material;
-		std::string		visibility;
 	};
 	struct Devices
 	{

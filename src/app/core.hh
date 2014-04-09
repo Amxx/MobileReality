@@ -47,6 +47,7 @@ class Core : public gk::App
 				
 		// OpenGL objects
 		gk::GLBasicMesh*													_mesh;
+		std::vector<gk::MeshGroup>								_meshgroups;
 		std::map<std::string,	gk::GLResource*>		_GLResources;
 		template<typename T> T*										getGLResource(const std::string&);
 	

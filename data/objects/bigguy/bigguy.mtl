@@ -1,0 +1,38 @@
+newmtl default
+Kd			0.75 0.75 0.75
+Ns			0
+
+newmtl white
+Kd			0.75 0.75 0.75
+map_Kd	bigguy_ambient_HD.png
+
+
+newmtl miror
+Kd  		0.2 0.2 0.2
+Ks  		0.8 0.8 0.8
+Ns			1000000
+map_Kd	bigguy_ambient_HD.png
+
+
+newmtl glossy
+Kd  		0.8 0.8 0.8
+Ks  		0.2 0.2 0.2
+Ns			400
+map_Kd	bigguy_ambient_HD.png
+
+
+
+newmtl diffuseLuminaire1SG
+Le 			1.0 1.0 1.0
+
+newmtl red
+Kd  		0.2 0 0
+Ks  		0.5 0 0
+Ns			50
+map_Kd	bigguy_ambient_HD.png
+
+newmtl blue
+Kd  	0.1420  0.1420  0.9500
+Ns		0
+
+

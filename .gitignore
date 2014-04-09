@@ -15,3 +15,4 @@
 .debugviewpoint.save
 build/
 install/
+data/objects/*/

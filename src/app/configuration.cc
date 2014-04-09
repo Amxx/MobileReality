@@ -33,10 +33,6 @@ Configuration& Configuration::load(const std::string& path)
 	// ------------------------------------------------------------------------------------------------------------
 	if (!fs["object"]["file"].empty())																					fs["object"]["file"]																								>>	object.file;
 	if (!fs["object"]["scale"].empty())																					fs["object"]["scale"]																								>>	object.scale;
-	if (!fs["object"]["material"]["kd"].empty())																fs["object"]["material"]["kd"]																			>>	object.material.kd;
-	if (!fs["object"]["material"]["ks"].empty())																fs["object"]["material"]["ks"]																			>>	object.material.ks;
-	if (!fs["object"]["material"]["ns"].empty())																fs["object"]["material"]["ns"]																			>>	object.material.ns;
-	if (!fs["object"]["visibility"].empty())																		fs["object"]["visibility"]																					>>	object.visibility;			
 	// ------------------------------------------------------------------------------------------------------------
 	devices.front.enable = !fs["devices"]["front"].empty() && strcmp(((std::string) fs["devices"]["front"]["enable"]).c_str(), "off");
 	if (fs["devices"]["front"]["id"].isInt())																		fs["devices"]["front"]["id"]																				>>	devices.front.id;
@@ -101,10 +97,6 @@ const Configuration& Configuration::display() const
 	printf("├─────────────────────────────────────────────────────────────────────┤\n");
 	printf("│ object.file                       : %-31s │\n",												format(object.file, 31, 8).c_str());
 	printf("│ object.scale                      : %-31f │\n",												object.scale);
-	printf("│ object.material.kd                : %-31f │\n",												object.material.kd);
-	printf("│ object.material.ks                : %-31f │\n",												object.material.ks);
-	printf("│ object.material.ns                : %-31f │\n",												object.material.ns);
-	printf("│ object.visibility                 : %-31s │\n",												format(object.visibility, 31, 8).c_str());
 	printf("│                                                                     │\n");
 	printf("│ devices.front.enable              : %-31s │\n",												(devices.front.enable?std::string("on"):std::string("off")).c_str());
 	printf("│ devices.front.id                  : %-31d │\n",												devices.front.id);

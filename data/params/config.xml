@@ -3,26 +3,21 @@
 	
 	<!-- ######################################### Object ######################################### -->
 	<object>
-		<file>data/objects/sphere.obj</file>
-		<scale>5.5</scale>
-		<material>
-			<kd>0.0</kd>
-			<ks>1.0</ks>
-			<ns>1000000.0</ns>
-		</material>
-		<!--<visibility>data/objects/bigguy_ambient_HD.png</visibility>-->
+		<file>data/objects/cube.obj</file>
+		<!--<file>data/objects/Peugeot_207/Peugeot_207.obj</file>-->
+		<scale>1.0</scale>
 	</object>
 	
 	<!-- #################################### Devices options ##################################### -->
 	<devices>
 		<front>
 			<enable>on</enable>																						<!-- on | off									-->
-			<id>1</id>																										<!-- [int] | auto | manual		-->
+			<id>0</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
 			<enable>on</enable>																						<!-- on | off									-->
-			<id>0</id>																										<!-- [int] | auto | manual		-->
+			<id>1</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/c910-fisheye.xml</params>
 		</back>
 	</devices>
@@ -45,14 +40,14 @@
 		</defaultValues>
 		
 		<envmap>
-			<type>dynamic</type>																					<!-- dynamic | debug					-->
+			<type>debug</type>																					<!-- dynamic | debug					-->
 			<size>256 256</size>
 			<dual>off</dual>																							<!-- on | off									-->
-			<path>data/envmap/6/%03d.jpg</path>
+			<path>data/envmap/5/%03d.jpg</path>
 		</envmap>
 		
 		<localisation>
-			<type>dynamic</type>																					<!-- dynamic | debug					-->
+			<type>debug</type>																					<!-- dynamic | debug					-->
 			<size>400.0</size>																						<!-- [float] (0 for infinity) -->
 		</localisation>		
 		

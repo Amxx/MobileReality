@@ -1,3 +1,6 @@
+mtllib bigguy.mtl
+usemtl glossy
+
 # The units used in this file are centimeters.
 g default
 v 3.347106 4.317614 4.212092
@@ -4660,7 +4663,6 @@ vn -0.795731 -0.144750 -0.588099
 vn -0.561887 -0.539221 -0.627314
 s 1
 g bigguy_0
-usemtl white
 f 523/845/1 524/846/2 562/847/3 564/848/4
 f 87/387/5 198/388/6 465/389/7 462/390/8
 f 75/391/9 439/392/10 486/393/11 491/394/12

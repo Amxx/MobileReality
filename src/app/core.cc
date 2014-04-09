@@ -181,20 +181,18 @@ int Core::init()
 	glBindAttribLocation(_GLResources["prg:rendering"]->name,	2, "texcoord");
 		
 	// ===============================================================
-	// =                C R E A T E   T E X T U R E S                =
+	// =          C R E A T E   F R A M E   T E X T U R E S          =
 	// ===============================================================	
 	_GLResources["tex:frame0"]				= (new gk::GLTexture())->createTexture2D(0, 640, 480);
 	_GLResources["tex:frame1"]				= (new gk::GLTexture())->createTexture2D(1, 640, 480);
-	if (!_config.object.visibility.empty())
-		_GLResources["tex:visibility"]	= (new gk::GLTexture())->createTexture2D(2, gk::readImage(_config.object.visibility));
 		
 	// ===============================================================
 	// =                  C R E A T E   E N V M A P                  =
 	// ===============================================================	
 	if (_config.general.envmap.type == Options::DEBUG && !_config.general.envmap.path.empty())
-		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(3, gk::readImageArray(_config.general.envmap.path.c_str(), 6));
+		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(2, gk::readImageArray(_config.general.envmap.path.c_str(), 6));
 	else
-		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(3, _config.general.envmap.size.width, _config.general.envmap.size.height);
+		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(2, _config.general.envmap.size.width, _config.general.envmap.size.height);
 
 	_envmap.init(	getGLResource<gk::GLProgram>("prg:build_cubemap"),
 								getGLResource<gk::GLTexture>("tex:envmap")					);
@@ -216,8 +214,25 @@ int Core::init()
   _mesh->createBuffer(1,	mesh->texcoords);
 	_mesh->createBuffer(2,	mesh->normals);
 	_mesh->createIndexBuffer(mesh->indices);
+	_meshgroups = mesh->groups;
 	_debugviewpoint = gk::Orbiter(mesh->box);
 	delete mesh;
+	
+	// ===============================================================
+	// =           C R E A T E   M E S H   T E X T U R E S           =
+	// ===============================================================	
+	
+	for (const gk::MeshGroup& grp : _meshgroups)
+	{
+		if (!grp.material.diffuse_texture.empty())
+			_GLResources[grp.material.diffuse_texture]	= (new gk::GLTexture())->createTexture2D(3, gk::readImage(grp.material.diffuse_texture));
+		if (!grp.material.specular_texture.empty())
+			_GLResources[grp.material.specular_texture]	= (new gk::GLTexture())->createTexture2D(4, gk::readImage(grp.material.specular_texture));
+	}
+	
+	
+	
+	
 	
 	return 1;
 }
@@ -396,25 +411,45 @@ int Core::draw()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(getGLResource<gk::GLTexture>("tex:envmap")->target, _GLResources["tex:envmap"]->name);
 		glBindSampler(0, _GLResources["spl:linear"]->name);
-		
-		if (!_config.object.visibility.empty())
-		{
-			glActiveTexture(GL_TEXTURE0+1);
-			glBindTexture(getGLResource<gk::GLTexture>("tex:visibility")->target, _GLResources["tex:visibility"]->name);
-		}
-		
+
 		glUseProgram(_GLResources["prg:rendering"]->name);
-		getGLResource<gk::GLProgram>("prg:rendering")->uniform("new_method")		= _newmethod;
 		getGLResource<gk::GLProgram>("prg:rendering")->uniform("mvMatrix")			= tr_mv.matrix();
 		getGLResource<gk::GLProgram>("prg:rendering")->uniform("mvMatrixInv")		= tr_mv.inverseMatrix();		
 		getGLResource<gk::GLProgram>("prg:rendering")->uniform("mvpMatrix")			= tr_mvp.matrix();
-		getGLResource<gk::GLProgram>("prg:rendering")->uniform("kd")						= _config.object.material.kd;
-		getGLResource<gk::GLProgram>("prg:rendering")->uniform("ks")						= _config.object.material.ks;
-		getGLResource<gk::GLProgram>("prg:rendering")->uniform("ns")						= _config.object.material.ns;
-		getGLResource<gk::GLProgram>("prg:rendering")->uniform("usevisibility")	= !_config.object.visibility.empty();
 		getGLResource<gk::GLProgram>("prg:rendering")->sampler("envmap")				= 0;
-		getGLResource<gk::GLProgram>("prg:rendering")->sampler("visibility")		= 1;
-		_mesh->draw();
+		getGLResource<gk::GLProgram>("prg:rendering")->uniform("new_method")		= _newmethod;
+		
+		for (const gk::MeshGroup& grp : _meshgroups)
+		{
+			if (!grp.material.diffuse_texture.empty())
+			{
+				glActiveTexture(GL_TEXTURE0+1);
+				glBindTexture(getGLResource<gk::GLTexture>(grp.material.diffuse_texture)->target, _GLResources[grp.material.diffuse_texture]->name);
+			}
+			
+			if (!grp.material.specular_texture.empty())
+			{
+				glActiveTexture(GL_TEXTURE0+2);
+				glBindTexture(getGLResource<gk::GLTexture>(grp.material.specular_texture)->target, _GLResources[grp.material.specular_texture]->name);
+			}
+
+			getGLResource<gk::GLProgram>("prg:rendering")->uniform("diffuse_color")		= grp.material.diffuse_color;
+			getGLResource<gk::GLProgram>("prg:rendering")->uniform("use_diffuse_texture")	= !grp.material.diffuse_texture.empty();
+			getGLResource<gk::GLProgram>("prg:rendering")->sampler("diffuse_texture") = 1;
+			getGLResource<gk::GLProgram>("prg:rendering")->uniform("kd")							= grp.material.kd;
+
+			getGLResource<gk::GLProgram>("prg:rendering")->uniform("specular_color")	= grp.material.specular_color;
+			getGLResource<gk::GLProgram>("prg:rendering")->uniform("use_specular_texture") = !grp.material.specular_texture.empty();
+			getGLResource<gk::GLProgram>("prg:rendering")->sampler("specular_texture") = 2;
+			getGLResource<gk::GLProgram>("prg:rendering")->uniform("ks")							= grp.material.ks;
+			getGLResource<gk::GLProgram>("prg:rendering")->uniform("ns")							= grp.material.ns;
+			
+			getGLResource<gk::GLProgram>("prg:rendering")->uniform("emission")				= grp.material.emission;
+			getGLResource<gk::GLProgram>("prg:rendering")->uniform("ni")							= grp.material.ni;
+			
+			_mesh->drawGroup(grp.begin, grp.end);
+		}
+		
 	}
 	
 	// ===============================================================
