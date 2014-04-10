@@ -38,7 +38,7 @@ Core::Core(int argc, char* argv[]) :
 	if (_config.general.verbose) _config.display();
 
 	_buildenvmap	= _config.general.envmap.type == Options::DYNAMIC;
-	_newmethod		= true;
+	_rendermethod	= 0x0;
 	// ===============================================================
 	// =                   L O A D   S C A N N E R                   =
 	// ===============================================================
@@ -415,23 +415,22 @@ int Core::draw()
 		glBindTexture(getGLResource<gk::GLTexture>("tex:envmap")->target, _GLResources["tex:envmap"]->name);
 		glBindSampler(0, _GLResources["spl:linear"]->name);
 		
-		
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_BLEND);
 		glUseProgram(_GLResources["prg:rendering_shadows"]->name);
-		getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("mvpMatrix")		= tr_mvp.matrix();
-		getGLResource<gk::GLProgram>("prg:rendering_shadows")->sampler("envmap")			= 0;
+		getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("mvpMatrix")	= tr_mvp.matrix();
+		getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("method")		= _rendermethod;
+		getGLResource<gk::GLProgram>("prg:rendering_shadows")->sampler("envmap")		= 0;
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glDisable(GL_BLEND);
-		
 		
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glUseProgram(_GLResources["prg:rendering_object"]->name);
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrix")			= tr_mv.matrix();
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrixInv")	= tr_mv.inverseMatrix();		
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvpMatrix")		= tr_mvp.matrix();
+		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("method")				= _rendermethod;
 		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("envmap")				= 0;
-		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("new_method")		= _newmethod;
 		
 		for (const gk::MeshGroup& grp : _meshgroups)
 		{
@@ -531,11 +530,17 @@ void Core::processKeyboardEvent()
 		if (_config.general.verbose) printf("- envmap cleared\n");
 	}
 	
-	if (key('m'))
+	if (key('r'))
 	{
-		key('m') = 0;
-		_newmethod = !_newmethod;
-		if (_config.general.verbose) printf("- switch to %s methode\n", (_newmethod?std::string("new"):std::string("old")).c_str());
+		key('r') = 0;
+		_rendermethod ^= 0x1;
+		if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_rendermethod & 0x1)?std::string("old"):std::string("new")).c_str());
+	}
+	if (key('s'))
+	{
+		key('s') = 0;
+		_rendermethod ^= 0x2;
+		if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_rendermethod & 0x2)?std::string("old"):std::string("new")).c_str());
 	}
 }
 

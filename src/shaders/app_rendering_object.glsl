@@ -7,10 +7,22 @@
 #ifdef VERTEX_SHADER
 
 uniform		mat4				mvMatrix;
+uniform 	mat4				mvMatrixInv;
 uniform		mat4				mvpMatrix;
+uniform		int					method;
 uniform 	samplerCube	envmap;
-uniform		bool				new_method;
+
+uniform		vec4				diffuse_color;
+uniform		bool				use_diffuse_texture;
+uniform 	sampler2D		diffuse_texture;
+uniform		float				kd;
+uniform		vec4				specular_color;
+uniform		bool				use_specular_texture;
+uniform 	sampler2D		specular_texture;
+uniform		float				ks;
 uniform		float				ns;
+uniform		vec4				emission;
+uniform		float				ni;
 
 in				vec3				position;
 in				vec3				texcoord;
@@ -37,7 +49,7 @@ void main()
 	specular_level		= log2(size * sqrt(3.0)) - 0.5 * log2(ns + 1);
 	
 	vec3	n						=	normalize(normal);
-	if (new_method)
+	if ((method & 0x1) == 0)
 		diffuse_light		= (	textureLod(envmap, vec3(+1.0, +0.0, +0.0),	diffuse_level)
 												* pow(max(0.75 + n.x, 0), 2.0)
 											+ textureLod(envmap, vec3(-1.0, +0.0, +0.0),	diffuse_level)
@@ -60,20 +72,21 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 	
+uniform		mat4				mvMatrix;
 uniform 	mat4				mvMatrixInv;
+uniform		mat4				mvpMatrix;
+uniform		int					method;
 uniform 	samplerCube	envmap;
-
 
 uniform		vec4				diffuse_color;
 uniform		bool				use_diffuse_texture;
 uniform 	sampler2D		diffuse_texture;
 uniform		float				kd;
-
 uniform		vec4				specular_color;
 uniform		bool				use_specular_texture;
 uniform 	sampler2D		specular_texture;
 uniform		float				ks;
-
+uniform		float				ns;
 uniform		vec4				emission;
 uniform		float				ni;
 

@@ -43,7 +43,7 @@
 			<type>debug</type>																					<!-- dynamic | debug					-->
 			<size>256 256</size>
 			<dual>off</dual>																							<!-- on | off									-->
-			<path>data/envmap/4/%03d.jpg</path>
+			<path>data/envmap/6/%03d.jpg</path>
 		</envmap>
 		
 		<localisation>
@@ -52,7 +52,7 @@
 		</localisation>		
 		
 		<rendering>
-			<background>on</background>																		<!-- on | off									-->
+			<background>off</background>																		<!-- on | off									-->
 			<scene>on</scene>																							<!-- on | off									-->
 			<view>off</view>																							<!-- on | off									-->
 		</rendering>
