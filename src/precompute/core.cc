@@ -56,8 +56,9 @@ Core::~Core()
 int Core::init()
 {	
 	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glBlendFunc(GL_ONE, GL_ONE);
+	
 	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	
 	
 	gk::programPath("install/shaders");
