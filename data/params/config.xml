@@ -11,13 +11,13 @@
 	<!-- #################################### Devices options ##################################### -->
 	<devices>
 		<front>
-			<enable>on</enable>																						<!-- on | off									-->
+			<enable>off</enable>																						<!-- on | off									-->
 			<id>0</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
-			<enable>on</enable>																						<!-- on | off									-->
-			<id>1</id>																										<!-- [int] | auto | maobjecnual		-->
+			<enable>off</enable>																						<!-- on | off									-->
+			<id>1</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/c910-fisheye.xml</params>
 		</back>
 	</devices>
@@ -43,7 +43,7 @@
 			<type>debug</type>																					<!-- dynamic | debug					-->
 			<size>256 256</size>
 			<dual>off</dual>																							<!-- on | off									-->
-			<path>data/envmap/6/%03d.jpg</path>
+			<path>data/envmap/4/%03d.jpg</path>
 		</envmap>
 		
 		<localisation>

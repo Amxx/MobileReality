@@ -48,24 +48,24 @@ void main()
 	
 	vec3	direction		=	sphere_center - vertex_position;
 	float distance		= length(direction);
-	float	cosinus			=	dot(top, normalize(direction));
 		
 	int		size				= textureSize(envmap, 0).x;
-	vec4	ambiant			=	(	textureLod(envmap, vec3(+0.0, +1.0, +0.0), log2(size)) * 1.75
-											+	textureLod(envmap, vec3(-1.0, +0.0, +0.0), log2(size)) * 0.35
-											+	textureLod(envmap, vec3(+1.0, +0.0, +0.0), log2(size)) * 0.35
-											+	textureLod(envmap, vec3(+0.0, +0.0, -1.0), log2(size)) * 0.35
-											+	textureLod(envmap, vec3(+0.0, +0.0, +1.0), log2(size)) * 0.35)/3.15;
-										
-	vec4	local				=	textureLod(envmap, direction, log2(size*sphere_size/distance));
+	vec4	ambiant			=	(	textureLod(envmap, vec3(+0.0, +1.0, +0.0), log2(size)                     ) * 1.75
+											+	textureLod(envmap, vec3(-1.0, +0.0, +0.0), log2(size)                     ) * 0.35
+											+	textureLod(envmap, vec3(+1.0, +0.0, +0.0), log2(size)                     ) * 0.35
+											+	textureLod(envmap, vec3(+0.0, +0.0, -1.0), log2(size)                     ) * 0.35
+											+	textureLod(envmap, vec3(+0.0, +0.0, +1.0), log2(size)                     ) * 0.35 ) / 3.15;
+	vec4	local				=		textureLod(envmap, direction,              log2(size*sphere_size/distance));
 	
-	float solid				= 1-cos(atan(sphere_size, distance));
-	float	occult			=	cosinus * solid * energy(local) / energy(ambiant);
+	float solidfactor	= 	dot(top, normalize(direction))
+											*	pow(sin(atan(sphere_size, distance)), 2.0);
+											
+	float	occult			=	solidfactor * energy(local) / energy(ambiant);
 	
 	if ((method & 0x2) == 0)
-		fragment_color = vec4(0.0, 0.0, 0.0, PI*occult);
+		fragment_color = vec4(0.0, 0.0, 0.0, 2*occult);
 	else
-		fragment_color = vec4(0.0, 0.0, 0.0, PI*solid);
+		fragment_color = vec4(0.0, 0.0, 0.0, 2*solidfactor);
 		
 }
 #endif
