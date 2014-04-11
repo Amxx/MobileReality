@@ -491,20 +491,13 @@ int Core::draw()
 	if (_config.general.verbose > 1)
 	{
 		cv::Mat timers(140, 280, CV_8UC1, cv::Scalar(25,25,25));
-		putText(timers, "User interaction",				cv::Point(5,10), 0, 0.36, cv::Scalar(230,230,230));
-		putText(timers, "Grabbing frames",				cv::Point(5,30), 0, 0.36, cv::Scalar(230,230,230));
-		putText(timers, "Positionning",						cv::Point(5,50), 0, 0.36, cv::Scalar(230,230,230));
-		putText(timers, "Bilding EnvMap",					cv::Point(5,70), 0, 0.36, cv::Scalar(230,230,230));
-		putText(timers, "Rendering - background",	cv::Point(5,90), 0, 0.36, cv::Scalar(230,230,230));
-		putText(timers, "Rendering - scene",			cv::Point(5,110), 0, 0.36, cv::Scalar(230,230,230));
-		putText(timers, "Rendering - frames",			cv::Point(5,130), 0, 0.36, cv::Scalar(230,230,230));
-		putText(timers, formatTimer(t2-t1), cv::Point(155,10), 0, 0.32, cv::Scalar(230,230,230));
-		putText(timers, formatTimer(t3-t2), cv::Point(155,30), 0, 0.32, cv::Scalar(230,230,230));
-		putText(timers, formatTimer(t4-t3), cv::Point(155,50), 0, 0.32, cv::Scalar(230,230,230));
-		putText(timers, formatTimer(t5-t4), cv::Point(155,70), 0, 0.32, cv::Scalar(230,230,230));
-		putText(timers, formatTimer(t6-t5), cv::Point(155,90), 0, 0.32, cv::Scalar(230,230,230));
-		putText(timers, formatTimer(t7-t6), cv::Point(155,110), 0, 0.32, cv::Scalar(230,230,230));
-		putText(timers, formatTimer(t8-t7), cv::Point(155,130), 0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, "User interaction",				cv::Point(5,10),  0, 0.36, cv::Scalar(230,230,230));	putText(timers, formatTimer(t2-t1), cv::Point(155,10),  0, 0.32, cv::Scalar(230,230,230));	
+		putText(timers, "Grabbing frames",				cv::Point(5,30),  0, 0.36, cv::Scalar(230,230,230));	putText(timers, formatTimer(t3-t2), cv::Point(155,30),  0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, "Positionning",						cv::Point(5,50),  0, 0.36, cv::Scalar(230,230,230));	putText(timers, formatTimer(t4-t3), cv::Point(155,50),  0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, "Bilding EnvMap",					cv::Point(5,70),  0, 0.36, cv::Scalar(230,230,230));	putText(timers, formatTimer(t5-t4), cv::Point(155,70),  0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, "Rendering - background",	cv::Point(5,90),  0, 0.36, cv::Scalar(230,230,230));	putText(timers, formatTimer(t6-t5), cv::Point(155,90),  0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, "Rendering - scene",			cv::Point(5,110), 0, 0.36, cv::Scalar(230,230,230));	putText(timers, formatTimer(t7-t6), cv::Point(155,110), 0, 0.32, cv::Scalar(230,230,230));
+		putText(timers, "Rendering - frames",			cv::Point(5,130), 0, 0.36, cv::Scalar(230,230,230));	putText(timers, formatTimer(t8-t7), cv::Point(155,130), 0, 0.32, cv::Scalar(230,230,230));
 		cv::imshow("timers", timers);
 	}
 	
@@ -522,41 +515,11 @@ int Core::draw()
 
 void Core::processKeyboardEvent()
 {
-	if (key('b'))
-	{
-		key('b') = 0;
-		_buildenvmap = !_buildenvmap;
-		if (_config.general.verbose) printf("- build envmap : %s\n", _buildenvmap?"on":"off");
-	}
-	if (key('c'))
-	{
-		key('c') = 0;
-		_envmap.clear();
-		if (_config.general.verbose) printf("- envmap cleared\n");
-	}
-	
-	
-	if (key('r'))
-	{
-		key('r') = 0;
-		_renderoptions ^= 0x0001;
-		if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_renderoptions & 0x0001)?std::string("old"):std::string("new")).c_str());
-	}
-	
-	
-	if (key('s'))
-	{
-		key('s') = 0;
-		_renderoptions ^= 0x0010;
-		if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_renderoptions & 0x0010)?std::string("old"):std::string("new")).c_str());
-	}
-	if (key('d'))
-	{
-		key('d') = 0;
-		_renderoptions ^= 0x0020;
-		if (_config.general.verbose) printf("- shadow rendering %s\n", ((_renderoptions & 0x0020)?std::string("enabled"):std::string("disabled")).c_str());
-	}
-	
+	if (key('b') && !(key('b')=0) )	{		_buildenvmap = !_buildenvmap;			if (_config.general.verbose) printf("- build envmap : %s\n",									_buildenvmap?"on":"off"																															);	}
+	if (key('c') && !(key('c')=0) )	{		_envmap.clear();									if (_config.general.verbose) printf("- envmap cleared\n"																																																					);	}
+	if (key('r') && !(key('r')=0) )	{		_renderoptions ^= 0x0001;					if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_renderoptions & 0x0001)?std::string("old"):std::string("new")).c_str()						);	}
+	if (key('s') && !(key('s')=0) )	{		_renderoptions ^= 0x0010;					if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_renderoptions & 0x0010)?std::string("old"):std::string("new")).c_str()						);	}
+	if (key('d') && !(key('d')=0) )	{		_renderoptions ^= 0x0020;					if (_config.general.verbose) printf("- shadow rendering %s\n",                ((_renderoptions & 0x0020)?std::string("enabled"):std::string("disabled")).c_str()	);	}	
 }
 
 
@@ -570,17 +533,15 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 		{
 			case SDLK_F1:
 			{
-				time_t now = time(0);
 				std::stringstream path;
-				path << "data/view/screenshot_" << now << ".png";
+				path << "data/view/screenshot_" << time(0) << ".png";
 				gk::writeFramebuffer(path.str());
 				break;
 			}
 			case SDLK_F2:
 			{
-				time_t now = time(0);
 				std::stringstream path;
-				path << "data/view/envmap_" << now << "_%03d.png";
+				path << "data/view/envmap_" << time(0) << "_%03d.png";
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(getGLResource<gk::GLTexture>("tex:envmap")->target, _GLResources["tex:envmap"]->name);
 				gk::ImageIO::writeImageArray(path.str(), getGLResource<gk::GLTexture>("tex:envmap")->imageArray(0));
