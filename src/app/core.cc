@@ -160,11 +160,9 @@ int Core::init()
 	glClearColor(1.0, 1.0, 1.0, 1.0); // WHITE
 	// glClearColor(0.0, 0.0, 0.0, 1.0); // BLACK
 	// glClearColor(0.1, 0.1, 0.1, 1.0); //BLACK!10
-	
-	//glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_DST_COLOR);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
+
 	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	// ===============================================================
 	// =        L O A D   S H A D E R S   A S   P R O G R A M        =

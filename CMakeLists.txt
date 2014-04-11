@@ -53,7 +53,8 @@ endforeach(module ${MODULES})
 # =====================================================================
 
 add_subdirectory(src/app)
-add_subdirectory(src/precompute)
+add_subdirectory(src/precompute_ambient)
+add_subdirectory(src/precompute_spheres)
 add_subdirectory(src/shaders)
 
 
