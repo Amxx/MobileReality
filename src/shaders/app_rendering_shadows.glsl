@@ -33,6 +33,9 @@ void main()
 uniform		mat4				mvpMatrix;
 uniform 	samplerCube	envmap;
 uniform		int					method;
+uniform		float 			sphere_size		= 1.0;;
+uniform		vec3				sphere_center	= vec3(0.0, 0.0, 0.0);;
+
 
 in				vec3				vertex_position;
 
@@ -42,30 +45,30 @@ float energy(vec4	color) { return length(color.rgb); }
 
 void main() 
 {
-	float sphere_size		= 1.0;
-	vec3	sphere_center	= vec3(0.0, 0.0, 0.0);
 	vec3	top						= vec3(0.0, 1.0, 0.0);
 	
 	vec3	direction		=	sphere_center - vertex_position;
 	float distance		= length(direction);
 		
 	int		size				= textureSize(envmap, 0).x;
+	/*
 	vec4	ambiant			=	(	textureLod(envmap, vec3(+0.0, +1.0, +0.0), log2(size)                     ) * 1.75
 											+	textureLod(envmap, vec3(-1.0, +0.0, +0.0), log2(size)                     ) * 0.35
 											+	textureLod(envmap, vec3(+1.0, +0.0, +0.0), log2(size)                     ) * 0.35
 											+	textureLod(envmap, vec3(+0.0, +0.0, -1.0), log2(size)                     ) * 0.35
 											+	textureLod(envmap, vec3(+0.0, +0.0, +1.0), log2(size)                     ) * 0.35 ) / 3.15;
-	vec4	local				=		textureLod(envmap, direction,              log2(size*sphere_size/distance));
+	*/
+	float	ambiant			=		energy(textureLod(envmap, vec3(+0.0, +1.0, +0.0), log2(size)                     ));
+	float	local				=		energy(textureLod(envmap, direction,              log2(size*sphere_size/distance)));
 	
 	float solidfactor	= 	dot(top, normalize(direction))
-											*	pow(sin(atan(sphere_size, distance)), 2.0);
-											
-	float	occult			=	solidfactor * energy(local) / energy(ambiant);
+											*	pow(sphere_size/distance, 2.0);
+	float	occult			=		solidfactor * min(local / ambiant, PI);
 	
-	if ((method & 0x2) == 0)
-		fragment_color = vec4(0.0, 0.0, 0.0, 2*occult);
+	if ((method & 0x0010) == 0)
+		fragment_color = vec4(0.0, 0.0, 0.0, 2.f * occult);
 	else
-		fragment_color = vec4(0.0, 0.0, 0.0, 2*solidfactor);
-		
+		fragment_color = vec4(0.0, 0.0, 0.0, 2.f * solidfactor);
+
 }
 #endif

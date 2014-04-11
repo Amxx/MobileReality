@@ -38,7 +38,7 @@ Core::Core(int argc, char* argv[]) :
 	if (_config.general.verbose) _config.display();
 
 	_buildenvmap	= _config.general.envmap.type == Options::DYNAMIC;
-	_rendermethod	= 0x0;
+	_renderoptions	= 0x0020;
 	// ===============================================================
 	// =                   L O A D   S C A N N E R                   =
 	// ===============================================================
@@ -126,7 +126,7 @@ Core::Core(int argc, char* argv[]) :
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	present();
-		
+	
 }
 
 
@@ -207,7 +207,7 @@ int Core::init()
 	// ===============================================================
 	// =                  S E A M L E S S   C U B E                  =
 	// ===============================================================
-	_GLResources["spl:linear"]				= gk::createLinearSampler();
+	_GLResources["spl:linear"]		= gk::createLinearSampler();
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	
 	// ===============================================================
@@ -415,21 +415,27 @@ int Core::draw()
 		glBindTexture(getGLResource<gk::GLTexture>("tex:envmap")->target, _GLResources["tex:envmap"]->name);
 		glBindSampler(0, _GLResources["spl:linear"]->name);
 		
-		glClear(GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_BLEND);
-		glUseProgram(_GLResources["prg:rendering_shadows"]->name);
-		getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("mvpMatrix")	= tr_mvp.matrix();
-		getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("method")		= _rendermethod;
-		getGLResource<gk::GLProgram>("prg:rendering_shadows")->sampler("envmap")		= 0;
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glDisable(GL_BLEND);
+		if (_renderoptions & 0x0020)
+		{
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_BLEND);
+			glUseProgram(_GLResources["prg:rendering_shadows"]->name);
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("mvpMatrix")			= tr_mvp.matrix();
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("method")				= _renderoptions;
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->sampler("envmap")				= 0;
+		
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere_size") 	= 1.f;
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere_center") = gk::Vec3(0.f, 0.f, 0.f);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glDisable(GL_BLEND);
+		}
 		
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glUseProgram(_GLResources["prg:rendering_object"]->name);
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrix")			= tr_mv.matrix();
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrixInv")	= tr_mv.inverseMatrix();		
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvpMatrix")		= tr_mvp.matrix();
-		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("method")				= _rendermethod;
+		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("method")				= _renderoptions;
 		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("envmap")				= 0;
 		
 		for (const gk::MeshGroup& grp : _meshgroups)
@@ -522,7 +528,6 @@ void Core::processKeyboardEvent()
 		_buildenvmap = !_buildenvmap;
 		if (_config.general.verbose) printf("- build envmap : %s\n", _buildenvmap?"on":"off");
 	}
-	
 	if (key('c'))
 	{
 		key('c') = 0;
@@ -530,18 +535,28 @@ void Core::processKeyboardEvent()
 		if (_config.general.verbose) printf("- envmap cleared\n");
 	}
 	
+	
 	if (key('r'))
 	{
 		key('r') = 0;
-		_rendermethod ^= 0x1;
-		if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_rendermethod & 0x1)?std::string("old"):std::string("new")).c_str());
+		_renderoptions ^= 0x0001;
+		if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_renderoptions & 0x0001)?std::string("old"):std::string("new")).c_str());
 	}
+	
+	
 	if (key('s'))
 	{
 		key('s') = 0;
-		_rendermethod ^= 0x2;
-		if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_rendermethod & 0x2)?std::string("old"):std::string("new")).c_str());
+		_renderoptions ^= 0x0010;
+		if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_renderoptions & 0x0010)?std::string("old"):std::string("new")).c_str());
 	}
+	if (key('d'))
+	{
+		key('d') = 0;
+		_renderoptions ^= 0x0020;
+		if (_config.general.verbose) printf("- shadow rendering %s\n", ((_renderoptions & 0x0020)?std::string("enabled"):std::string("disabled")).c_str());
+	}
+	
 }
 
 

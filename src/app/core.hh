@@ -52,7 +52,7 @@ class Core : public gk::App
 		template<typename T> T*										getGLResource(const std::string&);
 	
 		// Status
-		int																				_rendermethod;
+		int																				_renderoptions;
 		bool																			_buildenvmap;
 		gk::Orbiter																_debugviewpoint;
 		

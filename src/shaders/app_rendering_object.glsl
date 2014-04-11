@@ -49,7 +49,7 @@ void main()
 	specular_level		= log2(size * sqrt(3.0)) - 0.5 * log2(ns + 1);
 	
 	vec3	n						=	normalize(normal);
-	if ((method & 0x1) == 0)
+	if ((method & 0x0001) == 0)
 		diffuse_light		= (	textureLod(envmap, vec3(+1.0, +0.0, +0.0),	diffuse_level)
 												* pow(max(0.75 + n.x, 0), 2.0)
 											+ textureLod(envmap, vec3(-1.0, +0.0, +0.0),	diffuse_level)
