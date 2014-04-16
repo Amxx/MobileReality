@@ -1,6 +1,7 @@
 find_package(	OpenCV	REQUIRED	)
 
 include_directories(
+	${EIGEN_INCLUDE_DIRS}
   ${GKIT_INCLUDE_DIRS}
 	${OpenCV_INCLUDE_DIRS}
 )

@@ -218,14 +218,15 @@ int Core::init()
   _mesh->createBuffer(1,	mesh->texcoords);
 	_mesh->createBuffer(2,	mesh->normals);
 	_mesh->createIndexBuffer(mesh->indices);
-	_meshgroups = mesh->groups;
-	_debugviewpoint = gk::Orbiter(mesh->box);
+	_meshGroups = mesh->groups;
+	_meshBox		=	mesh->box;
 	delete mesh;
+
 	
 	// ===============================================================
 	// =           C R E A T E   M E S H   T E X T U R E S           =
 	// ===============================================================
-	for (const gk::MeshGroup& grp : _meshgroups)
+	for (const gk::MeshGroup& grp : _meshGroups)
 	{
 		if (!grp.material.diffuse_texture.empty())
 			_GLResources[grp.material.diffuse_texture]	= (new gk::GLTexture())->createTexture2D(3, gk::readImage(grp.material.diffuse_texture));
@@ -236,6 +237,8 @@ int Core::init()
 	
 	
 	
+	
+	_debugviewpoint = gk::Orbiter(_meshBox);
 	
 	return 1;
 }
@@ -415,15 +418,22 @@ int Core::draw()
 		
 		if (_renderoptions & 0x0020)
 		{
+			gk::Point box_center;
+			float			box_radius;
+			_meshBox.BoundingSphere(box_center, box_radius);
+			
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_BLEND);
 			glUseProgram(_GLResources["prg:rendering_shadows"]->name);
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("mvpMatrix")			= tr_mvp.matrix();
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("method")				= _renderoptions;
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->sampler("envmap")				= 0;
-		
-			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere_size") 	= 1.f;
-			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere_center") = gk::Vec3(0.f, 0.f, 0.f);
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("bbox_radius")		=	box_radius;	
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("bbox_height")		= _meshBox.pMin.y;
+			
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere_center") = box_center;							//gk::Vec3(0.f, 0.f, 0.f);
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere_size") 	= box_radius/sqrtf(3.f);	//+1.f;
+			
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glDisable(GL_BLEND);
 		}
@@ -436,7 +446,7 @@ int Core::draw()
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("method")				= _renderoptions;
 		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("envmap")				= 0;
 		
-		for (const gk::MeshGroup& grp : _meshgroups)
+		for (const gk::MeshGroup& grp : _meshGroups)
 		{
 			if (!grp.material.diffuse_texture.empty())
 			{
