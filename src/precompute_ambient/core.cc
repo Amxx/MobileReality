@@ -2,7 +2,7 @@
 
 
 #define			SIZE					1024
-#define			COUNT					100
+#define			COUNT					1000
 // ############################################################################
 // #                                  MACROS                                  #
 // ############################################################################
@@ -58,8 +58,7 @@ int Core::init()
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	
 	glBlendEquation(GL_FUNC_ADD);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	
+	glBlendFunc(GL_ONE, GL_ONE);
 	
 	gk::programPath("install/shaders");
 	
@@ -133,9 +132,12 @@ int Core::compute()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	
-	for (const Light& light : makelights(COUNT, orbiter.size))
+	// for (const Light& light : makelights(COUNT, orbiter.size))
+	for (int i=0; i<COUNT; ++i)
 	{
-		gk::Transform modelview	= gk::LookAt(light.position, gk::Point(0.0, 0.0, 0.0), gk::Vector(0.0, 1.0, 0.0));
+		Light light = Light::Random() * orbiter.size;
+		
+		gk::Transform modelview	= gk::LookAt(light, gk::Point(0.0, 0.0, 0.0), gk::Vector(0.0, 1.0, 0.0));
 		gk::Transform proj			= gk::Orthographic( -orbiter.size/2, +orbiter.size/2,
 																								-orbiter.size/2, +orbiter.size/2, 
 																								0.f,             +orbiter.size*2	);

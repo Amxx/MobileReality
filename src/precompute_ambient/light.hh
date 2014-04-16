@@ -3,11 +3,12 @@
 
 #include "Geometry.h"
 
-struct Light
+struct Light : public gk::Point
 {
-	Light(unsigned int _id, const gk::Point& _position) : id(_id), position(_position) {}
-	unsigned int		id;
-	gk::Point				position;
+	Light()                   : gk::Point()  {}
+	Light(const gk::Point& p) : gk::Point(p) {}
+
+	static Light Random();
 };
 
 std::vector<Light> makelights(unsigned int nb, float dist = 1.0);

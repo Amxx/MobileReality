@@ -3,6 +3,7 @@
 #define _GK_ORBITER_H
 
 #include "Geometry.h"
+#include "Transform.h"
 
 namespace gk {
 

@@ -28,7 +28,7 @@ void main()
 {
 	float n					= 4.0 / light_nb;
 	vec4	c					= texture(ambient, texcoords);
-	fragment_color	= vec4( c.rgb * n, c.a );
+	fragment_color	= vec4(c.rgb*n, c.a);
 }
 
 
