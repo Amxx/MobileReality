@@ -2,6 +2,7 @@
 #define CORE_HH
 
 #include <iostream>
+#include <fstream>
 #include <ctime>
 #include <ratio>
 #include <chrono>
@@ -48,7 +49,9 @@ class Core : public gk::App
 		// OpenGL objects
 		gk::GLBasicMesh*													_mesh;
 		gk::BBox																	_meshBox;
+		gk::Vec2																	_meshBoxDescriptor;
 		std::vector<gk::MeshGroup>								_meshGroups;
+		std::vector<gk::Vec4>											_meshSpheres;
 		std::map<std::string,	gk::GLResource*>		_GLResources;
 		template<typename T> T*										getGLResource(const std::string&);
 	

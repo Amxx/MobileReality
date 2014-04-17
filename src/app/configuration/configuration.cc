@@ -31,8 +31,8 @@ Configuration& Configuration::load(const std::string& path)
 	cv::FileStorage fs(path, cv::FileStorage::READ);
 	if (!fs.isOpened()) return *this;
 	// ------------------------------------------------------------------------------------------------------------
-	if (!fs["object"]["obj_file"].empty())																			fs["object"]["obj_file"]																						>>	object.obj_file;
-	if (!fs["object"]["spheres_file"].empty())																	fs["object"]["spheres_file"]																				>>	object.spheres_file;
+	if (!fs["object"]["obj"].empty())																						fs["object"]["obj"]																									>>	object.obj_file;
+	if (!fs["object"]["spheres"].empty())																				fs["object"]["spheres"]																							>>	object.spheres_file;
 	if (!fs["object"]["scale"].empty())																					fs["object"]["scale"]																								>>	object.scale;
 	// ------------------------------------------------------------------------------------------------------------
 	devices.front.enable = !fs["devices"]["front"].empty() && strcmp(((std::string) fs["devices"]["front"]["enable"]).c_str(), "off");

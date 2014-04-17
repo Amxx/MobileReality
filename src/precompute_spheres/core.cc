@@ -1,7 +1,7 @@
 #include "core.hh"
 
 size_t			samples_nb	= 100000;
-size_t			clusters_nb	= 20;
+size_t			clusters_nb	= 100;
 int					max_step		= 1000;
 std::string path;
 	
@@ -130,6 +130,7 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 		case SDLK_F1:			{ renderoptions ^= 0x01;	break; }
 		case SDLK_F2:			{ renderoptions ^= 0x02;	break; }
 		case SDLK_F9:			{ lms->step();						break; }
+		case SDLK_F10:		{ lms->finalize();				break; }
 		case SDLK_F5:			{	gk::reloadPrograms();		break; }
 		case SDLK_RETURN:
 		{

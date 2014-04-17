@@ -40,10 +40,9 @@ class LMS
 		typedef Cluster<C,P> clustertype;
 		
 		LMS(int snb=100000, int cnb=10) : samples(snb), clusters(cnb) {};
-		void init();
 		void run(int max_step = -1);
 		void step();
-			
+		virtual void finalize();
 	protected:
 		bool computegroups();
 		void computefit();
@@ -66,17 +65,6 @@ void sampleMesh(LMS<PN,P,float>&, gk::Mesh&);
 
 
 
-
-
-
-
-
-
-
-template<typename S, typename C, typename P>	
-void LMS<S,C,P>::init()
-{
-}
 
 template<typename S, typename C, typename P>		
 void LMS<S,C,P>::run(int max_step)
@@ -111,6 +99,15 @@ void LMS<S,C,P>::step()
 	computefit();
 	printf("done\n");
 }
+
+template<typename S, typename C, typename P>	
+void LMS<S,C,P>::finalize()
+{
+}
+
+
+
+
 
 template<typename S, typename C, typename P>	
 bool LMS<S,C,P>::computegroups()

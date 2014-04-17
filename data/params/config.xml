@@ -4,13 +4,13 @@
 	<!-- ######################################### Object ######################################### -->
 	<object>
 		<!--
-		<file>data/objects/sphere.obj</file>
-		<file>data/objects/bigguy/bigguy.obj</file>
-		<file>data/objects/Peugeot_207/Peugeot_207.obj</file>
-		<file>data/objects/Ford_Mustang_1966/Ford_Mustang_1966.obj</file>
+		<obj>data/objects/sphere.obj</obj>
+		<obj>data/objects/bigguy/bigguy.obj</obj>
+		<obj>data/objects/Peugeot_207/Peugeot_207.obj</obj>
+		<obj>data/objects/Ford_Mustang_1966/Ford_Mustang_1966.obj</obj>
 		-->
-		<obj_file>data/objects/bigguy/bigguy.obj</obj_file>
-		<spheres_file>data/objects/bigguy/bigguy.obj.sphere</spheres_file>
+		<obj>data/objects/Peugeot_207/Peugeot_207.obj</obj>
+		<spheres>data/objects/Peugeot_207/Peugeot_207.obj.spheres</spheres>
 		<scale>1.0</scale>
 	</object>
 	

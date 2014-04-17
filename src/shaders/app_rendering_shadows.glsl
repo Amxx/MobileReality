@@ -9,17 +9,16 @@
 uniform		mat4				mvpMatrix;
 uniform 	samplerCube	envmap;
 uniform		int					method;
-uniform		float 			bbox_radius = 1000;
-uniform		float 			bbox_height	= -1.0;
+uniform		vec2 				bbox = vec2(1000, -1.0);
 
 out				vec3				vertex_position;
 
 void main()
 {
-	vec3 pos[4]	= vec3[4](	vec3(-SIZE*bbox_radius, bbox_height, -SIZE*bbox_radius),
-													vec3(-SIZE*bbox_radius, bbox_height, +SIZE*bbox_radius),
-													vec3(+SIZE*bbox_radius, bbox_height, -SIZE*bbox_radius),
-													vec3(+SIZE*bbox_radius, bbox_height, +SIZE*bbox_radius)	);
+	vec3 pos[4]	= vec3[4](	vec3(-SIZE*bbox.x, bbox.y, -SIZE*bbox.x),
+													vec3(-SIZE*bbox.x, bbox.y, +SIZE*bbox.x),
+													vec3(+SIZE*bbox.x, bbox.y, -SIZE*bbox.x),
+													vec3(+SIZE*bbox.x, bbox.y, +SIZE*bbox.x)	);
 													
 	gl_Position			= mvpMatrix * vec4(pos[gl_VertexID], 1.0);
 	vertex_position = pos[gl_VertexID];

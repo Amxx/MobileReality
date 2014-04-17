@@ -196,10 +196,38 @@ int Core::init()
 	_mesh->createBuffer(2,	mesh->normals);
 	_mesh->createIndexBuffer(mesh->indices);
 	_meshGroups = mesh->groups;
-	_meshBox		=	mesh->box;
+	_meshBox		= mesh->box;
 	delete mesh;
 
+	// ===============================================================
+	// =              O C C L U S I O N   S P H E R E S              =
+	// ===============================================================
+
+	gk::Point box_center;
+	float			box_radius;
+	_meshBox.BoundingSphere(box_center, box_radius);
+	_meshBoxDescriptor = gk::Vec2(box_radius, _meshBox.pMin.y);
 	
+	if (!_config.object.spheres_file.empty())
+	{
+		std::ifstream ifs(_config.object.spheres_file, std::ifstream::in);
+		if (ifs.is_open())
+		{
+			while (ifs.good())
+			{
+				float x, y, z, r;
+				ifs >> x >> y >> z >> r;
+				_meshSpheres.push_back(gk::Vec4(x, y, z, r));
+			}
+			ifs.close();
+		}
+	}
+	if (_meshSpheres.empty())
+	{
+		if (!_config.object.spheres_file.empty()) fprintf(stderr, "[WARNING] Could not open / load spheres from file %s\n", _config.object.spheres_file.c_str());
+		_meshSpheres.push_back(gk::Vec4(box_center.x, box_center.y, box_center.z, box_radius/sqrtf(3.f)));
+	}
+
 	// ===============================================================
 	// =           C R E A T E   M E S H   T E X T U R E S           =
 	// ===============================================================
@@ -213,9 +241,8 @@ int Core::init()
 	
 	
 	
-	
-	
 	_debugviewpoint = gk::Orbiter(_meshBox);
+	
 	
 	return 1;
 }
@@ -395,10 +422,7 @@ int Core::draw()
 		
 		if (_renderoptions & 0x0020)
 		{
-			gk::Point box_center;
-			float			box_radius;
-			_meshBox.BoundingSphere(box_center, box_radius);
-			gk::Vec4	sphere(box_center.x, box_center.y, box_center.z, box_radius/sqrtf(3.f));
+			
 			
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_BLEND);
@@ -406,12 +430,13 @@ int Core::draw()
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("mvpMatrix")			= tr_mvp.matrix();
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("method")				= _renderoptions;
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->sampler("envmap")				= 0;
-			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("bbox_radius")		=	box_radius;	
-			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("bbox_height")		= _meshBox.pMin.y;
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("bbox")					=	_meshBoxDescriptor;
 			
-			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere") 				= sphere;
-			
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			for (gk::Vec4 sphere : _meshSpheres)
+			{
+				getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere") 			= sphere;
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			}
 			glDisable(GL_BLEND);
 		}
 		
