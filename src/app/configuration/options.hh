@@ -14,8 +14,9 @@ namespace Options
 	struct Object
 	{
 		
-		Object() : file("cube.obj"), scale(1.f) {}
-		std::string		file;
+		Object() : obj_file("cube.obj"), spheres_file(), scale(1.f) {}
+		std::string		obj_file;
+		std::string		spheres_file;
 		float					scale;
 	};
 	struct Devices

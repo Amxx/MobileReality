@@ -31,7 +31,8 @@ Configuration& Configuration::load(const std::string& path)
 	cv::FileStorage fs(path, cv::FileStorage::READ);
 	if (!fs.isOpened()) return *this;
 	// ------------------------------------------------------------------------------------------------------------
-	if (!fs["object"]["file"].empty())																					fs["object"]["file"]																								>>	object.file;
+	if (!fs["object"]["obj_file"].empty())																			fs["object"]["obj_file"]																						>>	object.obj_file;
+	if (!fs["object"]["spheres_file"].empty())																	fs["object"]["spheres_file"]																				>>	object.spheres_file;
 	if (!fs["object"]["scale"].empty())																					fs["object"]["scale"]																								>>	object.scale;
 	// ------------------------------------------------------------------------------------------------------------
 	devices.front.enable = !fs["devices"]["front"].empty() && strcmp(((std::string) fs["devices"]["front"]["enable"]).c_str(), "off");
@@ -95,7 +96,8 @@ const Configuration& Configuration::display() const
 	printf("┌─────────────────────────────────────────────────────────────────────┐\n");
 	printf("│             C O N F I G U R A T I O N   O V E R V I E W             │\n");
 	printf("├─────────────────────────────────────────────────────────────────────┤\n");
-	printf("│ object.file                       : %-31s │\n",												format(object.file, 31, 8).c_str());
+	printf("│ object.obj_file                   : %-31s │\n",												format(object.obj_file, 31, 8).c_str());
+	printf("│ object.spheres_file               : %-31s │\n",												format(object.spheres_file, 31, 8).c_str());
 	printf("│ object.scale                      : %-31f │\n",												object.scale);
 	printf("│                                                                     │\n");
 	printf("│ devices.front.enable              : %-31s │\n",												(devices.front.enable?std::string("on"):std::string("off")).c_str());

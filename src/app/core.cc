@@ -188,7 +188,7 @@ int Core::init()
 	// ===============================================================
 	// =                    C R E A T E   M E S H                    =
 	// ===============================================================
-	gk::Mesh *mesh = gk::MeshIO::readOBJ(_config.object.file);
+	gk::Mesh *mesh = gk::MeshIO::readOBJ(_config.object.obj_file);
 	if (mesh == nullptr) return -1;
 	_mesh = new gk::GLBasicMesh(GL_TRIANGLES, mesh->indices.size());
 	_mesh->createBuffer(0,	mesh->positions);
@@ -398,6 +398,7 @@ int Core::draw()
 			gk::Point box_center;
 			float			box_radius;
 			_meshBox.BoundingSphere(box_center, box_radius);
+			gk::Vec4	sphere(box_center.x, box_center.y, box_center.z, box_radius/sqrtf(3.f));
 			
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_BLEND);
@@ -408,8 +409,7 @@ int Core::draw()
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("bbox_radius")		=	box_radius;	
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("bbox_height")		= _meshBox.pMin.y;
 			
-			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere_center") = box_center;							//gk::Vec3(0.f, 0.f, 0.f);
-			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere_size") 	= box_radius/sqrtf(3.f);	//+1.f;
+			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere") 				= sphere;
 			
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glDisable(GL_BLEND);

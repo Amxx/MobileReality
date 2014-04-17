@@ -34,8 +34,7 @@ void main()
 uniform		mat4				mvpMatrix;
 uniform 	samplerCube	envmap;
 uniform		int					method;
-uniform		float 			sphere_size		= 1.0;
-uniform		vec3				sphere_center	= vec3(0.0, 0.0, 0.0);
+uniform		vec4				sphere	= vec4(0.0, 0.0, 0.0, 1.0);
 
 in				vec3				vertex_position;
 out				vec4				fragment_color;
@@ -46,11 +45,11 @@ void main()
 {
 	vec3	top						= vec3(0.0, 1.0, 0.0);
 	
-	vec3	direction		=	sphere_center - vertex_position;
+	vec3	direction		=	sphere.xyz - vertex_position;
 	float distance		= length(direction);
 		
 	float	size				= textureSize(envmap, 0).x;
-	float	viewsize		=	size * sphere_size / distance;
+	float	viewsize		=	size * sphere.w / distance;
 
 	float	ambiant			=	energy(	textureLod(envmap, vec3(+0.0, +1.0, +0.0), log2(size) 		) * 0.56
 														+	textureLod(envmap, vec3(-1.0, +0.0, +0.0), log2(size) 		) * 0.11
@@ -60,7 +59,7 @@ void main()
 	float	local				=	energy(	textureLod(envmap, direction,              log2(viewsize)	)					);
 	
 	
-	float solidfactor	=	dot(top, normalize(direction)) * pow(sphere_size/distance, 2.0);
+	float solidfactor	=	dot(top, normalize(direction)) * pow(sphere.w/distance, 2.0);
 	float	occult			=	solidfactor * min(local/ambiant, PI);
 	
 	
