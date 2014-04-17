@@ -13,6 +13,10 @@
 #include "Orbiter.h"
 #include "ProgramManager.h"
 
+#include "GL/GLBasicMesh.h"
+#include "GL/GLProgram.h"
+
+
 #include "LMS.hh"
 #include "SphereFit.hh"
 
@@ -20,8 +24,15 @@
 class Core : public gk::App
 {	
 	private:
+		
 		SphereFit								lms;
+	
+		gk::GLBasicMesh*				object;
+		gk::GLProgram*					programViewer;
+		gk::GLProgram*					programCluster;
 		gk::Orbiter							orbiter;
+	
+		int 										renderoptions;
 	
 	public:
     Core(int = 0, char*[] = nullptr);

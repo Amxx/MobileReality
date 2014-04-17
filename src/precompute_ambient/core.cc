@@ -37,7 +37,7 @@ Core::Core(int argc, char* argv[]) :
 	objectPath = argv[1];
 	
 	gk::AppSettings settings;
-	settings.setGLVersion(3,3);
+	settings.setGLVersion(4,1);
 	if(createWindow(800, 600, settings) < 0) closeWindow();
 }
 
@@ -62,25 +62,25 @@ int Core::init()
 	
 	gk::programPath("install/shaders");
 	
-	programLight = gk::createProgram("precompute_light.glsl");
+	programLight = gk::createProgram("precompute_ambient_light.glsl");
 	if (programLight == gk::GLProgram::null()) { printf("[ERROR] #2\n"); exit(1); }
 	glBindAttribLocation(programLight->name,	0, "position");
 	glBindAttribLocation(programLight->name,	1, "normal");
 	glBindAttribLocation(programLight->name,	2, "texcoord");
 	
-	programAmbient = gk::createProgram("precompute_ambient.glsl");
-	if (programAmbient == gk::GLProgram::null()) { printf("[ERROR] #3\n"); exit(1); }
-	glBindAttribLocation(programAmbient->name,	0, "position");
-	glBindAttribLocation(programAmbient->name,	1, "normal");
-	glBindAttribLocation(programAmbient->name,	2, "texcoord");
+	programTexture = gk::createProgram("precompute_ambient_texture.glsl");
+	if (programTexture == gk::GLProgram::null()) { printf("[ERROR] #3\n"); exit(1); }
+	glBindAttribLocation(programTexture->name,	0, "position");
+	glBindAttribLocation(programTexture->name,	1, "normal");
+	glBindAttribLocation(programTexture->name,	2, "texcoord");
 
-	programBlender = gk::createProgram("precompute_blender.glsl");
+	programBlender = gk::createProgram("precompute_ambient_blender.glsl");
 	if (programBlender == gk::GLProgram::null()) { printf("[ERROR] #4\n"); exit(1); }
 	
-	programClamp = gk::createProgram("precompute_clamp.glsl");
+	programClamp = gk::createProgram("precompute_ambient_clamp.glsl");
 	if (programClamp == gk::GLProgram::null()) { printf("[ERROR] #5\n"); exit(1); }
 	
-	programViewer = gk::createProgram("precompute_viewer.glsl");
+	programViewer = gk::createProgram("precompute_ambient_viewer.glsl");
 	if (programViewer == gk::GLProgram::null()) { printf("[ERROR] #6\n"); exit(1); }
 	glBindAttribLocation(programViewer->name,	0, "position");
 	glBindAttribLocation(programViewer->name,	1, "normal");
@@ -104,7 +104,7 @@ int Core::init()
 	
 	compute();
 	
-	return 0; // 1 for viewer
+	return 1;
 }  
 
 // ############################################################################
@@ -172,12 +172,12 @@ int Core::compute()
 		glViewport(0, 0, framebufferAmbient->width, framebufferAmbient->height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		glUseProgram(programAmbient->name);
-		programAmbient->uniform("height")			= (float) framebufferAmbient->height;
-		programAmbient->uniform("width")			= (float) framebufferAmbient->width;
-		programAmbient->uniform("mv")					= (        modelview ).matrix();
-		programAmbient->uniform("mvp")				= ( proj * modelview ).matrix();
-		programAmbient->sampler("light_map")	= 0;
+		glUseProgram(programTexture->name);
+		programTexture->uniform("height")			= (float) framebufferAmbient->height;
+		programTexture->uniform("width")			= (float) framebufferAmbient->width;
+		programTexture->uniform("mv")					= (        modelview ).matrix();
+		programTexture->uniform("mvp")				= ( proj * modelview ).matrix();
+		programTexture->sampler("light_map")	= 0;
 		object->draw();
 		
 		// --------------------------------------------------------------------------		

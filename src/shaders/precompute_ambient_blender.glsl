@@ -1,4 +1,4 @@
-#version 330
+#version 410
 
 #ifdef VERTEX_SHADER
 uniform		int					faceID;
@@ -30,6 +30,5 @@ void main()
 	vec4	c					= texture(ambient, texcoords);
 	fragment_color	= vec4(c.rgb*n, c.a);
 }
-
 
 #endif

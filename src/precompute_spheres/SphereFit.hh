@@ -10,19 +10,33 @@
 #include "MeshIO.h"
 
 
-class SphereFit : public LMS<gk::Point, float>
+
+struct P : public gk::Point
+{
+	P()                   : gk::Point()  {}
+	P(const gk::Point& p) : gk::Point(p) {}
+};
+struct PN : public gk::Point
+{
+	PN()                                       : gk::Point(),  normal()  {}
+	PN(const gk::Point& p)                     : gk::Point(p), normal()  {}
+	PN(const gk::Point& p, const gk::Point& n) : gk::Point(p), normal(n) {}
+	//------------------------------------------------
+	gk::Point normal;
+};
+
+
+
+
+class SphereFit : public LMS<PN, P, float>
 {	
-	public:
-		typedef Sample<gk::Point>         SampleT;
-		typedef Cluster<gk::Point, float> ClusterTP;
-	
 	public:
 		SphereFit(int snb=10000, int cnb=10) : LMS(snb, cnb) {};
 		void init(gk::Mesh*);
 	
 	private:
-		bool  fitfunc   (      ClusterTP& cluster, const std::vector<SampleT>& samples) const;
-		float weightfunc(const ClusterTP& cluster, const             SampleT & sample ) const;
+		bool  fitfunc   (      clustertype& cluster, const std::vector<sampletype>& samples) const;
+		float weightfunc(const clustertype& cluster, const             sampletype & sample ) const;
 };
 
 #endif

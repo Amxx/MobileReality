@@ -41,7 +41,7 @@ class Core : public gk::App
 		gk::GLFramebuffer*			framebufferClamp;
 	
 		gk::GLProgram*					programLight;
-		gk::GLProgram*					programAmbient;
+		gk::GLProgram*					programTexture;
 		gk::GLProgram*					programBlender;
 		gk::GLProgram*					programClamp;
 		gk::GLProgram*					programViewer;

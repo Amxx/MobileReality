@@ -1,4 +1,4 @@
-#version 330
+#version 410
 
 #ifdef VERTEX_SHADER
 in				vec3				position;

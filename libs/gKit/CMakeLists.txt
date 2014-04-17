@@ -20,7 +20,7 @@ add_library(gKit SHARED
 	${gKit_files}
 )
 
-add_definitions(-DGK_OPENGL3)
+add_definitions(-DGK_OPENGL4)
 add_definitions(-DVERBOSE)
 
 set(CMAKE_CXX_FLAGS_DEBUG			"-DDEBUG")

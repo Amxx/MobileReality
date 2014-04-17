@@ -1,4 +1,4 @@
-#version 140
+#version 410
 
 #ifdef VERTEX_SHADER
 out				vec2				texcoords;

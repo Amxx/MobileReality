@@ -6,45 +6,50 @@
 #include "timers.hh"
 
 
-template<typename T>
-class Sample  : public T {
-	public:
-		Sample()                   : T(),  group(0) {};
-		Sample(const T & t)        : T(t), group(0) {};
-		Sample(const T & t, int g) : T(t), group(g) {};
-		//------------------------------------------------
-		int group;
+template<typename S>
+struct Sample  : public S
+{
+	Sample()                  : S(),  group(0) {};
+	Sample(const S& s)        : S(s), group(0) {};
+	Sample(const S& s, int g) : S(s), group(g) {};
+	//------------------------------------------------
+	int group;
 };
 
-template<typename T, typename P>
-class Cluster : public T {
-	public:
-		Cluster()                 : T(),  parameter()  {};
-		Cluster(const T & t)      : T(t), parameter()  {};
-		Cluster(const T & t, P p) : T(t), parameter(p) {};
-		//------------------------------------------------
-		P parameter;
+template<typename C, typename P>
+struct Cluster : public C
+{
+	Cluster()                : C(),  parameter()  {};
+	Cluster(const C& c)      : C(c), parameter()  {};
+	Cluster(const C& c, P p) : C(c), parameter(p) {};
+	//------------------------------------------------
+	P parameter;
 };
 
-template<typename T, typename P>		
+
+
+
+template<typename S, typename C, typename P>		
 class LMS
 {
 	public:
-		typedef Sample<T>    SampleT;
-		typedef Cluster<T,P> ClusterTP;
+		typedef Sample<S>    sampletype;
+		typedef Cluster<C,P> clustertype;
 		
 		LMS(int snb=100000, int cnb=10) : samples(snb), clusters(cnb) {};
 		void init();
 		void run(int max_step = -1);
-	
-	private:
+		void step();
+			
+	protected:
+		bool computegroups();
 		void computefit();
-		virtual bool  fitfunc(ClusterTP&, const std::vector<SampleT>&) const = 0;
-		virtual float weightfunc(const ClusterTP&, const SampleT&) 		 const = 0;
+		virtual bool  fitfunc   (      clustertype&, const std::vector<sampletype>&) const = 0;
+		virtual float weightfunc(const clustertype&, const             sampletype &) const = 0;
 
 	public:
-		std::vector<SampleT>   samples;
-		std::vector<ClusterTP> clusters;
+		std::vector<sampletype>   samples;
+		std::vector<clustertype> clusters;
 	
 };
 
@@ -53,53 +58,72 @@ class LMS
 
 
 
+#include <iostream>
+#define			LOGHERE					std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
 
 
 
 
-template<typename T, typename P>		
-void LMS<T,P>::init()
+template<typename S, typename C, typename P>	
+void LMS<S,C,P>::init()
 {
-	//SET samples
-	//SET clusters
-	computefit();
 }
 
-template<typename T, typename P>		
-void LMS<T,P>::run(int max_step)
+template<typename S, typename C, typename P>		
+void LMS<S,C,P>::run(int max_step)
 {
 	timer begin = now();
 	
-	int		step = 0;
-	bool	loop = true;
-	while (loop && max_step != step++)
-	{
-		printf("%d\n", step);
-		loop = false;
-		for (size_t i=0; i<samples.size(); ++i)
-		{
-			int old=samples[i].group;
-			for (size_t k=0; k<clusters.size(); ++k)
-				if (weightfunc(clusters[k], samples[i]) < weightfunc(clusters[samples[i].group], samples[i])) samples[i].group=k;	
-			if (old!=samples[i].group) loop = true;
-		}
-		if (loop) computefit();
+	int step = 0;
+	while (computegroups() && max_step != step++)
+	{		
+		computefit();
+			
+		float sf = (float) step / max_step;
+		int   si = 80*sf;
+		fprintf(stdout, "\rIteration %4d [", step);
+		for (int i=0; i<si; ++i)  fprintf(stdout, "#");
+		for (int i=si; i<80; ++i) fprintf(stdout, " ");
+		fprintf(stdout, "] %3d%%", (int)(sf*100));
+		fflush(stdout);
 	}
 	
 	timer end = now();
-	fprintf(stderr, "Convergence in %d iterations : %s\n", step, formatTimer(end-begin).c_str());
-	fprintf(stderr, "Stopped by : %s\n", ((loop)?std::string("step limitation"):std::string("matching stability")).c_str());
-	
-	// std::cout	<< "====================================" << std::endl;
-	// for (ClusterTP cluster: clusters) printf("%10f %10f %10f %10f\n", cluster.x, cluster.y, cluster.z, cluster.radius);
-	// std::cout	<< "====================================" << std::endl;
+	fprintf(stdout, "\n");
+	fprintf(stdout, "Stopped after %d iterations : %s\n", step-1, formatTimer(end-begin).c_str());
+	fprintf(stdout, "Stopped by : %s\n", ((max_step<step)?std::string("step limitation"):std::string("matching stability")).c_str());
 }
 
-template<typename T, typename P>	
-void LMS<T,P>::computefit()
+template<typename S, typename C, typename P>	
+void LMS<S,C,P>::step()
 {
-	std::vector<std::vector<SampleT>> smpls(clusters.size());
-	for (const SampleT& smpl : samples)
+	printf("computing step ... "); fflush(stdout);
+	computegroups();
+	computefit();
+	printf("done\n");
+}
+
+template<typename S, typename C, typename P>	
+bool LMS<S,C,P>::computegroups()
+{
+	bool changes = false;
+	for (sampletype& sample : samples)
+	{
+		int oldgroup = sample.group;
+		for (size_t k=0; k<clusters.size(); ++k)
+			if (weightfunc(clusters[k], sample) < weightfunc(clusters[sample.group], sample))
+				sample.group=k;	
+		if (oldgroup!=sample.group)
+			changes = true;
+	}
+	return changes;
+}
+
+template<typename S, typename C, typename P>
+void LMS<S,C,P>::computefit()
+{
+	std::vector<std::vector<sampletype>> smpls(clusters.size());
+	for (const sampletype& smpl : samples)
 		smpls[smpl.group].push_back(smpl);
 	for (size_t i=0; i<clusters.size(); ++i)
 		fitfunc(clusters[i], smpls[i]);

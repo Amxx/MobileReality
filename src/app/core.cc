@@ -119,7 +119,7 @@ Core::Core(int argc, char* argv[]) :
 	// =                   R E A D Y   T O   R U N                   =
 	// ===============================================================
 	gk::AppSettings settings;
-	settings.setGLVersion(3,1);
+	settings.setGLVersion(4,1);
 	// settings.setFullscreen();
 	if(createWindow(800, 600, settings) < 0) closeWindow();
 	
