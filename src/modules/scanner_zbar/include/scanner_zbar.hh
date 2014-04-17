@@ -1,9 +1,9 @@
 #ifndef ZBAR_SCANNER_HH
 #define ZBAR_SCANNER_HH
 
-#include "scanner.hh"
-#include "symbol.hh"
-#include "module.hh"
+#include "modules/module.hh"
+#include "modules/scanner/scanner.hh"
+#include "modules/scanner/symbol.hh"
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <zbar.h>

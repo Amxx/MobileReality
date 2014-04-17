@@ -1,28 +1,5 @@
 #include "SphereFit.hh"
 
-
-void SphereFit::init(gk::Mesh* mesh)
-{
-	std::vector<double> importance(mesh->triangleCount());
-	for (int i=0; i<mesh->triangleCount(); ++i) importance[i]  = mesh->triangle(i).area();
-	for (int i=1; i<mesh->triangleCount(); ++i) importance[i] += importance[i-1];
-	for (sampletype& sample : samples)
-	{
-		double seed = drand48() * importance.back();
-		int idx=0;
-		for (double imp : importance) { if (imp>seed) break; idx++; }
-		mesh->triangle(idx).sampleUniform(drand48(), drand48(), sample);
-	//fprintf(stderr, "[Random Point] seed = %12.7f - triangle = %4d\n", seed, idx);
-	}
-	for(size_t i=0; i<clusters.size(); ++i)
-		clusters[i] = clustertype(samples[i], 1.f);
-}
-
-
-
-
-
-
 bool SphereFit::fitfunc(clustertype& cluster, const std::vector<sampletype>& samples) const
 {
 	

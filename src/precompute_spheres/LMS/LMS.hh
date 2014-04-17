@@ -2,9 +2,17 @@
 #define LMS_HH
 
 #include "Eigen/Dense"
+#include "../tools/P.hh"
+#include "../tools/timers.hh"
 
-#include "timers.hh"
+// =================================
+// =   G K I T   I N C L U D E S   =
+// =================================
+#include "Mesh.h"
+#include "MeshIO.h"
 
+
+typedef bool UNUSEDTYPE;
 
 template<typename S>
 struct Sample  : public S
@@ -12,7 +20,6 @@ struct Sample  : public S
 	Sample()                  : S(),  group(0) {};
 	Sample(const S& s)        : S(s), group(0) {};
 	Sample(const S& s, int g) : S(s), group(g) {};
-	//------------------------------------------------
 	int group;
 };
 
@@ -22,12 +29,8 @@ struct Cluster : public C
 	Cluster()                : C(),  parameter()  {};
 	Cluster(const C& c)      : C(c), parameter()  {};
 	Cluster(const C& c, P p) : C(c), parameter(p) {};
-	//------------------------------------------------
 	P parameter;
 };
-
-
-
 
 template<typename S, typename C, typename P>		
 class LMS
@@ -50,16 +53,22 @@ class LMS
 	public:
 		std::vector<sampletype>   samples;
 		std::vector<clustertype> clusters;
-	
 };
 
 
+void sampleMesh(LMS<PN,P,float>&, gk::Mesh&);
 
 
 
 
-#include <iostream>
-#define			LOGHERE					std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
+
+
+
+
+
+
+
+
 
 
 
@@ -81,7 +90,7 @@ void LMS<S,C,P>::run(int max_step)
 			
 		float sf = (float) step / max_step;
 		int   si = 80*sf;
-		fprintf(stdout, "\rIteration %4d [", step);
+		fprintf(stdout, "\rIteration %4d/%d [", step-1, max_step);
 		for (int i=0; i<si; ++i)  fprintf(stdout, "#");
 		for (int i=si; i<80; ++i) fprintf(stdout, " ");
 		fprintf(stdout, "] %3d%%", (int)(sf*100));

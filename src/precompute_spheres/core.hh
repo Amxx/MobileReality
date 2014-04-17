@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 // =================================
 // =   G K I T   I N C L U D E S   =
@@ -17,15 +18,16 @@
 #include "GL/GLProgram.h"
 
 
-#include "LMS.hh"
-#include "SphereFit.hh"
+#include "LMS/LMS.hh"
+#include "LMS/SphereFit.hh"
+#include "LMS/PointFit.hh"
 
 
 class Core : public gk::App
 {	
 	private:
 		
-		SphereFit								lms;
+		LMS<PN,P,float>*				lms;
 	
 		gk::GLBasicMesh*				object;
 		gk::GLProgram*					programViewer;

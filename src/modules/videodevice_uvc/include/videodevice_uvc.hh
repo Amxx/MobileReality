@@ -1,8 +1,8 @@
 #ifndef OPENCV_DEVICE_HH
 #define OPENCV_DEVICE_HH
 
-#include "module.hh"
-#include "videodevice.hh"
+#include "modules/module.hh"
+#include "modules/video/videodevice.hh"
 
 #include <iostream>
 #include <linux/videodev2.h>

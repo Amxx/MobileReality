@@ -6,7 +6,7 @@ include_directories(
 	${OpenCV_INCLUDE_DIRS}
 )
 
-file(GLOB PrecomputeSpheres_files
+file(GLOB_RECURSE PrecomputeSpheres_files
 	*.cc
 )
 

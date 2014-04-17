@@ -1,14 +1,15 @@
 #include "core.hh"
 
-size_t			samples_nb	= 1000;
-size_t			clusters_nb	= 10;
-int					max_step		= 100;
+size_t			samples_nb	= 100000;
+size_t			clusters_nb	= 20;
+int					max_step		= 1000;
 std::string path;
 	
 // ############################################################################
 
 Core::Core(int argc, char* argv[]) :
-	gk::App()
+	gk::App(),
+	lms(nullptr)
 {
 	srand48(time(nullptr));
 	if (argc<2) { printf("Usage: %s <file.obj>\n", argv[0]); exit(1); }
@@ -24,13 +25,14 @@ Core::Core(int argc, char* argv[]) :
 
 Core::~Core()
 {
+	if (lms) delete lms;
 }
 
 // ############################################################################
 
 int Core::init()
 {
-	renderoptions = 0x02;// | 0x01;
+	renderoptions = 0x02 | 0x01;
 	
 	glClearColor(0.0, 0.0, 0.0, 0.0);	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -59,11 +61,15 @@ int Core::init()
 	object->createIndexBuffer(mesh->indices);
 	orbiter = gk::Orbiter(mesh->box);
 	
-	lms = SphereFit(samples_nb, clusters_nb);
-	printf("intialisation ... "); fflush(stdout);
-	lms.init(mesh);
-	printf("done");
-	// lms.run(max_step);
+	
+	// lms = new SphereFit(samples_nb, clusters_nb);
+	lms = new PointFit(samples_nb, clusters_nb);
+	
+	
+	printf("mesh sampling ... "); fflush(stdout);
+	sampleMesh(*lms, *mesh);
+	printf("done\n");
+	lms->run(max_step);
 	
 	delete mesh;
 
@@ -100,15 +106,12 @@ int Core::draw()
 	}
 	
 	if (renderoptions & 0x02)
-		for (const SphereFit::clustertype& cluster : lms.clusters)
+		for (const SphereFit::clustertype& cluster : lms->clusters)
 		{
 			glUseProgram(programCluster->name);
 			programCluster->uniform("mvp")								= ( proj * modelview ).matrix();
-			programCluster->uniform("tesselation_level")	= 3.f;
-			programCluster->uniform("sphere") 						= gk::Vec4(	cluster.x,	\
-																																cluster.y,	\
-																																cluster.z,	\
-																																cluster.parameter);
+			programCluster->uniform("tesselation_level")	= gk::Vec2(5.f, 5.f);
+			programCluster->uniform("sphere") 						= gk::Vec4(cluster.x, cluster.y, cluster.z, cluster.parameter);
 			glDrawArrays(GL_PATCHES, 0, 60);
 		}
 
@@ -125,7 +128,21 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 	{
 		case SDLK_ESCAPE: {	closeWindow();					break; }
 		case SDLK_F1:			{ renderoptions ^= 0x01;	break; }
-		case SDLK_F2:			{ lms.step();							break; }
+		case SDLK_F2:			{ renderoptions ^= 0x02;	break; }
+		case SDLK_F9:			{ lms->step();						break; }
 		case SDLK_F5:			{	gk::reloadPrograms();		break; }
+		case SDLK_RETURN:
+		{
+			std::stringstream spherepath;
+			spherepath << path << ".spheres";
+			
+			printf("Exporting sphere informations to %s ... ", spherepath.str().c_str()); fflush(stdout);
+			std::ofstream file(spherepath.str());
+			for (const SphereFit::clustertype& cluster : lms->clusters)
+				file << cluster.x << " " << cluster.y << " " << cluster.z << " " << cluster.parameter << std::endl;
+			file.close();
+			printf("done\n");
+			break;
+		}
 	}
 }	

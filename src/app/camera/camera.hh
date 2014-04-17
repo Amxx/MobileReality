@@ -1,11 +1,9 @@
 #ifndef CAMERA_HH
 #define CAMERA_HH
 
-#include "videodevice.hh"
 #include "calibration.hh"
-#include "scanner.hh"
-
-#define  LOGHERE  std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
+#include "../modules/video/videodevice.hh"
+#include "../modules/scanner/scanner.hh"
 
 class Camera : public VideoDevice, public Calibration
 {

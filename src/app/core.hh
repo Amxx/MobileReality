@@ -30,10 +30,10 @@
 // =================================
 // =   S E L F   I N C L U D E S   =
 // =================================
-#include "configuration.hh"
-#include "envmap.hh"
-#include "module.hh"
-#include "tools.hh"
+#include "configuration/configuration.hh"
+#include "envmap/envmap.hh"
+#include "modules/module.hh"
+#include "tools/tools.hh"
 
 
 class Core : public gk::App

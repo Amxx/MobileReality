@@ -1,29 +1,6 @@
 ﻿#include "core.hh"
 
 // ############################################################################
-// #                                  MACROS                                  #
-// ############################################################################
-
-#define			LOGHERE					std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
-#define			NOW()						std::chrono::steady_clock::now();
-
-typedef			std::chrono::steady_clock::time_point														timer;
-typedef			std::chrono::duration<long int, std::ratio<1l, 1000000000l>>		duration;
-
-std::string formatTimer(duration dt)
-{
-	char buffer[1024];
-	sprintf(buffer, "%3d ms %03d ys %03d ns",
-					std::chrono::duration_cast<std::chrono::milliseconds>(dt).count(),
-					std::chrono::duration_cast<std::chrono::microseconds>(dt).count()%1000,
-					std::chrono::duration_cast<std::chrono::nanoseconds>(dt).count()%1000);
-	return std::string(buffer);
-}
-
-
-
-
-// ############################################################################
 // #                                 METHODS                                  #
 // ############################################################################
 
@@ -277,7 +254,7 @@ int Core::draw()
 	// ===============================================================
 	// =               U S E R   I N T E R A C T I O N               =
 	// ===============================================================
-	timer t1 = NOW();
+	timer t1 = now();
 	
 	processKeyboardEvent();
 	int x, y;
@@ -289,7 +266,7 @@ int Core::draw()
 	// ===============================================================
 	// =                 G R A B I N G   I M A G E S                 =
 	// ===============================================================
-	timer t2 = NOW();
+	timer t2 = now();
 	
 	if (_config.devices.front.enable)
 	{
@@ -311,7 +288,7 @@ int Core::draw()
 	// ===============================================================
 	// =                    P O S I T I O N I N G                    =
 	// ===============================================================	
-	timer t3 = NOW();
+	timer t3 = now();
 	
 	switch (_config.general.localisation.type)
 	{
@@ -355,7 +332,7 @@ int Core::draw()
 	// ===============================================================
 	// =                B U I L D I N G   E N V M A P                =
 	// ===============================================================
-	timer t4 = NOW();
+	timer t4 = now();
 		
 	if (_buildenvmap && position_fresh)
 	{
@@ -374,7 +351,7 @@ int Core::draw()
 	// ===============================================================
 	// =               B A C K G R O U N D   F R A M E               =
 	// ===============================================================
-	timer t5 = NOW();
+	timer t5 = now();
 	
 	if (_config.general.rendering.background)
 	{
@@ -408,7 +385,7 @@ int Core::draw()
 	// ===============================================================
 	// =                S C E N E   R E N D E R I N G                =
 	// ===============================================================
-	timer t6 = NOW();
+	timer t6 = now();
 	
 	if (_config.general.rendering.scene && (_config.general.localisation.type == Options::DEBUG || (position_duration && position_duration--)))
 	{
@@ -483,7 +460,7 @@ int Core::draw()
 	// ===============================================================
 	// =                 F R A M E S   D I S P L A Y                 =
 	// ===============================================================
-	timer t7 = NOW();
+	timer t7 = now();
 	
 	if (_config.general.rendering.view)
 	{
@@ -494,7 +471,7 @@ int Core::draw()
 	// ===============================================================
 	// =                         T I M E R S                         =
 	// ===============================================================
-	timer t8 = NOW();
+	timer t8 = now();
 	
 	if (_config.general.verbose > 1)
 	{

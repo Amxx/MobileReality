@@ -10,9 +10,9 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/photo/photo.hpp>
 
-#include "videodevice.hh"
-#include "scanner.hh"
-#include "symbol.hh"
+#include "../modules/video/videodevice.hh"
+#include "../modules/scanner/scanner.hh"
+#include "../modules/scanner/symbol.hh"
 
 class Calibration
 {

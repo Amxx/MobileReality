@@ -5,7 +5,8 @@
 #include "GL/GLProgram.h"
 #include "GL/GLTexture.h"
 
-#include "tools.hh"
+#include "../tools/tools.hh"
+#include "../camera/camera.hh"
 
 class EnvMap
 {

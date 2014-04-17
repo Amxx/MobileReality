@@ -5,7 +5,7 @@ include_directories(
 	${OpenCV_INCLUDE_DIRS}
 )
 
-file(GLOB Reality_files
+file(GLOB_RECURSE Reality_files
 	*.cc
 )
 

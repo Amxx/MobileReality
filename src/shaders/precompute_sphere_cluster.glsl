@@ -48,7 +48,7 @@ void main()
 
 #ifdef CONTROL_SHADER
 layout(vertices = 3) out;
-uniform		float				tesselation_level = 3.0;
+uniform		vec2				tesselation_level = vec2(3.f, 3.f);
 in				vec3				vertex_position[];
 out				vec3				control_position[];
  
@@ -57,10 +57,10 @@ void main(void)
 	control_position[gl_InvocationID] = vertex_position[gl_InvocationID];
 	if (gl_InvocationID == 0)
 	{
-		gl_TessLevelInner[0] = tesselation_level;
-		gl_TessLevelOuter[0] = tesselation_level;
-		gl_TessLevelOuter[1] = tesselation_level;
-		gl_TessLevelOuter[2] = tesselation_level;
+		gl_TessLevelInner[0] = tesselation_level.x;
+		gl_TessLevelOuter[0] = tesselation_level.y;
+		gl_TessLevelOuter[1] = tesselation_level.y;
+		gl_TessLevelOuter[2] = tesselation_level.y;
 	}
 }
 #endif
