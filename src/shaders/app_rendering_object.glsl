@@ -6,35 +6,35 @@
 
 #ifdef VERTEX_SHADER
 
-uniform		mat4				mvMatrix;
-uniform 	mat4				mvMatrixInv;
-uniform		mat4				mvpMatrix;
-uniform		int					method;
-uniform 	samplerCube	envmap;
+uniform												mat4				mvMatrix;
+uniform												mat4				mvMatrixInv;
+uniform												mat4				mvpMatrix;
+uniform												int					method;
+uniform												samplerCube	envmap;
 
-uniform		vec4				diffuse_color;
-uniform		bool				use_diffuse_texture;
-uniform 	sampler2D		diffuse_texture;
-uniform		float				kd;
-uniform		vec4				specular_color;
-uniform		bool				use_specular_texture;
-uniform 	sampler2D		specular_texture;
-uniform		float				ks;
-uniform		float				ns;
-uniform		vec4				emission;
-uniform		float				ni;
+uniform												vec4				diffuse_color;
+uniform												bool				use_diffuse_texture;
+uniform												sampler2D		diffuse_texture;
+uniform												float				kd;
+uniform												vec4				specular_color;
+uniform												bool				use_specular_texture;
+uniform												sampler2D		specular_texture;
+uniform												float				ks;
+uniform												float				ns;
+uniform												vec4				emission;
+uniform												float				ni;
 
-in				vec3				position;
-in				vec3				texcoord;
-in				vec3				normal;
+layout(location = 0) in				vec3				position;
+layout(location = 1) in				vec3				texcoord;
+layout(location = 2) in				vec3				normal;
 
-out				vec3				vertex_position;
-out				vec3				vertex_normal;
-out				vec3				vertex_texcoord;
+out														vec3				vertex_position;
+out														vec3				vertex_normal;
+out														vec3				vertex_texcoord;
 
-out 			vec4				diffuse_light;
-out				float				diffuse_level;
-out				float 			specular_level;
+out														vec4				diffuse_light;
+out														float				diffuse_level;
+out														float 			specular_level;
 
 
 void main()
@@ -72,35 +72,33 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 	
-uniform		mat4				mvMatrix;
-uniform 	mat4				mvMatrixInv;
-uniform		mat4				mvpMatrix;
-uniform		int					method;
-uniform 	samplerCube	envmap;
+uniform												mat4				mvMatrix;
+uniform												mat4				mvMatrixInv;
+uniform												mat4				mvpMatrix;
+uniform												int					method;
+uniform												samplerCube	envmap;
 
-uniform		vec4				diffuse_color;
-uniform		bool				use_diffuse_texture;
-uniform 	sampler2D		diffuse_texture;
-uniform		float				kd;
-uniform		vec4				specular_color;
-uniform		bool				use_specular_texture;
-uniform 	sampler2D		specular_texture;
-uniform		float				ks;
-uniform		float				ns;
-uniform		vec4				emission;
-uniform		float				ni;
+uniform												vec4				diffuse_color;
+uniform												bool				use_diffuse_texture;
+uniform												sampler2D		diffuse_texture;
+uniform												float				kd;
+uniform												vec4				specular_color;
+uniform												bool				use_specular_texture;
+uniform												sampler2D		specular_texture;
+uniform												float				ks;
+uniform												float				ns;
+uniform												vec4				emission;
+uniform												float				ni;
 
+in														vec3				vertex_position;
+in														vec3				vertex_normal;
+in														vec3				vertex_texcoord;
 
+in														vec4				diffuse_light;
+in														float				diffuse_level;
+in														float 			specular_level;
 
-in				vec3				vertex_position;
-in				vec3				vertex_normal;
-in				vec3				vertex_texcoord;
-
-in	 			vec4				diffuse_light;
-in				float				diffuse_level;
-in				float 			specular_level;
-
-out				vec4				fragment_color;
+out														vec4				fragment_color;
 
 void main() 
 {

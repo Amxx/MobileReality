@@ -6,12 +6,14 @@
 
 #ifdef VERTEX_SHADER
 
-uniform		mat4				mvpMatrix;
-uniform 	samplerCube	envmap;
-uniform		int					method;
-uniform		vec2 				bbox = vec2(1000, -1.0);
+uniform												mat4				mvpMatrix;
+uniform												samplerCube	envmap;
+uniform												int					method;
+uniform												vec2 				bbox = vec2(1000, -1.0);
 
-out				vec3				vertex_position;
+layout(location = 3) in				vec4				sphere;
+out														vec3				vertex_position;
+out														vec4				vertex_sphere;
 
 void main()
 {
@@ -22,6 +24,7 @@ void main()
 													
 	gl_Position			= mvpMatrix * vec4(pos[gl_VertexID], 1.0);
 	vertex_position = pos[gl_VertexID];
+	vertex_sphere		= sphere;
 }
 #endif
 
@@ -30,13 +33,13 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 
-uniform		mat4				mvpMatrix;
-uniform 	samplerCube	envmap;
-uniform		int					method;
-uniform		vec4				sphere	= vec4(0.0, 0.0, 0.0, 1.0);
+uniform												mat4				mvpMatrix;
+uniform												samplerCube	envmap;
+uniform												int					method;
 
-in				vec3				vertex_position;
-out				vec4				fragment_color;
+in														vec3				vertex_position;
+in														vec4				vertex_sphere;
+out														vec4				fragment_color;
 
 float energy(vec4	color) { return length(color.rgb); }
 
@@ -44,11 +47,11 @@ void main()
 {
 	vec3	top						= vec3(0.0, 1.0, 0.0);
 	
-	vec3	direction		=	sphere.xyz - vertex_position;
+	vec3	direction		=	vertex_sphere.xyz - vertex_position;
 	float distance		= length(direction);
 		
 	float	size				= textureSize(envmap, 0).x;
-	float	viewsize		=	size * sphere.w / distance;
+	float	viewsize		=	size * vertex_sphere.w / distance;
 
 	float	ambiant			=	energy(	textureLod(envmap, vec3(+0.0, +1.0, +0.0), log2(size) 		) * 0.56
 														+	textureLod(envmap, vec3(-1.0, +0.0, +0.0), log2(size) 		) * 0.11
@@ -58,7 +61,7 @@ void main()
 	float	local				=	energy(	textureLod(envmap, direction,              log2(viewsize)	)					);
 	
 	
-	float solidfactor	=	dot(top, normalize(direction)) * pow(sphere.w/distance, 2.0);
+	float solidfactor	=	dot(top, normalize(direction)) * pow(vertex_sphere.w/distance, 2.0);
 	float	occult			=	solidfactor * min(local/ambiant, PI);
 	
 	

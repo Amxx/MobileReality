@@ -1,9 +1,9 @@
 #include "core.hh"
 
-size_t			samples_nb	= 100000;
-size_t			clusters_nb	= 100;
-int					max_step		= 1000;
-std::string path;
+size_t				samples_nb	= 100000;
+size_t				clusters_nb	= 100;
+int						max_step		= 1000;
+std::string 	path;
 	
 // ############################################################################
 
@@ -12,8 +12,19 @@ Core::Core(int argc, char* argv[]) :
 	lms(nullptr)
 {
 	srand48(time(nullptr));
-	if (argc<2) { printf("Usage: %s <file.obj>\n", argv[0]); exit(1); }
-	path = argv[1];
+
+	
+	for (int i=1; i<argc; ++i) 
+		if			(i+1 < argc && !strcmp(argv[i], "-i"))		path				= argv[++i];
+		else if (i+1 < argc && !strcmp(argv[i], "-s"))		samples_nb	= atoi(argv[++i]);
+		else if (i+1 < argc && !strcmp(argv[i], "-c"))		clusters_nb	= atoi(argv[++i]);
+		else if (i+1 < argc && !strcmp(argv[i], "-m"))		max_step		= atoi(argv[++i]);
+	
+	if (argc<2 || path.empty())
+	{
+		printf("Usage: %s [options] -i file.obj\n", argv[0]);
+		exit(1);
+	}
 	
 	
 	gk::AppSettings settings;
@@ -39,7 +50,6 @@ int Core::init()
 	present();
 	
 	
-	
 	gk::programPath("install/shaders");
 	
 	programCluster = gk::createProgram("precompute_sphere_cluster.glsl");
@@ -50,7 +60,6 @@ int Core::init()
 	glBindAttribLocation(programViewer->name,	0, "position");
 	glBindAttribLocation(programViewer->name,	1, "normal");
 	glBindAttribLocation(programViewer->name,	2, "texcoord");
-	
 	
 	
 	gk::Mesh* mesh = gk::MeshIO::readOBJ(path);
@@ -146,4 +155,4 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 			break;
 		}
 	}
-}	
+}

@@ -161,6 +161,7 @@ int Core::init()
 	glBindAttribLocation(_GLResources["prg:rendering_object"]->name,	0, "position");
 	glBindAttribLocation(_GLResources["prg:rendering_object"]->name,	1, "normal");
 	glBindAttribLocation(_GLResources["prg:rendering_object"]->name,	2, "texcoord");
+	glBindAttribLocation(_GLResources["prg:rendering_shadows"]->name, 3, "sphere");
 		
 	// ===============================================================
 	// =          C R E A T E   F R A M E   T E X T U R E S          =
@@ -186,7 +187,7 @@ int Core::init()
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	
 	// ===============================================================
-	// =                    C R E A T E   M E S H                    =
+	// =                           M E S H                           =
 	// ===============================================================
 	gk::Mesh *mesh = gk::MeshIO::readOBJ(_config.object.obj_file);
 	if (mesh == nullptr) return -1;
@@ -198,36 +199,41 @@ int Core::init()
 	_meshGroups = mesh->groups;
 	_meshBox		= mesh->box;
 	delete mesh;
+	
+	gk::Point box_center;
+	float			box_radius;
+	_meshBox.BoundingSphere(box_center, box_radius);
+	_meshBoxDescriptor = gk::Vec2(box_radius, _meshBox.pMin.y);
 
 	// ===============================================================
 	// =              O C C L U S I O N   S P H E R E S              =
 	// ===============================================================
 
-	gk::Point box_center;
-	float			box_radius;
-	_meshBox.BoundingSphere(box_center, box_radius);
-	_meshBoxDescriptor = gk::Vec2(box_radius, _meshBox.pMin.y);
-	
+	std::vector<gk::Vec4> instances;
 	if (!_config.object.spheres_file.empty())
 	{
 		std::ifstream ifs(_config.object.spheres_file, std::ifstream::in);
 		if (ifs.is_open())
 		{
-			while (ifs.good())
-			{
-				float x, y, z, r;
-				ifs >> x >> y >> z >> r;
-				_meshSpheres.push_back(gk::Vec4(x, y, z, r));
-			}
+			float x, y, z, r;
+			while (ifs.good()) { ifs >> x >> y >> z >> r; instances.push_back(gk::Vec4(x, y, z, r)); }
 			ifs.close();
 		}
 	}
-	if (_meshSpheres.empty())
+	if (instances.empty())
 	{
 		if (!_config.object.spheres_file.empty()) fprintf(stderr, "[WARNING] Could not open / load spheres from file %s\n", _config.object.spheres_file.c_str());
-		_meshSpheres.push_back(gk::Vec4(box_center.x, box_center.y, box_center.z, box_radius/sqrtf(3.f)));
+		instances.push_back(gk::Vec4(box_center.x, box_center.y, box_center.z, box_radius/sqrtf(3.f)));
 	}
-
+	
+	_GLResources["buffer:spheres"] = gk::createBuffer(GL_ARRAY_BUFFER, instances);
+	_sphereNumber 								 = instances.size();
+	
+	glBindBuffer(GL_ARRAY_BUFFER, _GLResources["buffer:spheres"]->name);
+	glVertexAttribPointer			(getGLResource<gk::GLProgram>("prg:rendering_shadows")->attribute("sphere"), 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray	(getGLResource<gk::GLProgram>("prg:rendering_shadows")->attribute("sphere"));
+	glVertexAttribDivisor			(getGLResource<gk::GLProgram>("prg:rendering_shadows")->attribute("sphere"), 1);
+	
 	// ===============================================================
 	// =           C R E A T E   M E S H   T E X T U R E S           =
 	// ===============================================================
@@ -239,10 +245,10 @@ int Core::init()
 			_GLResources[grp.material.specular_texture]	= (new gk::GLTexture())->createTexture2D(4, gk::readImage(grp.material.specular_texture));
 	}
 	
-	
-	
+	// ===============================================================
+	// =                        O R B I T E R                        =
+	// ===============================================================
 	_debugviewpoint = gk::Orbiter(_meshBox);
-	
 	
 	return 1;
 }
@@ -422,8 +428,6 @@ int Core::draw()
 		
 		if (_renderoptions & 0x0020)
 		{
-			
-			
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_BLEND);
 			glUseProgram(_GLResources["prg:rendering_shadows"]->name);
@@ -431,16 +435,11 @@ int Core::draw()
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("method")				= _renderoptions;
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->sampler("envmap")				= 0;
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("bbox")					=	_meshBoxDescriptor;
-			
-			for (gk::Vec4 sphere : _meshSpheres)
-			{
-				getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("sphere") 			= sphere;
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			}
+			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, _sphereNumber);
 			glDisable(GL_BLEND);
 		}
 		
-		glClear(GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);		
 		glUseProgram(_GLResources["prg:rendering_object"]->name);
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrix")			= tr_mv.matrix();
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrixInv")	= tr_mv.inverseMatrix();		

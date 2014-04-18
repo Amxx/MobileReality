@@ -51,7 +51,9 @@ class Core : public gk::App
 		gk::BBox																	_meshBox;
 		gk::Vec2																	_meshBoxDescriptor;
 		std::vector<gk::MeshGroup>								_meshGroups;
-		std::vector<gk::Vec4>											_meshSpheres;
+		//std::vector<gk::Vec4>											_meshSpheres;
+		int																				_sphereNumber;
+	
 		std::map<std::string,	gk::GLResource*>		_GLResources;
 		template<typename T> T*										getGLResource(const std::string&);
 	
