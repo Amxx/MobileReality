@@ -17,12 +17,12 @@
 	<!-- #################################### Devices options ##################################### -->
 	<devices>
 		<front>
-			<enable>off</enable>																						<!-- on | off									-->
+			<enable>off</enable>																					<!-- on | off									-->
 			<id>0</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
-			<enable>off</enable>																						<!-- on | off									-->
+			<enable>off</enable>																					<!-- on | off									-->
 			<id>1</id>																										<!-- [int] | auto | manual		-->
 			<params>data/params/c910-fisheye.xml</params>
 		</back>
@@ -37,7 +37,7 @@
 	<!-- ######################### General parameters of the application ########################## -->
 	<generalParameters>
 	
-		<verbose>high</verbose>																					<!-- [int] | off | low | high -->
+		<verbose>1</verbose>																						<!-- [int] | off | low | high -->
 	
 		<defaultValues>
 			<brightness>128</brightness>																	<!-- -1 for auto							-->
@@ -46,19 +46,19 @@
 		</defaultValues>
 		
 		<envmap>
-			<type>debug</type>																					<!-- dynamic | debug					-->
+			<type>debug</type>																						<!-- dynamic | debug					-->
 			<size>256 256</size>
 			<dual>off</dual>																							<!-- on | off									-->
-			<path>data/envmap/4/%03d.jpg</path>
+			<path>data/envmap/0/%03d.jpg</path>
 		</envmap>
 		
 		<localisation>
-			<type>debug</type>																					<!-- dynamic | debug					-->
+			<type>debug</type>																						<!-- dynamic | debug					-->
 			<size>400.0</size>																						<!-- [float] (0 for infinity) -->
 		</localisation>		
 		
 		<rendering>
-			<background>off</background>																		<!-- on | off									-->
+			<background>on</background>																		<!-- on | off									-->
 			<scene>on</scene>																							<!-- on | off									-->
 			<view>off</view>																							<!-- on | off									-->
 		</rendering>

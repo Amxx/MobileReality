@@ -29,7 +29,7 @@ Core::Core(int argc, char* argv[]) :
 	{
 		VideoDevice* videodevice = Module<VideoDevice>::load(_config.general.modules.video);
 		if (videodevice == nullptr) exit(1);
-		_cameras[0] = new Camera(videodevice, cv::Matx44f(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0));
+		_cameras[0] = new Camera(videodevice, cv::Matx44f(1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f));
 		if (_config.devices.front.id != -2) _cameras[0]->open(_config.devices.front.id);
 		_cameras[0]->UIOpen();
 	}
@@ -37,7 +37,7 @@ Core::Core(int argc, char* argv[]) :
 	{
 		VideoDevice* videodevice = Module<VideoDevice>::load(_config.general.modules.video);
 		if (videodevice == nullptr) exit(1);
-		_cameras[1] = new Camera(videodevice,  cv::Matx44f(-1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0));
+		_cameras[1] = new Camera(videodevice,  cv::Matx44f(-1.f, 0.f, 0.f, 0.f, 0.0f, 1.f, 0.f, 0.f, 0.f, 0.f, -1.f, 0.f, 0.f, 0.f, 0.f, 1.f));
 		if (_config.devices.back.id != -2) _cameras[1]->open(_config.devices.back.id);
 		_cameras[1]->UIOpen();
 	}
@@ -177,8 +177,7 @@ int Core::init()
 	else
 		_GLResources["tex:envmap"]	= (new gk::GLTexture())->createTextureCube(2, _config.general.envmap.size.width, _config.general.envmap.size.height);
 
-	_envmap.init(	getGLResource<gk::GLProgram>("prg:build_cubemap"),
-								getGLResource<gk::GLTexture>("tex:envmap")					);
+	_envmap.init(getGLResource<gk::GLProgram>("prg:build_cubemap"), getGLResource<gk::GLTexture>("tex:envmap"));
 	
 	// ===============================================================
 	// =                  S E A M L E S S   C U B E                  =
@@ -226,10 +225,10 @@ int Core::init()
 		instances.push_back(gk::Vec4(box_center.x, box_center.y, box_center.z, box_radius/sqrtf(3.f)));
 	}
 	
-	_GLResources["buffer:spheres"] = gk::createBuffer(GL_ARRAY_BUFFER, instances);
-	_sphereNumber 								 = instances.size();
+	_GLResources["buffer:occlusion"]	= gk::createBuffer(GL_ARRAY_BUFFER, instances);
+	_occlusionSize										= instances.size();
 	
-	glBindBuffer(GL_ARRAY_BUFFER, _GLResources["buffer:spheres"]->name);
+	glBindBuffer(GL_ARRAY_BUFFER, _GLResources["buffer:occlusion"]->name);
 	glVertexAttribPointer			(getGLResource<gk::GLProgram>("prg:rendering_shadows")->attribute("sphere"), 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray	(getGLResource<gk::GLProgram>("prg:rendering_shadows")->attribute("sphere"));
 	glVertexAttribDivisor			(getGLResource<gk::GLProgram>("prg:rendering_shadows")->attribute("sphere"), 1);
@@ -239,10 +238,8 @@ int Core::init()
 	// ===============================================================
 	for (const gk::MeshGroup& grp : _meshGroups)
 	{
-		if (!grp.material.diffuse_texture.empty())
-			_GLResources[grp.material.diffuse_texture]	= (new gk::GLTexture())->createTexture2D(3, gk::readImage(grp.material.diffuse_texture));
-		if (!grp.material.specular_texture.empty())
-			_GLResources[grp.material.specular_texture]	= (new gk::GLTexture())->createTexture2D(4, gk::readImage(grp.material.specular_texture));
+		if (!grp.material.diffuse_texture.empty())	_GLResources[grp.material.diffuse_texture]	= (new gk::GLTexture())->createTexture2D(3, gk::readImage(grp.material.diffuse_texture));
+		if (!grp.material.specular_texture.empty())	_GLResources[grp.material.specular_texture]	= (new gk::GLTexture())->createTexture2D(4, gk::readImage(grp.material.specular_texture));
 	}
 	
 	// ===============================================================
@@ -282,7 +279,6 @@ int Core::draw()
 	
 	bool									position_fresh		= false;
 	static	int						position_duration	= 0;												// Persistent : Persistency duration
-	
 	
 	// ===============================================================
 	// =               U S E R   I N T E R A C T I O N               =
@@ -435,7 +431,7 @@ int Core::draw()
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("method")				= _renderoptions;
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->sampler("envmap")				= 0;
 			getGLResource<gk::GLProgram>("prg:rendering_shadows")->uniform("bbox")					=	_meshBoxDescriptor;
-			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, _sphereNumber);
+			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, _occlusionSize);
 			glDisable(GL_BLEND);
 		}
 		
@@ -524,11 +520,11 @@ int Core::draw()
 
 void Core::processKeyboardEvent()
 {
-	if (key('b') && !(key('b')=0) )	{		_buildenvmap = !_buildenvmap;			if (_config.general.verbose) printf("- build envmap : %s\n",									_buildenvmap?"on":"off"																															);	}
-	if (key('c') && !(key('c')=0) )	{		_envmap.clear();									if (_config.general.verbose) printf("- envmap cleared\n"																																																					);	}
-	if (key('r') && !(key('r')=0) )	{		_renderoptions ^= 0x0001;					if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_renderoptions & 0x0001)?std::string("old"):std::string("new")).c_str()						);	}
-	if (key('s') && !(key('s')=0) )	{		_renderoptions ^= 0x0010;					if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_renderoptions & 0x0010)?std::string("old"):std::string("new")).c_str()						);	}
-	if (key('d') && !(key('d')=0) )	{		_renderoptions ^= 0x0020;					if (_config.general.verbose) printf("- shadow rendering %s\n",                ((_renderoptions & 0x0020)?std::string("enabled"):std::string("disabled")).c_str()	);	}	
+	if (key('b') && !(key('b')=0) )	{ _buildenvmap = !_buildenvmap; if (_config.general.verbose) printf("- build envmap : %s\n",									_buildenvmap?"on":"off"																															);	}
+	if (key('c') && !(key('c')=0) )	{	_envmap.clear();							if (_config.general.verbose) printf("- envmap cleared\n"																																																					);	}
+	if (key('r') && !(key('r')=0) )	{	_renderoptions ^= 0x0001;			if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_renderoptions & 0x0001)?std::string("old"):std::string("new")).c_str()						);	}
+	if (key('s') && !(key('s')=0) )	{	_renderoptions ^= 0x0010;			if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_renderoptions & 0x0010)?std::string("old"):std::string("new")).c_str()						);	}
+	if (key('d') && !(key('d')=0) )	{	_renderoptions ^= 0x0020;			if (_config.general.verbose) printf("- shadow rendering %s\n",                ((_renderoptions & 0x0020)?std::string("enabled"):std::string("disabled")).c_str()	);	}	
 }
 
 
@@ -578,71 +574,46 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 			}
 			case SDLK_RIGHT:
 			{
-				int brightness;
-				if (_config.devices.front.enable)
+				for (Camera* camera : _cameras) if (camera)
 				{
-					brightness = std::min(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) + 8, 255);
-					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, brightness);
-					if (_config.general.verbose) printf("[CAMERA %d] brightness set to %d\n", 0, brightness);
-				}
-				if (_config.devices.back.enable)
-				{
-					brightness = std::min(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) + 8, 255);
-					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, brightness);
-					if (_config.general.verbose) printf("[CAMERA %d] brightness set to %d\n", 1, brightness);
+					int b = std::min(camera->getParameter(VideoDevice::BRIGHTNESS) + 0x08, 0xFF);
+					camera->setParameter(VideoDevice::BRIGHTNESS, b);
+					if (_config.general.verbose) printf("[CAMERA %p] brightness set to %d\n", camera, b);
 				}
 				break;
 			}
 			case SDLK_LEFT:
 			{
-				if (_config.devices.front.enable)
+				for (Camera* camera : _cameras) if (camera)
 				{
-					int brightness = std::max(_cameras[0]->getParameter(VideoDevice::BRIGHTNESS) - 8, 0);
-					_cameras[0]->setParameter(VideoDevice::BRIGHTNESS, brightness);
-					if (_config.general.verbose) printf("[CAMERA %d] brightness set to %d\n", 0, brightness);
-				}
-				if (_config.devices.back.enable)
-				{
-					int brightness = std::max(_cameras[1]->getParameter(VideoDevice::BRIGHTNESS) - 8, 0);
-					_cameras[1]->setParameter(VideoDevice::BRIGHTNESS, brightness);
-					if (_config.general.verbose) printf("[CAMERA %d] brightness set to %d\n", 1, brightness);
+					int b = std::max(camera->getParameter(VideoDevice::BRIGHTNESS) - 0x08, 0x00);
+					camera->setParameter(VideoDevice::BRIGHTNESS, b);
+					if (_config.general.verbose) printf("[CAMERA %p] brightness set to %d\n", camera, b);
 				}
 				break;
 			}
 			case SDLK_UP:
 			{
-				if (_config.devices.front.enable)
+				for (Camera* camera : _cameras) if (camera)
 				{
-					int gain = std::min(_cameras[0]->getParameter(VideoDevice::GAIN) + 8, 255);
-					_cameras[0]->setParameter(VideoDevice::GAIN, gain);
-					if (_config.general.verbose) printf("[CAMERA %d] gain set to %d\n", 0, gain);
-				}
-				if (_config.devices.back.enable)
-				{
-					int gain = std::min(_cameras[1]->getParameter(VideoDevice::GAIN) + 8, 255);
-					_cameras[1]->setParameter(VideoDevice::GAIN, gain);
-					if (_config.general.verbose) printf("[CAMERA %d] gain set to %d\n", 1, gain);
+					int g = std::min(camera->getParameter(VideoDevice::GAIN) + 0x08, 0xFF);
+					camera->setParameter(VideoDevice::GAIN, g);
+					if (_config.general.verbose) printf("[CAMERA %p] gain set to %d\n", camera, g);
 				}
 				break;
 			}
 			case SDLK_DOWN:
 			{
-				if (_config.devices.front.enable)
+				for (Camera* camera : _cameras) if (camera)
 				{
-					int gain = std::max(_cameras[0]->getParameter(VideoDevice::GAIN) - 8, 0);
-					_cameras[0]->setParameter(VideoDevice::GAIN, gain);
-					if (_config.general.verbose) printf("[CAMERA %d] gain set to %d\n", 0, gain);
-				}
-				if (_config.devices.back.enable)
-				{
-					int gain = std::max(_cameras[1]->getParameter(VideoDevice::GAIN) - 8, 0);
-					_cameras[1]->setParameter(VideoDevice::GAIN, gain);
-					if (_config.general.verbose) printf("[CAMERA %d] gain set to %d\n", 1, gain);
+					int g = std::max(camera->getParameter(VideoDevice::GAIN) - 0x08, 0x00);
+					camera->setParameter(VideoDevice::GAIN, g);
+					if (_config.general.verbose) printf("[CAMERA %p] gain set to %d\n", camera, g);
 				}
 				break;
 			}
 			default:
-				if (_config.general.verbose) printf("Key %d unmapped\n", (int) event.keysym.sym);
+				if (_config.general.verbose  > 1) printf("Key %d unmapped\n", (int) event.keysym.sym);
 				break;
 		}
 }

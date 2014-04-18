@@ -7,7 +7,7 @@ Kd			0.75 0.75 0.75
 map_Kd	bigguy_ambient_HD.png
 
 
-newmtl miror
+newmtl mirror
 Kd  		0.2 0.2 0.2
 Ks  		0.8 0.8 0.8
 Ns			1000000
