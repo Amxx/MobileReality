@@ -1,7 +1,5 @@
 #include "occlusion.hh"
 
-
-
 #define SHADOWSIZE	3
 gk::Vec2 Occlusion::bbox() const { return gk::Vec2(SHADOWSIZE * _box_radius, _box_bottom); }
 
@@ -36,8 +34,6 @@ void Occlusion::loadSpheres(const std::string& str)
 		_instances.push_back(gk::Vec4(_box_center.x, _box_center.y, _box_center.z, _box_radius/sqrtf(3.f)));
 	}
 }
-
-
 
 void Occlusion::render(gk::GLTexture* texture, int renderoptions)
 {

@@ -8,6 +8,8 @@
 #include <ratio>
 #include <chrono>
 
+#include <map>
+
 // =================================
 // =   G K I T   I N C L U D E S   =
 // =================================
@@ -26,29 +28,19 @@
 
 
 #include "light.hh"
+#include "tools/timers.hh"
 
 
 
 class Core : public gk::App
 {	
 	private:
-		std::string							objectPath;
-		
-		gk::GLBasicMesh*				object;
-		gk::GLFramebuffer*			framebufferLight;
-		gk::GLFramebuffer*			framebufferAmbient;
-		gk::GLFramebuffer*			framebufferBlender;
-		gk::GLFramebuffer*			framebufferClamp;
+		std::string																objectPath;
+		gk::GLBasicMesh*													object;
+		std::map<std::string,	gk::GLResource*>		_GLResources;
+		gk::Orbiter																orbiter;
 	
-		gk::GLProgram*					programLight;
-		gk::GLProgram*					programTexture;
-		gk::GLProgram*					programBlender;
-		gk::GLProgram*					programClamp;
-		gk::GLProgram*					programViewer;
-			
-		gk::Orbiter							orbiter;
-	
-	
+		template<typename T> T*										getGLResource(const std::string&);	
 	
 	public:
     Core(int = 0, char*[] = nullptr);
@@ -62,5 +54,10 @@ class Core : public gk::App
 	
 		void processKeyboardEvent(SDL_KeyboardEvent&);
 };
+
+
+
+
+template<typename T> T* Core::getGLResource(const std::string& str) { return static_cast<T*>(_GLResources[str.c_str()]); }
 
 #endif

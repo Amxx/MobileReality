@@ -1,11 +1,11 @@
 #version 410
 
 #ifdef VERTEX_SHADER
-in				vec3				position;
-in				vec3				texcoord;
-in				vec3				normal;
-out				vec3				vertex_position;
-out				vec3				vertex_normal;
+layout(location=0) in		vec3				position;
+layout(location=1) in		vec3				texcoord;
+layout(location=2) in		vec3				normal;
+out											vec3				vertex_position;
+out											vec3				vertex_normal;
 
 void main()
 {
@@ -20,18 +20,18 @@ void main()
 
 #ifdef GEOMETRY_SHADER
 
-uniform		float				width;
-uniform		float				height;
+uniform								float				width;
+uniform								float				height;
 
 
 layout(triangles) in;
 layout(triangle_strip) out;
 layout(max_vertices = 9) out;
 
-in				vec3				vertex_position[];
-in				vec3				vertex_normal[];
-out				vec3				geometry_position;
-out				vec3				geometry_normal;
+in										vec3				vertex_position[];
+in										vec3				vertex_normal[];
+out										vec3				geometry_position;
+out										vec3				geometry_normal;
 
 vec4 BL(vec4 p)	{	return vec4(p.x-2/width, p.y-2/height, p.zw); }
 vec4 BR(vec4 p) { return vec4(p.x+2/width, p.y-2/height, p.zw); }
@@ -223,12 +223,12 @@ void main()
 
 
 #ifdef FRAGMENT_SHADER
-uniform		sampler2D		light_map;
-uniform		mat4				mv;
-uniform		mat4				mvp;
-in				vec3				geometry_position;
-in				vec3				geometry_normal;
-out				vec4				fragment_color;
+uniform								sampler2D		light_map;
+uniform								mat4				mv;
+uniform								mat4				mvp;
+in										vec3				geometry_position;
+in										vec3				geometry_normal;
+out										vec4				fragment_color;
 
 void main() 
 {	

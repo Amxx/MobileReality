@@ -5,7 +5,7 @@ include_directories(
 	${OpenCV_INCLUDE_DIRS}
 )
 
-file(GLOB PrecomputeAmbient_files
+file(GLOB_RECURSE PrecomputeAmbient_files
 	*.cc
 )
 

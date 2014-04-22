@@ -157,12 +157,7 @@ int Core::init()
 	if (_GLResources["prg:build_softshadow"]			== gk::GLProgram::null())	return -1;
 	if (_GLResources["prg:rendering_object"]			== gk::GLProgram::null())	return -1;
 	if (_GLResources["prg:rendering_softshadow"]	== gk::GLProgram::null())	return -1;
-	
-	glBindAttribLocation(_GLResources["prg:rendering_object"]->name, 0, "position");
-	glBindAttribLocation(_GLResources["prg:rendering_object"]->name, 1, "normal");
-	glBindAttribLocation(_GLResources["prg:rendering_object"]->name, 2, "texcoord");
-	glBindAttribLocation(_GLResources["prg:build_softshadow"]->name, 3, "sphere");
-	
+		
 	// ===============================================================
 	// =                           M E S H                           =
 	// ===============================================================

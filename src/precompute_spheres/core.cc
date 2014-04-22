@@ -51,16 +51,12 @@ int Core::init()
 	
 	
 	gk::programPath("install/shaders");
-	
-	programCluster = gk::createProgram("precompute_sphere_cluster.glsl");
-	if (programCluster == gk::GLProgram::null()) { printf("[ERROR] #2\n"); exit(1); }
-	
-	programViewer = gk::createProgram("precompute_sphere_viewer.glsl");
-	if (programViewer == gk::GLProgram::null()) { printf("[ERROR] #2\n"); exit(1); }
-	glBindAttribLocation(programViewer->name,	0, "position");
-	glBindAttribLocation(programViewer->name,	1, "normal");
-	glBindAttribLocation(programViewer->name,	2, "texcoord");
-	
+
+	programCluster	= gk::createProgram("precompute_sphere_cluster.glsl");
+	programViewer		= gk::createProgram("precompute_sphere_viewer.glsl");
+
+	if (programCluster	== gk::GLProgram::null()) { printf("[ERROR] #1\n"); exit(1); }
+	if (programViewer		== gk::GLProgram::null()) { printf("[ERROR] #2\n"); exit(1); }
 	
 	gk::Mesh* mesh = gk::MeshIO::readOBJ(path);
 	object = new gk::GLBasicMesh(GL_TRIANGLES, mesh->indices.size());

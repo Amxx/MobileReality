@@ -18,13 +18,13 @@ void main()
 
 #ifdef FRAGMENT_SHADER
 
-uniform		sampler2D		input;
+uniform		sampler2D		data;
 in				vec2				texcoords;
 out				vec4				fragment_color;
 
 void main()
 {
-	fragment_color	= vec4( clamp(texture(input, texcoords).rgba, 0.f, 1.f) );
+	fragment_color	= vec4( clamp(texture(data, texcoords).rgba, 0.f, 1.f) );
 }
 
 
