@@ -2,7 +2,6 @@
 #define CORE_HH
 
 #include <iostream>
-#include <fstream>
 #include <ctime>
 #include <ratio>
 #include <chrono>
@@ -33,6 +32,7 @@
 // =================================
 #include "configuration/configuration.hh"
 #include "envmap/envmap.hh"
+#include "occlusion/occlusion.hh"
 #include "modules/module.hh"
 #include "tools/tools.hh"
 
@@ -42,16 +42,15 @@ class Core : public gk::App
 	private:
 		// Acquisition and environnement processing
 		std::vector<Camera*>											_cameras;
+		Scanner*																	_scanner;
 		Configuration															_config;
 		EnvMap																		_envmap;
-		Scanner*																	_scanner;
-				
+		Occlusion																	_occlusion;
+	
 		// OpenGL objects
 		gk::GLBasicMesh*													_mesh;
-		gk::BBox																	_meshBox;
-		gk::Vec2																	_meshBoxDescriptor;
 		std::vector<gk::MeshGroup>								_meshGroups;
-		int																				_occlusionSize;
+		gk::BBox																	_meshBox;
 	
 		std::map<std::string,	gk::GLResource*>		_GLResources;
 		template<typename T> T*										getGLResource(const std::string&);

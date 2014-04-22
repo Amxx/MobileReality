@@ -8,6 +8,7 @@
 		<obj>data/objects/bigguy/bigguy.obj</obj>
 		<obj>data/objects/Peugeot_207/Peugeot_207.obj</obj>
 		<obj>data/objects/Ford_Mustang_1966/Ford_Mustang_1966.obj</obj>
+		<obj>data/objects/MRX22_Recon_Flyer/MRX22_Recon_Flyer.obj</obj>
 		-->
 		<obj>data/objects/bigguy/bigguy.obj</obj>
 		<spheres>data/objects/bigguy/bigguy.obj.spheres</spheres>
@@ -37,7 +38,7 @@
 	<!-- ######################### General parameters of the application ########################## -->
 	<generalParameters>
 	
-		<verbose>1</verbose>																						<!-- [int] | off | low | high -->
+		<verbose>2</verbose>																						<!-- [int] | off | low | high -->
 	
 		<defaultValues>
 			<brightness>128</brightness>																	<!-- -1 for auto							-->
@@ -47,9 +48,9 @@
 		
 		<envmap>
 			<type>debug</type>																						<!-- dynamic | debug					-->
-			<size>256 256</size>
+			<size>512 512</size>
 			<dual>off</dual>																							<!-- on | off									-->
-			<path>data/envmap/0/%03d.jpg</path>
+			<path>data/envmap/6/%03d.jpg</path>
 		</envmap>
 		
 		<localisation>
@@ -58,7 +59,7 @@
 		</localisation>		
 		
 		<rendering>
-			<background>on</background>																		<!-- on | off									-->
+			<background>off</background>																		<!-- on | off									-->
 			<scene>on</scene>																							<!-- on | off									-->
 			<view>off</view>																							<!-- on | off									-->
 		</rendering>
