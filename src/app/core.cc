@@ -561,6 +561,15 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				gk::ImageIO::writeImageArray(path.str(), getGLResource<gk::GLTexture>("tex:cubemap")->imageArray(0));
 				break;
 			}
+			case SDLK_F3:
+			{
+				std::stringstream path;
+				path << "data/view/softshadow_" << time(0) << ".png";
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(getGLResource<gk::GLTexture>("tex:softshadow")->target, _GLResources["tex:softshadow"]->name);
+				gk::ImageIO::writeImage(path.str(), getGLResource<gk::GLTexture>("tex:softshadow")->image(0));
+				break;
+			}
 			case SDLK_F5:
 			{
 				gk::reloadPrograms();

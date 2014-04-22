@@ -63,9 +63,6 @@ void sampleMesh(LMS<PN,P,float>&, gk::Mesh&);
 
 
 
-
-
-
 template<typename S, typename C, typename P>		
 void LMS<S,C,P>::run(int max_step)
 {
@@ -77,10 +74,10 @@ void LMS<S,C,P>::run(int max_step)
 		computefit();
 			
 		float sf = (float) step / max_step;
-		int   si = 80*sf;
+		int   si = 50*sf;
 		fprintf(stdout, "\rIteration %4d/%d [", step-1, max_step);
 		for (int i=0; i<si; ++i)  fprintf(stdout, "#");
-		for (int i=si; i<80; ++i) fprintf(stdout, " ");
+		for (int i=si; i<50; ++i) fprintf(stdout, " ");
 		fprintf(stdout, "] %3d%%", (int)(sf*100));
 		fflush(stdout);
 	}
