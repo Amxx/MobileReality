@@ -2,7 +2,7 @@
 
 
 #define			SIZE					1024
-#define			COUNT					100
+#define			COUNT					1000
 
 #define			LOGHERE				std::cout << "[HERE] " << __FILE__ << " : " << __LINE__ << std::endl;
 
@@ -31,6 +31,12 @@ Core::Core(int argc, char* argv[]) :
 
 Core::~Core()
 {
+	for (auto r : _GLResources)
+	{
+		printf("releasing '%s' ... ", r.first.c_str()); fflush(stdout);
+		r.second->release();
+		printf("done\n");
+	}
 }
 
 

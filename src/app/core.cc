@@ -410,13 +410,18 @@ int Core::draw()
 	// ===============================================================
 	timer t7 = now();
 	
+	
+	glActiveTexture(GL_TEXTURE0+0);
+	glBindTexture(getGLResource<gk::GLTexture>("tex:softshadow")->target, _GLResources["tex:softshadow"]->name);
+	glBindSampler(0, _GLResources["spl:linear"]->name);
+	glActiveTexture(GL_TEXTURE0+1);
+	glBindTexture(getGLResource<gk::GLTexture>("tex:cubemap")->target, _GLResources["tex:cubemap"]->name);
+	glBindSampler(1, _GLResources["spl:linear"]->name);
+		
 	if (_config.general.rendering.scene && (_config.general.localisation.type == Options::DEBUG || (position_duration && position_duration--)))
 	{
 		if (!(_renderoptions & 0x0020))
-		{			
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(getGLResource<gk::GLTexture>("tex:softshadow")->target, _GLResources["tex:softshadow"]->name);
-
+		{
 			glClear(GL_DEPTH_BUFFER_BIT);
 			
 			glBlendEquation(GL_FUNC_ADD);
@@ -433,40 +438,38 @@ int Core::draw()
 			glDisable(GL_BLEND);
 		}
 		
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(getGLResource<gk::GLTexture>("tex:cubemap")->target, _GLResources["tex:cubemap"]->name);
-		glBindSampler(0, _GLResources["spl:linear"]->name);
-		
 		glClear(GL_DEPTH_BUFFER_BIT);		
 		glUseProgram(_GLResources["prg:rendering_object"]->name);
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrix")			= tr_mv.matrix();
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrixInv")	= tr_mv.inverseMatrix();		
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvpMatrix")		= tr_mvp.matrix();
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("method")				= _renderoptions;
-		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("envmap")				= 0;
+		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("softshadow")		= 0;
+		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("envmap")				= 1;
+		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("bbox")					=	_occlusion.bbox();
 		
 		for (const gk::MeshGroup& grp : _meshGroups)
 		{
 			if (!grp.material.diffuse_texture.empty())
 			{
-				glActiveTexture(GL_TEXTURE0+1);
+				glActiveTexture(GL_TEXTURE0+2);
 				glBindTexture(getGLResource<gk::GLTexture>(grp.material.diffuse_texture)->target, _GLResources[grp.material.diffuse_texture]->name);
 			}
 			
 			if (!grp.material.specular_texture.empty())
 			{
-				glActiveTexture(GL_TEXTURE0+2);
+				glActiveTexture(GL_TEXTURE0+3);
 				glBindTexture(getGLResource<gk::GLTexture>(grp.material.specular_texture)->target, _GLResources[grp.material.specular_texture]->name);
 			}
 
 			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("diffuse_color")				= grp.material.diffuse_color;
 			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("use_diffuse_texture")	= !grp.material.diffuse_texture.empty();
-			getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("diffuse_texture") 			= 1;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("diffuse_texture") 			= 2;
 			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("kd")										= grp.material.kd;
 
 			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("specular_color")				= grp.material.specular_color;
 			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("use_specular_texture") = !grp.material.specular_texture.empty();
-			getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("specular_texture") 		= 2;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("specular_texture") 		= 3;
 			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("ks")										= grp.material.ks;
 			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("ns")										= grp.material.ns;
 			
@@ -525,8 +528,10 @@ void Core::processKeyboardEvent()
 {
 	if (key('b') && !(key('b')=0) )	{ _buildenvmap = !_buildenvmap; if (_config.general.verbose) printf("- build envmap : %s\n",									_buildenvmap?"on":"off"																															);	}
 	if (key('c') && !(key('c')=0) )	{	_envmap.clear();							if (_config.general.verbose) printf("- envmap cleared\n"																																																					);	}
+	
 	if (key('r') && !(key('r')=0) )	{	_renderoptions ^= 0x0001;			if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_renderoptions & 0x0001)?std::string("old"):std::string("new")).c_str()						);	}
-	if (key('s') && !(key('s')=0) )	{	_renderoptions ^= 0x0010;			if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_renderoptions & 0x0010)?std::string("old"):std::string("new")).c_str()						);	}
+	if (key('f') && !(key('f')=0) )	{	_renderoptions ^= 0x0002;			if (_config.general.verbose) printf("- specular shadow %s\n", 								((_renderoptions & 0x0002)?std::string("disabled"):std::string("enabled")).c_str()	);	}
+	if (key('e') && !(key('e')=0) )	{	_renderoptions ^= 0x0010;			if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_renderoptions & 0x0010)?std::string("old"):std::string("new")).c_str()						);	}
 	if (key('d') && !(key('d')=0) )	{	_renderoptions ^= 0x0020;			if (_config.general.verbose) printf("- shadow rendering %s\n",                ((_renderoptions & 0x0020)?std::string("disabled"):std::string("enabled")).c_str()	);	}	
 }
 
