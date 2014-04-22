@@ -40,9 +40,6 @@ void Occlusion::render(gk::GLTexture* texture, int renderoptions)
 	clear();
 	glBindTexture(texture->target, texture->name);
 	
-	glBlendEquation(GL_FUNC_ADD);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	
 	glEnable(GL_BLEND);
 	glUseProgram(_program->name);
 	_program->uniform("method")			= renderoptions;

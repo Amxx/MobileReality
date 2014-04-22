@@ -139,6 +139,9 @@ Core::~Core()
 
 int Core::init()
 {
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	
 	// ===============================================================
 	// =        L O A D   S H A D E R S   A S   P R O G R A M        =
 	// ===============================================================
@@ -424,9 +427,6 @@ int Core::draw()
 		{
 			glClear(GL_DEPTH_BUFFER_BIT);
 			
-			glBlendEquation(GL_FUNC_ADD);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			
 			glEnable(GL_BLEND);
 			glDisable(GL_CULL_FACE);
 			glUseProgram(_GLResources["prg:rendering_softshadow"]->name);
@@ -548,6 +548,7 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 			{
 				std::stringstream path;
 				path << "data/view/screenshot_" << time(0) << ".png";
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 				gk::writeFramebuffer(path.str());
 				break;
 			}
