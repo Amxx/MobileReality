@@ -15,9 +15,9 @@ TextureFormat TextureRGBA16F= TextureFormat( GL_RGBA16F, GL_RGBA, GL_FLOAT );
 TextureFormat TextureRGB32F= TextureFormat( GL_RGB32F, GL_RGB, GL_FLOAT );
 TextureFormat TextureRGBA32F= TextureFormat( GL_RGBA32F, GL_RGBA, GL_FLOAT );
 
-TextureFormat TextureDepth= TextureFormat( GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT );
-TextureFormat TextureDepth24= TextureFormat( GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT );
-TextureFormat TextureDepth32= TextureFormat( GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT );
+TextureFormat TextureDepth= TextureFormat( GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT );
+TextureFormat TextureDepth24= TextureFormat( GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT );
+TextureFormat TextureDepth32= TextureFormat( GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT );
 
 TextureFormat TextureR32F= TextureFormat( GL_R32F, GL_RED, GL_FLOAT );
 TextureFormat TextureRG32F= TextureFormat( GL_RG32F, GL_RG, GL_FLOAT );
@@ -32,9 +32,9 @@ TextureFormat TextureRG16UI= TextureFormat( GL_RG16UI, GL_RG_INTEGER, GL_UNSIGNE
 TextureFormat TextureR32I= TextureFormat( GL_R32I, GL_RED_INTEGER, GL_INT );
 
 TextureFormat TextureRGBA_MS4= TextureFormat( GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 4 );
-TextureFormat TextureDepth_MS4= TextureFormat( GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, 4 );
+TextureFormat TextureDepth_MS4= TextureFormat( GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 4 );
 TextureFormat TextureRGBA_MS8= TextureFormat( GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 8 );
-TextureFormat TextureDepth_MS8= TextureFormat( GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, 8 );
+TextureFormat TextureDepth_MS8= TextureFormat( GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, 8 );
 
 
 GLTexture *GLTexture::createTexture2D( const int _unit, 
@@ -42,6 +42,7 @@ GLTexture *GLTexture::createTexture2D( const int _unit,
 {
     if(_format.samples == 0)
     {
+        // creation d'une texture standard
         create(_unit, GL_TEXTURE_2D, _width, _height, 1, _format);
         if(name == 0)
             return this;
@@ -66,6 +67,7 @@ GLTexture *GLTexture::createTexture2D( const int _unit,
     }
     else
     {
+        // creation d'un buffer de rendu msaa, utilisation avec un framebuffer.
         create(_unit, GL_TEXTURE_2D_MULTISAMPLE, _width, _height, 1, _format);
         if(name == 0)
             return this;
@@ -119,9 +121,12 @@ GLTexture *GLTexture::createTexture2DArray( const int _unit,
     if(name == 0)
         return this;
     
+    // alloue un buffer assez gros pour tous les formats
+    std::vector<unsigned int> zeros(width * height * depth * 4, 0);
+    
     glTexImage3D(target, 0, 
         format.internal, width, height, depth, 0,
-        format.data_format, format.data_type, NULL);
+        format.data_format, format.data_type, &zeros.front());
     
     glGenerateMipmap(target);
     return this;

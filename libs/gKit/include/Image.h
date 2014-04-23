@@ -69,7 +69,7 @@ protected:
     }
     
     //! renvoie la valeur d'un pixel.
-    VecColor pixel( const unsigned int offset )
+    VecColor pixel( const unsigned int offset ) const
     {
         VecColor color(0, 0, 0, 1);
         switch(type)
@@ -203,13 +203,13 @@ public:
     }
     
     //! renvoie la valeur d'un pixel.
-    VecColor pixel( const unsigned int x, const unsigned int y )
+    VecColor pixel( const unsigned int x, const unsigned int y ) const
     {
         return pixel(offset(x, y));
     }
     
     //! renvoie la valeur d'un pixel.
-    VecColor pixel( const unsigned int x, const unsigned int y, const unsigned int z )
+    VecColor pixel( const unsigned int x, const unsigned int y, const unsigned int z ) const
     {
         return pixel(offset(x, y, z));
     }    

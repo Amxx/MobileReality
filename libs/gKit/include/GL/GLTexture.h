@@ -123,7 +123,7 @@ public:
         return this;
     }
     
-    //! utilisation exeperimentale.
+    //! utilisation exeperimentale. construit un objet GLTexture a partir d'une texture opengl deja cree.
     GLTexture *attach( const int _unit, 
         const GLenum _target, GLuint _name, const int _width, const int _height, const int _depth, const TextureFormat& _format )
     {

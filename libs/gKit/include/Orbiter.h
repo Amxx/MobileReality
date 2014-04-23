@@ -5,6 +5,7 @@
 #include "Geometry.h"
 #include "Transform.h"
 
+
 namespace gk {
 
 //! camera type inspection d'objet.

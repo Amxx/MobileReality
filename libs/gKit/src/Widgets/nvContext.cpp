@@ -77,8 +77,12 @@ void UIContext::file( const char *file, int x, int y ) {
 
 
 void UIContext::reshape(int w, int h) {
-    m_window.x = 0;
-    m_window.y = 0;
+    reshape(0, 0, w, h);
+}
+
+void UIContext::reshape(int x, int y, int w, int h) {
+    m_window.x = x;
+    m_window.y = y;
     m_window.w = w;
     m_window.h = h;
     

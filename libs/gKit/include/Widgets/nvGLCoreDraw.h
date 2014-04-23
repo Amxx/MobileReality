@@ -113,7 +113,7 @@ public:
     {
         m_vertex= vertex();
         
-        // sort states
+        // sort states, improve batching but "kills" z order rendering
         unsigned int i= 0;
         for(; i < m_draws.size(); i++)
             if(m_draws[i] == params)
@@ -153,9 +153,9 @@ public:
     void reshape( const Rect& window )
     {
         const float left= window.x;
-        const float right= window.w;
+        const float right= window.x + window.w;
         const float bottom= window.y;
-        const float top= window.h;
+        const float top= window.y + window.h;
         const float znear= -1.f;
         const float zfar= 1.f;
         
@@ -203,6 +203,7 @@ public:
         if(m_buffer_id != -1u)
             return;     // must call end() before draw()
         
+        // organise buffer data
         unsigned int index_size= 0;
         unsigned int data_size= 0;
         for(unsigned int i= 0; i < m_buffers.size(); i++)
@@ -249,7 +250,7 @@ public:
 
         // draw states
         glPrimitiveRestartIndex(0xffff);
-        glEnable(GL_PRIMITIVE_RESTART);
+        glEnable(GL_PRIMITIVE_RESTART); 
         glBindVertexArray(m_vao);
         
         const void *program= NULL;
@@ -274,6 +275,8 @@ public:
                 m_draws[i].end - m_draws[i].start, 
                 GL_UNSIGNED_INT, (GLvoid *) ((m_buffers[i].index_offset + m_draws[i].start) * sizeof(unsigned int)),
                 m_buffers[i].data_offset);
+            
+            //! \todo use glDrawElements() and remap index buffer / opengl es 3
         }
         
 	glUseProgram(0);

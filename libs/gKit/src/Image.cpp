@@ -104,7 +104,7 @@ Image *createImage( const int w, const int h, const VecColor& color, const int c
     // remplit la premiere ligne
     for(int x= 0; x < image->width; x++)
         image->setPixel(x, 0, color);
-
+    
     // duplique la premiere ligne sur les suivantes
     for(int y= 1; y < image->height; y++)
         memcpy(image->data + image->offset(0, y), image->data, image->width * image->channels * image->pixel_sizeof);

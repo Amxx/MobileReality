@@ -530,7 +530,8 @@ void Core::processKeyboardEvent()
 	if (key('c') && !(key('c')=0) )	{	_envmap.clear();							if (_config.general.verbose) printf("- envmap cleared\n"																																																					);	}
 	
 	if (key('r') && !(key('r')=0) )	{	_renderoptions ^= 0x0001;			if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_renderoptions & 0x0001)?std::string("old"):std::string("new")).c_str()						);	}
-	if (key('f') && !(key('f')=0) )	{	_renderoptions ^= 0x0002;			if (_config.general.verbose) printf("- specular shadow %s\n", 								((_renderoptions & 0x0002)?std::string("disabled"):std::string("enabled")).c_str()	);	}
+	if (key('f') && !(key('f')=0) )	{	_renderoptions ^= 0x0002;			if (_config.general.verbose) printf("- diffuse shadow %s\n", 									((_renderoptions & 0x0002)?std::string("disabled"):std::string("enabled")).c_str()	);	}
+	if (key('v') && !(key('v')=0) )	{	_renderoptions ^= 0x0004;			if (_config.general.verbose) printf("- specular shadow %s\n", 								((_renderoptions & 0x0004)?std::string("disabled"):std::string("enabled")).c_str()	);	}
 	if (key('e') && !(key('e')=0) )	{	_renderoptions ^= 0x0010;			if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_renderoptions & 0x0010)?std::string("old"):std::string("new")).c_str()						);	}
 	if (key('d') && !(key('d')=0) )	{	_renderoptions ^= 0x0020;			if (_config.general.verbose) printf("- shadow rendering %s\n",                ((_renderoptions & 0x0020)?std::string("disabled"):std::string("enabled")).c_str()	);	}	
 }

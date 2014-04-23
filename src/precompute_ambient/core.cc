@@ -64,29 +64,15 @@ int Core::init()
 	if (getGLResource<gk::GLProgram>("prg:clamp"	)	== gk::GLProgram::null()) { printf("[ERROR] #4\n"); exit(1); }
 	if (getGLResource<gk::GLProgram>("prg:viewer"	)	== gk::GLProgram::null()) { printf("[ERROR] #5\n"); exit(1); }
 	
-	LOGHERE
-	
-	_GLResources["fbf:light"	]	= (new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT, gk::TextureRGBA32F);
+	_GLResources["fbf:light"	]	= (new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT | gk::GLFramebuffer::DEPTH_BIT, gk::TextureRGBA32F);
 	_GLResources["fbf:texture"]	= (new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT, gk::TextureRGBA32F);
 	_GLResources["fbf:blender"]	= (new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT, gk::TextureRGBA32F);
 	_GLResources["fbf:clamp"	]	= (new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER, SIZE, SIZE, gk::GLFramebuffer::COLOR0_BIT, gk::TextureRGBA32F);
-	
-	LOGHERE
-	
-	// _GLResources["tex:depth"	]	= (new gk::GLTexture())->createTexture2D(0, SIZE, SIZE);
-	// getGLResource<gk::GLFramebuffer>("fbf:light"	)->attach(GL_DRAW_FRAMEBUFFER, gk::GLFramebuffer::DEPTH_BIT, getGLResource<gk::GLTexture>("tex:depth"));
-	// getGLResource<gk::GLFramebuffer>("fbf:texture")->attach(GL_DRAW_FRAMEBUFFER, gk::GLFramebuffer::DEPTH_BIT, getGLResource<gk::GLTexture>("tex:depth"));
-	// getGLResource<gk::GLFramebuffer>("fbf:blender")->attach(GL_DRAW_FRAMEBUFFER, gk::GLFramebuffer::DEPTH_BIT, getGLResource<gk::GLTexture>("tex:depth"));
-	// getGLResource<gk::GLFramebuffer>("fbf:clamp"	)->attach(GL_DRAW_FRAMEBUFFER, gk::GLFramebuffer::DEPTH_BIT, getGLResource<gk::GLTexture>("tex:depth"));
-	
-	LOGHERE
 	
 	_GLResources["tex:light"	]	= getGLResource<gk::GLFramebuffer>("fbf:light"	)->texture(gk::GLFramebuffer::COLOR0);
 	_GLResources["tex:texture"]	= getGLResource<gk::GLFramebuffer>("fbf:texture")->texture(gk::GLFramebuffer::COLOR0);
 	_GLResources["tex:blender"]	= getGLResource<gk::GLFramebuffer>("fbf:blender")->texture(gk::GLFramebuffer::COLOR0);
 	_GLResources["tex:clamp"	]	= getGLResource<gk::GLFramebuffer>("fbf:clamp"	)->texture(gk::GLFramebuffer::COLOR0);
-	
-	LOGHERE
 	
 	gk::Mesh *mesh = gk::MeshIO::readOBJ(objectPath);
 	if (mesh == nullptr) { printf("[ERROR] #7\n"); exit(1); }

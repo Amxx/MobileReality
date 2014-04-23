@@ -332,6 +332,7 @@ public:
 
     // UI method for processing window size events
     void reshape(int w, int h);
+    void reshape(int x, int y, int w, int h);
 
     // UI method for processing mouse events
     void mouse(int button, int state, int modifier, int x, int y);

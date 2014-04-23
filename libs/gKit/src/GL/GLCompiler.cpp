@@ -287,7 +287,7 @@ std::string GLCompiler::build_source( unsigned int shader )
     if(shader >= GLProgram::SHADERTYPE_LAST) return "";
     if(sources[shader].source.empty()) return "";
     
-    // extraire la directive version 
+    // extraire la directive #version pour la repositionner en debut de source
     std::string version;
     {
         unsigned long int b= sources[shader].source.find("#version");
@@ -344,11 +344,13 @@ struct parameter
 GLProgram *GLCompiler::make( )
 {
     bool errors= false;
+    bool shaders= false;
     for(unsigned int i= 0; i < GLProgram::SHADERTYPE_LAST; i++)
     {
         if(sources[i].source.empty()) continue;
         
         // construit le source
+        shaders= true;
         sources[i].build= build_source(i);
         
         // cree le program
@@ -403,8 +405,12 @@ GLProgram *GLCompiler::make( )
         #endif
     }
     
-    if(program == GLProgram::null())
+    if(shaders == false || program == GLProgram::null())
+    {
+        ERROR("no shader. failed.\n");
         return program;
+    }
+    
     if(errors == true)
     {
         program->resources();

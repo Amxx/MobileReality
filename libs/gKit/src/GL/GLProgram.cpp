@@ -27,201 +27,6 @@ const char *GLProgram::labels[]= {
 };
 
 
-namespace glsl {
-    
-bool is_sampler( const GLenum type )
-{
-    switch(type)
-    {
-        case  GL_SAMPLER_1D:
-        case  GL_SAMPLER_2D:
-        case  GL_SAMPLER_3D:
-        case  GL_SAMPLER_CUBE:
-        case  GL_SAMPLER_1D_SHADOW:
-        case  GL_SAMPLER_2D_SHADOW:
-        
-    #ifdef GL_VERSION_3_0
-        case  GL_SAMPLER_1D_ARRAY:
-        case  GL_SAMPLER_2D_ARRAY:
-        case  GL_SAMPLER_1D_ARRAY_SHADOW:
-        case  GL_SAMPLER_2D_ARRAY_SHADOW:
-        case  GL_SAMPLER_CUBE_SHADOW:
-        case  GL_INT_SAMPLER_1D:
-        case  GL_INT_SAMPLER_2D:
-        case  GL_INT_SAMPLER_3D:
-        case  GL_INT_SAMPLER_CUBE:
-        case  GL_INT_SAMPLER_1D_ARRAY:
-        case  GL_INT_SAMPLER_2D_ARRAY:
-        case  GL_UNSIGNED_INT_SAMPLER_1D:
-        case  GL_UNSIGNED_INT_SAMPLER_2D:
-        case  GL_UNSIGNED_INT_SAMPLER_3D:
-        case  GL_UNSIGNED_INT_SAMPLER_CUBE:
-        case  GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
-        case  GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
-    #endif
-    
-    #ifdef GL_VERSION_3_1
-        case  GL_SAMPLER_2D_RECT:
-        case  GL_SAMPLER_2D_RECT_SHADOW:
-        case GL_SAMPLER_BUFFER:
-        case GL_INT_SAMPLER_2D_RECT:
-        case GL_INT_SAMPLER_BUFFER:
-        case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
-        case GL_UNSIGNED_INT_SAMPLER_BUFFER:
-    #endif
-    
-    #ifdef GL_VERSION_4_0
-        case GL_SAMPLER_CUBE_MAP_ARRAY:
-        case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW:
-        case GL_INT_SAMPLER_CUBE_MAP_ARRAY:
-        case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY:
-    #endif
-    
-    #ifdef GL_ARB_texture_multisample
-        case GL_SAMPLER_2D_MULTISAMPLE:
-        case GL_INT_SAMPLER_2D_MULTISAMPLE:
-        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
-        case GL_SAMPLER_2D_MULTISAMPLE_ARRAY:
-        case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
-        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
-    #endif
-            return true;
-
-        default:
-            return false;
-    }
-}
-
-bool is_image( const GLenum type )
-{
-    switch(type)
-    {
-        #ifdef GL_ARB_shader_image_load_store
-        case  GL_IMAGE_1D:
-        case  GL_IMAGE_2D:
-        case  GL_IMAGE_3D:
-        case  GL_IMAGE_2D_RECT:
-        case  GL_IMAGE_CUBE:
-        case  GL_IMAGE_BUFFER:
-        case  GL_IMAGE_1D_ARRAY:
-        case  GL_IMAGE_2D_ARRAY:
-        case  GL_IMAGE_CUBE_MAP_ARRAY:
-        case  GL_IMAGE_2D_MULTISAMPLE:
-        case  GL_IMAGE_2D_MULTISAMPLE_ARRAY:
-        case  GL_INT_IMAGE_1D:
-        case  GL_INT_IMAGE_2D:
-        case  GL_INT_IMAGE_3D:
-        case  GL_INT_IMAGE_2D_RECT:
-        case  GL_INT_IMAGE_CUBE:
-        case  GL_INT_IMAGE_BUFFER:
-        case  GL_INT_IMAGE_1D_ARRAY:
-        case  GL_INT_IMAGE_2D_ARRAY:
-        case  GL_INT_IMAGE_CUBE_MAP_ARRAY:
-        case  GL_INT_IMAGE_2D_MULTISAMPLE:
-        case  GL_INT_IMAGE_2D_MULTISAMPLE_ARRAY:
-        case  GL_UNSIGNED_INT_IMAGE_1D:
-        case  GL_UNSIGNED_INT_IMAGE_2D:
-        case  GL_UNSIGNED_INT_IMAGE_3D:
-        case  GL_UNSIGNED_INT_IMAGE_2D_RECT:
-        case  GL_UNSIGNED_INT_IMAGE_CUBE:
-        case  GL_UNSIGNED_INT_IMAGE_BUFFER:
-        case  GL_UNSIGNED_INT_IMAGE_1D_ARRAY:
-        case  GL_UNSIGNED_INT_IMAGE_2D_ARRAY:
-        case  GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY:
-        case  GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE:
-        case  GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY:
-            return true;
-        #endif
-        
-        default: 
-            return false;
-    }
-}
-
-
-bool is_integer( const GLenum type )
-{
-    switch(type)
-    {
-        case GL_BOOL:
-        case GL_BOOL_VEC2:
-        case GL_BOOL_VEC3:
-        case GL_BOOL_VEC4:
-        case GL_INT:
-        case GL_INT_VEC2:
-        case GL_INT_VEC3:
-        case GL_INT_VEC4:
-        case GL_UNSIGNED_INT:
-        case GL_UNSIGNED_INT_VEC2:
-        case GL_UNSIGNED_INT_VEC3: 
-        case GL_UNSIGNED_INT_VEC4:
-            return true;
-        
-        default:
-            return false;
-    }
-}
-
-bool is_matrix( const GLenum type )
-{
-    switch(type)
-    {
-        case GL_FLOAT_MAT2:
-        case GL_FLOAT_MAT2x3:
-        case GL_FLOAT_MAT2x4:
-        case GL_FLOAT_MAT3:
-        case GL_FLOAT_MAT3x2:
-        case GL_FLOAT_MAT3x4:
-        case GL_FLOAT_MAT4:
-        case GL_FLOAT_MAT4x2:
-        case GL_FLOAT_MAT4x3:
-            return true;
-        
-        default:
-            return false;
-    }    
-}
-
-
-const char *type_string( const GLenum value )
-{
-#define type(v, s) case v: return s;
-    
-    switch(value)
-    {
-        type(GL_FLOAT, "float")
-        type(GL_FLOAT_VEC2, "vec2")
-        type(GL_FLOAT_VEC3, "vec3")
-        type(GL_FLOAT_VEC4, "vec4")
-        
-        type(GL_UNSIGNED_INT, "uint")
-        type(GL_UNSIGNED_INT_VEC2, "uvec2")
-        type(GL_UNSIGNED_INT_VEC3, "uvec3")
-        type(GL_UNSIGNED_INT_VEC4, "uvec4")
-        
-        type(GL_INT, "int")
-        type(GL_INT_VEC2, "ivec2")
-        type(GL_INT_VEC3, "ivec3")
-        type(GL_INT_VEC4, "ivec4")
-        
-        type(GL_BOOL, "bool")
-        type(GL_BOOL_VEC2, "bvec2")
-        type(GL_BOOL_VEC3, "bvec3")
-        type(GL_BOOL_VEC4, "bvec4")
-        
-        type(GL_FLOAT_MAT2, "mat2")
-        type(GL_FLOAT_MAT3, "mat3")
-        type(GL_FLOAT_MAT4, "mat4")
-        
-        default: return NULL;
-    }
-    
-#undef type
-}
-
-}       // namespace
-
-
 int GLProgram::resources( )
 {
     //
@@ -285,11 +90,17 @@ int GLProgram::resources( )
                         
                 }
                 
-                //! \todo si location < 0, pas la peine de conserver l'uniform, sa valeur ne peut pas etre fixee par glProgramUniform, il fait parti du pipeline fixe, ou d'un buffer...
-                //! mais ils sont references par les uniforms buffers...
+                /*! \todo si location < 0, pas la peine de conserver l'uniform, sa valeur ne peut pas etre fixee par glProgramUniform, il fait parti du pipeline fixe, ou d'un buffer...
+                    mais ils sont references par les uniforms buffers...
+                */
+                //! \todo gestion des tableaux...
                 m_uniforms.push_back( 
                     parameter(uname, location, m_uniforms.size(), size, type, 
-                        glsl::is_integer(type) ? 1 << ProgramName::INTEGER : 1 << ProgramName::UNIFORM) );
+                        (1 << ProgramName::UNIFORM)
+                        | (glsl::is_integer(type) ? 1 << ProgramName::INTEGER : 0)
+                        | (glsl::is_vec2(type) ? 1 << ProgramName::VEC2 : 0)
+                        | (glsl::is_vec3(type) ? 1 << ProgramName::VEC3 : 0)
+                        | (glsl::is_vec4(type) ? 1 << ProgramName::VEC4 : 0) ));
             }
         }
         
@@ -485,13 +296,14 @@ int GLProgram::resources( )
         GLint threads;
         glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &threads);
         
-        MESSAGE("  compute shader group size %d %d %d, %d (max %d %d %d, %d)\n", 
+        MESSAGE("  compute shader group size %dx%dx%d %d threads (max %dx%dx%d %d threads)\n", 
             group_size[0], group_size[1], group_size[2], group_size[0] * group_size[1] * group_size[2], 
             group_max[0], group_max[1], group_max[2], threads);
     }
     #endif
 #endif
 
+    changes++;   // nombre de fois ou le programme a ete recharge / linke / modifie
     return 0;
 }
 

@@ -65,6 +65,7 @@ protected:
 public:
     std::vector<GLuint> shaders;        //!< shaders compiles et linkes dans le program.
     unsigned int version;               //!< si les shaders peuvent etre compiles differement (avec des #define, par exemple), permet d'identifier une combinaison particuliere.
+    unsigned int changes;               //!< compte le nombre de fois ou le program a ete recharge / linke / modifie
     bool errors;                        //!< derniere compilation reussie ou non.
     
     //! constructeur par defaut.
@@ -72,7 +73,7 @@ public:
         :
         GLResource(),
         shaders(SHADERTYPE_LAST, 0),
-        version(0), errors(false)
+        version(0), changes(0), errors(false)
     {}
     
     //! constructuer d'un programme nomme, cf khr_debug.
@@ -80,7 +81,7 @@ public:
         :
         GLResource(_label),
         shaders(SHADERTYPE_LAST, 0),
-        version(0), errors(false)
+        version(0), changes(0), errors(false)
     {}
     
     //! creation d'un shader program opengl.
@@ -143,9 +144,18 @@ public:
         return ProgramAttribute( this, m_attributes[id].location, m_attributes[id].index, 
             m_attributes[id].size, m_attributes[id].type, m_attributes[id].flags );
     }
+    
+    
+    //! renvoie le nombre d'uniforms
+    unsigned int uniformCount( ) const
+    {
+        return m_uniforms.size();
+    }
+    
     //! renvoie le ieme uniform.
     ProgramUniform uniform( const unsigned int id ) const 
     {
+        assert((int) id == m_uniforms[id].index);
         return ProgramUniform( this, m_uniforms[id].location, m_uniforms[id].index, 
             m_uniforms[id].size, m_uniforms[id].type, m_uniforms[id].flags );
     }
@@ -202,16 +212,6 @@ public:
     static const char *labels[];        //!< nom d'un shader en fonction de son type.
 };
 
-
-namespace glsl {
-    
-bool is_sampler( const GLenum type );
-bool is_image( const GLenum type );
-bool is_integer( const GLenum type );
-bool is_matrix( const GLenum type );
-const char *type_string( const GLenum value );
-
-}       // namespace 
 
 }       // namespace 
 
