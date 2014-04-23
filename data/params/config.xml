@@ -10,8 +10,8 @@
 		<obj>data/objects/Ford_Mustang_1966/Ford_Mustang_1966.obj</obj>
 		<obj>data/objects/MRX22_Recon_Flyer/MRX22_Recon_Flyer.obj</obj>
 		-->
-		<obj>data/objects/MRX22_Recon_Flyer/MRX22_Recon_Flyer.obj</obj>
-		<spheres>data/objects/MRX22_Recon_Flyer/MRX22_Recon_Flyer.obj.spheres</spheres>
+		<obj>data/objects/bigguy/bigguy.obj</obj>
+		<spheres>data/objects/bigguy/bigguy.obj.spheres</spheres>
 		<scale>1.0</scale>
 	</object>
 	

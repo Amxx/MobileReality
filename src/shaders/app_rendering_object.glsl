@@ -108,43 +108,37 @@ void main()
 {
 	//if (ni > 0.f) discard;
 
-	vec3	p_v											= vertex_position_v;
-	vec3	p_g											= vertex_position_g;
-	vec3	n_v											= normalize(vertex_normal_v);
-	vec3	n_g											= normalize(vertex_normal_g);
+	vec3	p_v						= vertex_position_v;
+	vec3	p_g						= vertex_position_g;
+	vec3	n_v						= normalize(vertex_normal_v);
+	vec3	n_g						= normalize(vertex_normal_g);
 	
-	vec3	l_v											= reflect(normalize(p_v), n_v);
-	vec3	l_g											= normalize(mat3(mvMatrixInv) * l_v);
-
-	float cos_theta								= abs(dot(n_v, l_v));
+	vec3	l_v						= reflect(normalize(p_v), n_v);
+	vec3	l_g						= normalize(mat3(mvMatrixInv) * l_v);
 	
 	//-----------------------------------------------------------------
 	
-	float	diffuse_shadow_factor		= 1.f;
+	vec4	env_diffuse		=		kd * diffuse_color  * diffuse_light;
 	if ((method & 0x0002) == 0 && n_g.y < 0)
 	{
 		vec2 shadowpos		= p_g.xz + n_g.xz * (bbox.y - p_g.y) / n_g.y;
 		vec2 shadowcoords	= shadowpos.xy / bbox.x / 2 + vec2(.5, .5); 
 		if ( shadowcoords.x > 0 && shadowcoords.x < 1 && shadowcoords.y > 0 && shadowcoords.y < 1 )
-			diffuse_shadow_factor = 1 - texture(softshadow, shadowcoords.xy).w;
+			env_diffuse *= 1 - texture(softshadow, shadowcoords.xy).w;
 	}
-	
-	vec4												env_diffuse		=		kd * diffuse_color  * diffuse_light * diffuse_shadow_factor;
-	if (use_diffuse_texture)		env_diffuse		*=	texture(diffuse_texture, vertex_texcoord.st);
+	if (use_diffuse_texture)	env_diffuse		*=	texture(diffuse_texture, vertex_texcoord.st);
 	
 	//-----------------------------------------------------------------
 	
-	float	specular_shadow_factor	= 1.f;
+	vec4	env_specular	=		ks * specular_color * textureLod(envmap, l_g, specular_level);
 	if ((method & 0x0004) == 0 && l_g.y < 0)
 	{
 		vec2 shadowpos		= p_g.xz + l_g.xz * (bbox.y - p_g.y) / l_g.y;
 		vec2 shadowcoords	= shadowpos.xy / bbox.x / 2 + vec2(.5, .5); 
 		if ( shadowcoords.x > 0 && shadowcoords.x < 1 && shadowcoords.y > 0 && shadowcoords.y < 1 )
-			specular_shadow_factor = 1 - texture(softshadow, shadowcoords.xy).w;
+			env_specular *= 1 - texture(softshadow, shadowcoords.xy).w;
 	}
-	
-	vec4												env_specular	=		ks * specular_color * textureLod(envmap, l_g, specular_level) * specular_shadow_factor;
-	if (use_specular_texture)		env_specular	*=	texture(specular_texture, vertex_texcoord.st);
+	if (use_specular_texture)	env_specular	*=	texture(specular_texture, vertex_texcoord.st);
 	
 	//-----------------------------------------------------------------
 	

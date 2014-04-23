@@ -14,8 +14,9 @@ Core::Core(int argc, char* argv[]) :
 	if (argc > 1) _config.load(argv[1]).check();
 	if (_config.general.verbose) _config.display();
 
-	_buildenvmap		= _config.general.envmap.type == Options::DYNAMIC;
-	_renderoptions	= 0x0000;
+	_buildenvmap	= _config.general.envmap.type == Options::DYNAMIC;
+	_method				= 0x0000;
+	_rebuild			= 0x0001;
 	// ===============================================================
 	// =                   L O A D   S C A N N E R                   =
 	// ===============================================================
@@ -147,19 +148,19 @@ int Core::init()
 	// ===============================================================
 	gk::programPath("install/shaders");
 	
-	_GLResources["prg:background_frame"]			= gk::createProgram("app_background_frame.glsl");
-	_GLResources["prg:background_envmap"]			= gk::createProgram("app_background_cubemap.glsl");
-	_GLResources["prg:build_cubemap"]					= gk::createProgram("app_build_cubemap.glsl");
-	_GLResources["prg:build_softshadow"]			= gk::createProgram("app_build_softshadow.glsl");
-	_GLResources["prg:rendering_object"]			= gk::createProgram("app_rendering_object.glsl");
-	_GLResources["prg:rendering_softshadow"]	= gk::createProgram("app_rendering_softshadow.glsl");
+	_GLResources["prg:background_frame"			] = gk::createProgram("app_background_frame.glsl"			);
+	_GLResources["prg:background_envmap"		] = gk::createProgram("app_background_cubemap.glsl"		);
+	_GLResources["prg:build_cubemap"				] = gk::createProgram("app_build_cubemap.glsl"				);
+	_GLResources["prg:build_softshadow"			] = gk::createProgram("app_build_softshadow.glsl"			);
+	_GLResources["prg:rendering_object"			] = gk::createProgram("app_rendering_object.glsl"			);
+	_GLResources["prg:rendering_softshadow"	] = gk::createProgram("app_rendering_softshadow.glsl"	);
 	
-	if (_GLResources["prg:background_frame"]			== gk::GLProgram::null())	return -1;
-	if (_GLResources["prg:background_envmap"]			== gk::GLProgram::null())	return -1;
-	if (_GLResources["prg:build_cubemap"]					== gk::GLProgram::null())	return -1;
-	if (_GLResources["prg:build_softshadow"]			== gk::GLProgram::null())	return -1;
-	if (_GLResources["prg:rendering_object"]			== gk::GLProgram::null())	return -1;
-	if (_GLResources["prg:rendering_softshadow"]	== gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:background_frame"			] == gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:background_envmap"		] == gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:build_cubemap"				] == gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:build_softshadow"			] == gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:rendering_object"			] == gk::GLProgram::null())	return -1;
+	if (_GLResources["prg:rendering_softshadow"	] == gk::GLProgram::null())	return -1;
 		
 	// ===============================================================
 	// =                           M E S H                           =
@@ -168,7 +169,7 @@ int Core::init()
 	if (mesh == nullptr) return -1;
 	_mesh = new gk::GLBasicMesh(GL_TRIANGLES, mesh->indices.size());
 	_mesh->createBuffer(0,	mesh->positions);
-  _mesh->createBuffer(1,	mesh->texcoords);
+	_mesh->createBuffer(1,	mesh->texcoords);
 	_mesh->createBuffer(2,	mesh->normals);
 	_mesh->createIndexBuffer(mesh->indices);
 	_meshGroups = mesh->groups;
@@ -180,7 +181,11 @@ int Core::init()
 	// ===============================================================
 	_GLResources["spl:linear"] = gk::createLinearSampler();
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-	
+	glBindSampler(0, _GLResources["spl:linear"]->name);
+	glBindSampler(1, _GLResources["spl:linear"]->name);
+	glBindSampler(2, _GLResources["spl:linear"]->name);
+	glBindSampler(3, _GLResources["spl:linear"]->name);
+
 	// ===============================================================
 	// =          C R E A T E   F R A M E   T E X T U R E S          =
 	// ===============================================================	
@@ -225,7 +230,7 @@ int Core::init()
 	glEnableVertexAttribArray	(getGLResource<gk::GLProgram>("prg:build_softshadow")->attribute("sphere"));
 	glVertexAttribDivisor			(getGLResource<gk::GLProgram>("prg:build_softshadow")->attribute("sphere"), 1);
 
-	_occlusion.render(getGLResource<gk::GLTexture>("tex:cubemap"), _renderoptions);
+	_occlusion.render(getGLResource<gk::GLTexture>("tex:cubemap"), _method);
 	_occlusion.generateMipMap();
 
 	// ===============================================================
@@ -235,7 +240,7 @@ int Core::init()
 	
 	return 1;
 }
-  
+
 
 // ############################################################################
 
@@ -265,7 +270,7 @@ int Core::draw()
 	static	gk::Transform	tr_mvp;
 	
 	bool									position_fresh		= false;
-	static	int						position_duration	= 0;												// Persistent : Persistency duration
+	static	int						position_duration	= 0;			// Persistent : Persistency duration
 	
 	// ===============================================================
 	// =               U S E R   I N T E R A C T I O N               =
@@ -276,7 +281,7 @@ int Core::draw()
 	int x, y;
 	unsigned int button= SDL_GetRelativeMouseState(&x, &y);
 	if (button & SDL_BUTTON(1))				_debugviewpoint.rotate(x, y);
-  else if (button & SDL_BUTTON(2))	_debugviewpoint.move(float(x) / float(windowWidth()), float(y) / float(windowHeight()));
+	else if (button & SDL_BUTTON(2))	_debugviewpoint.move(float(x) / float(windowWidth()), float(y) / float(windowHeight()));
 	else if (button & SDL_BUTTON(3))	_debugviewpoint.move(x);
 	
 	// ===============================================================
@@ -361,9 +366,14 @@ int Core::draw()
 	// =            B U I L D I N G   S O F T S H A D O W            =
 	// ===============================================================
 	timer t5 = now();
-	_occlusion.render(getGLResource<gk::GLTexture>("tex:cubemap"), _renderoptions);
-	_occlusion.generateMipMap();
-	
+
+	if ((_buildenvmap && position_fresh) || _rebuild & 0x0001)
+	{
+		_rebuild ^= 0x0001;	// disable rebuild shoftshadow bit
+		_occlusion.render(getGLResource<gk::GLTexture>("tex:cubemap"), _method);
+		_occlusion.generateMipMap();
+	}
+
 	// ===============================================================
 	// =                      R E N D E R I N G                      =
 	// ===============================================================
@@ -416,14 +426,12 @@ int Core::draw()
 	
 	glActiveTexture(GL_TEXTURE0+0);
 	glBindTexture(getGLResource<gk::GLTexture>("tex:softshadow")->target, _GLResources["tex:softshadow"]->name);
-	glBindSampler(0, _GLResources["spl:linear"]->name);
 	glActiveTexture(GL_TEXTURE0+1);
 	glBindTexture(getGLResource<gk::GLTexture>("tex:cubemap")->target, _GLResources["tex:cubemap"]->name);
-	glBindSampler(1, _GLResources["spl:linear"]->name);
 		
 	if (_config.general.rendering.scene && (_config.general.localisation.type == Options::DEBUG || (position_duration && position_duration--)))
 	{
-		if (!(_renderoptions & 0x0020))
+		if (!(_method & 0x0020))
 		{
 			glClear(GL_DEPTH_BUFFER_BIT);
 			
@@ -443,7 +451,7 @@ int Core::draw()
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrix")			= tr_mv.matrix();
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrixInv")	= tr_mv.inverseMatrix();		
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvpMatrix")		= tr_mvp.matrix();
-		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("method")				= _renderoptions;
+		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("method")				= _method;
 		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("softshadow")		= 0;
 		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("envmap")				= 1;
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("bbox")					=	_occlusion.bbox();
@@ -526,14 +534,14 @@ int Core::draw()
 
 void Core::processKeyboardEvent()
 {
-	if (key('b') && !(key('b')=0) )	{ _buildenvmap = !_buildenvmap; if (_config.general.verbose) printf("- build envmap : %s\n",									_buildenvmap?"on":"off"																															);	}
-	if (key('c') && !(key('c')=0) )	{	_envmap.clear();							if (_config.general.verbose) printf("- envmap cleared\n"																																																					);	}
-	
-	if (key('r') && !(key('r')=0) )	{	_renderoptions ^= 0x0001;			if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_renderoptions & 0x0001)?std::string("old"):std::string("new")).c_str()						);	}
-	if (key('f') && !(key('f')=0) )	{	_renderoptions ^= 0x0002;			if (_config.general.verbose) printf("- diffuse shadow %s\n", 									((_renderoptions & 0x0002)?std::string("disabled"):std::string("enabled")).c_str()	);	}
-	if (key('v') && !(key('v')=0) )	{	_renderoptions ^= 0x0004;			if (_config.general.verbose) printf("- specular shadow %s\n", 								((_renderoptions & 0x0004)?std::string("disabled"):std::string("enabled")).c_str()	);	}
-	if (key('e') && !(key('e')=0) )	{	_renderoptions ^= 0x0010;			if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_renderoptions & 0x0010)?std::string("old"):std::string("new")).c_str()						);	}
-	if (key('d') && !(key('d')=0) )	{	_renderoptions ^= 0x0020;			if (_config.general.verbose) printf("- shadow rendering %s\n",                ((_renderoptions & 0x0020)?std::string("disabled"):std::string("enabled")).c_str()	);	}	
+	if (key('b') && !(key('b')=0) )	{ _buildenvmap = !_buildenvmap;						if (_config.general.verbose) printf("- build envmap : %s\n", _buildenvmap?"on":"off"																																			);	}
+	if (key('c') && !(key('c')=0) )	{	_envmap.clear();												if (_config.general.verbose) printf("- envmap cleared\n"																																																	);	}
+
+	if (key('r') && !(key('r')=0) )	{	_method ^= 0x0001;	_rebuild |= 0x0000;	if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_method & 0x0001)?std::string("old"):std::string("new")).c_str()					);	}
+	if (key('f') && !(key('f')=0) )	{	_method ^= 0x0002;	_rebuild |= 0x0000;	if (_config.general.verbose) printf("- diffuse shadow %s\n", 									((_method & 0x0002)?std::string("disabled"):std::string("enabled")).c_str()	);	}
+	if (key('v') && !(key('v')=0) )	{	_method ^= 0x0004;	_rebuild |= 0x0000;	if (_config.general.verbose) printf("- specular shadow %s\n", 								((_method & 0x0004)?std::string("disabled"):std::string("enabled")).c_str()	);	}
+	if (key('e') && !(key('e')=0) )	{	_method ^= 0x0010;	_rebuild |= 0x0001;	if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_method & 0x0010)?std::string("old"):std::string("new")).c_str()					);	}
+	if (key('d') && !(key('d')=0) )	{	_method ^= 0x0020;	_rebuild |= 0x0000;	if (_config.general.verbose) printf("- shadow rendering %s\n",                ((_method & 0x0020)?std::string("disabled"):std::string("enabled")).c_str()	);	}	
 }
 
 

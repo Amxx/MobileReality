@@ -56,17 +56,18 @@ class Core : public gk::App
 		template<typename T> T*										getGLResource(const std::string&);
 	
 		// Status
-		int																				_renderoptions;
+		int																				_method;
+		int																				_rebuild;
 		bool																			_buildenvmap;
 		gk::Orbiter																_debugviewpoint;
 		
 	public:
-    Core(int = 0, char*[] = nullptr);
-    ~Core();
+		Core(int = 0, char*[] = nullptr);
+		~Core();
 	
-    int init();
-    int quit();
-    int draw();
+		int init();
+		int quit();
+		int draw();
 	
 		void processKeyboardEvent();
 		void processKeyboardEvent(SDL_KeyboardEvent&);
