@@ -148,12 +148,12 @@ int Core::init()
 	// ===============================================================
 	gk::programPath("install/shaders");
 	
-	_GLResources["prg:background_frame"			] = gk::createProgram("app_background_frame.glsl"			);
-	_GLResources["prg:background_envmap"		] = gk::createProgram("app_background_cubemap.glsl"		);
-	_GLResources["prg:build_cubemap"				] = gk::createProgram("app_build_cubemap.glsl"				);
-	_GLResources["prg:build_softshadow"			] = gk::createProgram("app_build_softshadow.glsl"			);
-	_GLResources["prg:rendering_object"			] = gk::createProgram("app_rendering_object.glsl"			);
-	_GLResources["prg:rendering_softshadow"	] = gk::createProgram("app_rendering_softshadow.glsl"	);
+	_GLResources["prg:background_frame"			]	= gk::createProgram("app_background_frame.glsl"			);
+	_GLResources["prg:background_envmap"		]	= gk::createProgram("app_background_cubemap.glsl"		);
+	_GLResources["prg:build_cubemap"				]	= gk::createProgram("app_build_cubemap.glsl"				);
+	_GLResources["prg:build_softshadow"			]	= gk::createProgram("app_build_softshadow.glsl"			);
+	_GLResources["prg:rendering_object"			]	= gk::createProgram("app_rendering_object.glsl"			);
+	_GLResources["prg:rendering_softshadow"	]	= gk::createProgram("app_rendering_softshadow.glsl"	);
 	
 	if (_GLResources["prg:background_frame"			] == gk::GLProgram::null())	return -1;
 	if (_GLResources["prg:background_envmap"		] == gk::GLProgram::null())	return -1;
