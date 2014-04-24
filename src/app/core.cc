@@ -397,8 +397,8 @@ int Core::draw()
 		{
 			case Options::DYNAMIC:
 			{
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(getGLResource<gk::GLTexture>("tex:frame0")->target, _GLResources["tex:frame0"]->name);
+				glActiveTexture(GL_TEXTURE0); glBindTexture(getGLResource<gk::GLTexture>("tex:frame0")->target, _GLResources["tex:frame0"]->name);
+				
 				glUseProgram(_GLResources["prg:background_frame"]->name);
 				getGLResource<gk::GLProgram>("prg:background_frame")->sampler("frame") = 0;
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -406,12 +406,11 @@ int Core::draw()
 			}
 			case Options::DEBUG:
 			{
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(getGLResource<gk::GLTexture>("tex:cubemap")->target, _GLResources["tex:cubemap"]->name);
-				glBindSampler(0, _GLResources["spl:linear"]->name);
+				glActiveTexture(GL_TEXTURE0); glBindTexture(getGLResource<gk::GLTexture>("tex:cubemap")->target, _GLResources["tex:cubemap"]->name);
+
 				glUseProgram(_GLResources["prg:background_envmap"]->name);
-				getGLResource<gk::GLProgram>("prg:background_envmap")->uniform("reproject")	= tr_vp.inverseMatrix();
-				getGLResource<gk::GLProgram>("prg:background_envmap")->sampler("envmap")		= 0;
+				getGLResource<gk::GLProgram>("prg:background_envmap")->uniform("reproject") = tr_vp.inverseMatrix();
+				getGLResource<gk::GLProgram>("prg:background_envmap")->sampler("envmap"		) = 0;
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 				break;
 			}
@@ -436,9 +435,9 @@ int Core::draw()
 			glEnable(GL_BLEND);
 			glDisable(GL_CULL_FACE);
 			glUseProgram(_GLResources["prg:rendering_softshadow"]->name);
-			getGLResource<gk::GLProgram>("prg:rendering_softshadow")->uniform("mvpMatrix")	= tr_mvp.matrix();
-			getGLResource<gk::GLProgram>("prg:rendering_softshadow")->sampler("softshadow")	= 0;
-			getGLResource<gk::GLProgram>("prg:rendering_softshadow")->uniform("bbox")				=	_occlusion.bbox();
+			getGLResource<gk::GLProgram>("prg:rendering_softshadow")->uniform("mvpMatrix"	) = tr_mvp.matrix();
+			getGLResource<gk::GLProgram>("prg:rendering_softshadow")->sampler("softshadow") = 0;
+			getGLResource<gk::GLProgram>("prg:rendering_softshadow")->uniform("bbox"			) =	_occlusion.bbox();
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glEnable(GL_CULL_FACE);
 			glDisable(GL_BLEND);
@@ -446,13 +445,13 @@ int Core::draw()
 		
 		glClear(GL_DEPTH_BUFFER_BIT);		
 		glUseProgram(_GLResources["prg:rendering_object"]->name);
-		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrix")			= tr_mv.matrix();
-		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrixInv")	= tr_mv.inverseMatrix();		
-		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvpMatrix")		= tr_mvp.matrix();
-		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("method")				= _method;
-		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("softshadow")		= 0;
-		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("envmap")				= 1;
-		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("bbox")					=	_occlusion.bbox();
+		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrix"		) = tr_mv.matrix();
+		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvMatrixInv"	) = tr_mv.inverseMatrix();		
+		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvpMatrix"		) = tr_mvp.matrix();
+		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("method"			) = _method;
+		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("softshadow"	) = 0;
+		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("envmap"			) = 1;
+		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("bbox"				) =	_occlusion.bbox();
 		
 		for (const gk::MeshGroup& grp : _meshGroups)
 		{
@@ -468,19 +467,19 @@ int Core::draw()
 				glBindTexture(getGLResource<gk::GLTexture>(grp.material.specular_texture)->target, _GLResources[grp.material.specular_texture]->name);
 			}
 
-			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("diffuse_color")				= grp.material.diffuse_color;
-			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("use_diffuse_texture")	= !grp.material.diffuse_texture.empty();
-			getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("diffuse_texture") 			= 2;
-			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("kd")										= grp.material.kd;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("diffuse_color"				) = grp.material.diffuse_color;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("use_diffuse_texture"	) = !grp.material.diffuse_texture.empty();
+			getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("diffuse_texture"			) = 2;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("kd"									) = grp.material.kd;
 
-			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("specular_color")				= grp.material.specular_color;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("specular_color"			) = grp.material.specular_color;
 			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("use_specular_texture") = !grp.material.specular_texture.empty();
-			getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("specular_texture") 		= 3;
-			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("ks")										= grp.material.ks;
-			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("ns")										= grp.material.ns;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("specular_texture"		) = 3;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("ks"									) = grp.material.ks;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("ns"									) = grp.material.ns;
 			
-			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("emission")							= grp.material.emission;
-			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("ni")										= grp.material.ni;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("emission"						) = grp.material.emission;
+			getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("ni"									) = grp.material.ni;
 			
 			_mesh->drawGroup(grp.begin, grp.end);
 		}
@@ -495,7 +494,7 @@ int Core::draw()
 	if (_config.general.rendering.view)
 	{
 		if (_config.devices.front.enable)	cv::imshow("camera 0", cv::Mat(_cameras[0]->frame()));
-		if (_config.devices.back.enable)	cv::imshow("camera 1", cv::Mat(_cameras[1]->frame()));
+		if (_config.devices.back.enable	)	cv::imshow("camera 1", cv::Mat(_cameras[1]->frame()));
 	}
 	
 	// ===============================================================
