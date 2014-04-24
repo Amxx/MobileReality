@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <opencv_storage>
 	
-	<!-- ######################################### Object ######################################### -->
+	<!-- ############################## Object ############################### -->
 	<object>
 		<!--
 		<obj>data/objects/sphere.obj</obj>
@@ -15,53 +15,53 @@
 		<scale>1.0</scale>
 	</object>
 	
-	<!-- #################################### Devices options ##################################### -->
+	<!-- ########################## Devices options ########################## -->
 	<devices>
 		<front>
-			<enable>off</enable>																					<!-- on | off									-->
-			<id>0</id>																										<!-- [int] | auto | manual		-->
+			<enable>off</enable>											<!-- on | off								-->
+			<id>0</id>																<!-- [int] | auto | manual	-->
 			<params>data/params/logitech.xml</params>
 		</front>
 		<back>
-			<enable>off</enable>																					<!-- on | off									-->
-			<id>1</id>																										<!-- [int] | auto | manual		-->
+			<enable>off</enable>											<!-- on | off								-->
+			<id>1</id>																<!-- [int] | auto | manual	-->
 			<params>data/params/c910-fisheye.xml</params>
 		</back>
 	</devices>
 	
-	<!-- ################################## Markers description ################################### -->
+	<!-- ######################## Markers description ######################## -->
 	<markers>
 		<size>6.0</size>
 		<scale>0.786667</scale>
 	</markers>
 	
-	<!-- ######################### General parameters of the application ########################## -->
+	<!-- ############### General parameters of the application ############### -->
 	<generalParameters>
 	
-		<verbose>2</verbose>																						<!-- [int] | off | low | high -->
+		<verbose>2</verbose>												<!-- [int] | off | low | high -->
 	
 		<defaultValues>
-			<brightness>128</brightness>																	<!-- -1 for auto							-->
-			<gain>64</gain>																								<!-- -1 for auto							-->
+			<brightness>128</brightness>							<!-- -1 for auto							-->
+			<gain>64</gain>														<!-- -1 for auto							-->
 			<persistency>10</persistency>
 		</defaultValues>
 		
 		<envmap>
-			<type>debug</type>																						<!-- dynamic | debug					-->
+			<type>debug</type>												<!-- dynamic | debug					-->
 			<size>512 512</size>
-			<dual>off</dual>																							<!-- on | off									-->
+			<dual>off</dual>													<!-- on | off									-->
 			<path>data/envmap/6/%03d.jpg</path>
 		</envmap>
 		
 		<localisation>
-			<type>debug</type>																						<!-- dynamic | debug					-->
-			<size>400.0</size>																						<!-- [float] (0 for infinity) -->
+			<type>debug</type>												<!-- dynamic | debug					-->
+			<size>400.0</size>												<!-- [float] (0 for infinity) -->
 		</localisation>		
 		
 		<rendering>
-			<background>off</background>																		<!-- on | off									-->
-			<scene>on</scene>																							<!-- on | off									-->
-			<view>off</view>																							<!-- on | off									-->
+			<background>off</background>							<!-- on | off								-->
+			<scene>on</scene>													<!-- on | off								-->
+			<view>off</view>													<!-- on | off								-->
 		</rendering>
 		
 		<modules>

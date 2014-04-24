@@ -22,10 +22,8 @@
 #include "GL/GLBasicMesh.h"
 #include "GL/GLBuffer.h"
 #include "GL/GLFramebuffer.h"
-#include "GL/GLQuery.h"
 #include "GL/GLTexture.h"
 #include "GL/GLSampler.h"
-#include "GL/GLVertexArray.h"
 
 // =================================
 // =   S E L F   I N C L U D E S   =

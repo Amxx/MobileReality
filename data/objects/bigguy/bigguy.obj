@@ -1,5 +1,5 @@
 mtllib bigguy.mtl
-usemtl miror
+usemtl glossy
 
 # The units used in this file are centimeters.
 g default

@@ -379,7 +379,7 @@ int Core::draw()
 	// ===============================================================
 	glClearColor(1.0, 1.0, 1.0, 1.0); // WHITE
 //glClearColor(0.0, 0.0, 0.0, 1.0); // BLACK
-//glClearColor(0.1, 0.1, 0.1, 1.0); //BLACK!10
+//glClearColor(0.1, 0.1, 0.1, 1.0); // BLACK!10
 	
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glViewport(0, 0, windowWidth(), windowHeight());
@@ -424,10 +424,8 @@ int Core::draw()
 	timer t7 = now();
 	
 	
-	glActiveTexture(GL_TEXTURE0+0);
-	glBindTexture(getGLResource<gk::GLTexture>("tex:softshadow")->target, _GLResources["tex:softshadow"]->name);
-	glActiveTexture(GL_TEXTURE0+1);
-	glBindTexture(getGLResource<gk::GLTexture>("tex:cubemap")->target, _GLResources["tex:cubemap"]->name);
+	glActiveTexture(GL_TEXTURE0+0);	glBindTexture(getGLResource<gk::GLTexture>("tex:softshadow"	)->target, _GLResources["tex:softshadow"]->name);
+	glActiveTexture(GL_TEXTURE0+1);	glBindTexture(getGLResource<gk::GLTexture>("tex:cubemap"		)->target, _GLResources["tex:cubemap"		]->name);
 		
 	if (_config.general.rendering.scene && (_config.general.localisation.type == Options::DEBUG || (position_duration && position_duration--)))
 	{
@@ -486,7 +484,6 @@ int Core::draw()
 			
 			_mesh->drawGroup(grp.begin, grp.end);
 		}
-		
 	
 	}
 	
@@ -522,6 +519,7 @@ int Core::draw()
 	
 	present();
 	cv::waitKey(3);
+
 	return 1;
 }
 
@@ -557,7 +555,7 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 			{
 				std::stringstream path;
 				path << "data/view/screenshot_" << time(0) << ".png";
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 				gk::writeFramebuffer(path.str());
 				break;
 			}
