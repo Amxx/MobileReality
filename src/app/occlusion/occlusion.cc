@@ -1,7 +1,7 @@
 #include "occlusion.hh"
 
 #define SHADOWSIZE	3
-gk::Vec2 Occlusion::bbox() const { return gk::Vec2(SHADOWSIZE * _box_radius, _box_bottom); }
+gk::Vec3 Occlusion::bbox() const { return gk::Vec3(SHADOWSIZE * _box_radius, _box_bottom, SHADOWSIZE * _box_radius); }
 
 
 

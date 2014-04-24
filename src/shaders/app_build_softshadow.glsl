@@ -6,7 +6,7 @@
 
 uniform												samplerCube	envmap;
 uniform												int					method;
-uniform												vec2 				bbox = vec2(100, -1.0);
+uniform												vec3 				bbox;
 
 layout(location = 3) in				vec4				sphere;
 out														vec3				vertex_position;
@@ -18,10 +18,10 @@ void main()
 															vec2(+1.0, -1.0),
 															vec2(-1.0, +1.0),
 															vec2(+1.0, +1.0) );
-	vec3 pos[4]			= vec3[4]	(	vec3(-bbox.x, bbox.y, -bbox.x),
-															vec3(+bbox.x, bbox.y, -bbox.x),
-															vec3(-bbox.x, bbox.y, +bbox.x),
-															vec3(+bbox.x, bbox.y, +bbox.x)	);
+	vec3 pos[4]			= vec3[4]	(	vec3(-bbox.x, bbox.y, -bbox.z),
+															vec3(+bbox.x, bbox.y, -bbox.z),
+															vec3(-bbox.x, bbox.y, +bbox.z),
+															vec3(+bbox.x, bbox.y, +bbox.z)	);
 
 	gl_Position = vec4( coords[gl_VertexID].xy, 0.0, 1.0 );
 	vertex_position = pos[gl_VertexID];
@@ -35,7 +35,7 @@ void main()
 
 uniform												samplerCube	envmap;
 uniform												int					method;
-uniform												vec2 				bbox = vec2(100, -1.0);
+uniform												vec3 				bbox;
 
 in														vec3				vertex_position;
 in														vec4				vertex_sphere;

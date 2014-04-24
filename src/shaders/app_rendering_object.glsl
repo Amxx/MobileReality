@@ -2,8 +2,6 @@
 
 #define PI 3.14159
 
-
-
 #ifdef VERTEX_SHADER
 
 uniform												mat4				mvMatrix;
@@ -12,7 +10,7 @@ uniform												mat4				mvpMatrix;
 uniform												int					method;
 uniform												sampler2D		softshadow;
 uniform												samplerCube	envmap;
-uniform												vec2				bbox;
+uniform												vec3				bbox;
 
 uniform												vec4				diffuse_color;
 uniform												bool				use_diffuse_texture;
@@ -78,7 +76,7 @@ uniform												mat4				mvpMatrix;
 uniform												int					method;
 uniform												sampler2D		softshadow;
 uniform												samplerCube	envmap;
-uniform												vec2				bbox;
+uniform												vec3				bbox;
 
 uniform												vec4				diffuse_color;
 uniform												bool				use_diffuse_texture;
@@ -121,10 +119,13 @@ void main()
 	vec4	env_diffuse		=		kd * diffuse_color  * diffuse_light;
 	if ((method & 0x0002) == 0 && n_g.y < 0)
 	{
-		vec2 shadowpos		= p_g.xz + n_g.xz * (bbox.y - p_g.y) / n_g.y;
-		vec2 shadowcoords	= shadowpos.xy / bbox.x / 2 + vec2(.5, .5); 
+		float	dist					= (bbox.y - p_g.y) / n_g.y;
+		vec2	shadowpos			= p_g.xz + dist * n_g.xz;
+		vec2	shadowcoords	= shadowpos.xy / bbox.xz / 2 + vec2(.5, .5);
+		float shadowlevel		= log2(2*dist);
+
 		if ( shadowcoords.x > 0 && shadowcoords.x < 1 && shadowcoords.y > 0 && shadowcoords.y < 1 )
-			env_diffuse *= 1 - texture(softshadow, shadowcoords.xy).w;
+			env_diffuse *= 1 - textureLod(softshadow, shadowcoords.xy, shadowlevel).w;
 	}
 	if (use_diffuse_texture)	env_diffuse		*=	texture(diffuse_texture, vertex_texcoord.st);
 	
@@ -133,10 +134,13 @@ void main()
 	vec4	env_specular	=		ks * specular_color * textureLod(envmap, l_g, specular_level);
 	if ((method & 0x0004) == 0 && l_g.y < 0)
 	{
-		vec2 shadowpos		= p_g.xz + l_g.xz * (bbox.y - p_g.y) / l_g.y;
-		vec2 shadowcoords	= shadowpos.xy / bbox.x / 2 + vec2(.5, .5); 
+		float	dist				= (bbox.y - p_g.y) / l_g.y;
+		vec2 shadowpos		= p_g.xz + dist * l_g.xz; 
+		vec2 shadowcoords	= shadowpos.xy / bbox.xz / 2 + vec2(.5, .5);
+		float shadowlevel	= log2(2*dist * sqrt(3.0)) - 0.5 * log2(ns + 1);
+
 		if ( shadowcoords.x > 0 && shadowcoords.x < 1 && shadowcoords.y > 0 && shadowcoords.y < 1 )
-			env_specular *= 1 - texture(softshadow, shadowcoords.xy).w;
+			env_specular *= 1 - textureLod(softshadow, shadowcoords.xy, shadowlevel).w;
 	}
 	if (use_specular_texture)	env_specular	*=	texture(specular_texture, vertex_texcoord.st);
 	

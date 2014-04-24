@@ -5,7 +5,7 @@
 #ifdef VERTEX_SHADER
 
 uniform												mat4				mvpMatrix;
-uniform												vec2 				bbox = vec2(100, -1.0);
+uniform												vec3 				bbox;
 out														vec2				vertex_texcoords;
 
 void main()
@@ -14,10 +14,10 @@ void main()
 															vec2(+0.0, +1.0),
 															vec2(+1.0, +0.0),
 															vec2(+1.0, +1.0) );
-	vec3 pos[4]			= vec3[4]	(	vec3(-bbox.x, bbox.y, -bbox.x),
-															vec3(-bbox.x, bbox.y, +bbox.x),
-															vec3(+bbox.x, bbox.y, -bbox.x),
-															vec3(+bbox.x, bbox.y, +bbox.x)	);
+	vec3 pos[4]			= vec3[4]	(	vec3(-bbox.x, bbox.y, -bbox.z),
+															vec3(-bbox.x, bbox.y, +bbox.z),
+															vec3(+bbox.x, bbox.y, -bbox.z),
+															vec3(+bbox.x, bbox.y, +bbox.z)	);
 
 	gl_Position				= mvpMatrix * vec4( pos[gl_VertexID].xyz, 1.0 );
 	vertex_texcoords	= coords[gl_VertexID];

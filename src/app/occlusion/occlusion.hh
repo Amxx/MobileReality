@@ -20,7 +20,7 @@ struct Occlusion
 	void clear();
 	void generateMipMap();
 	
-	gk::Vec2 bbox() const;
+	gk::Vec3 bbox() const;
 	
 	//-------------------------------------------------------------------------
 	gk::GLProgram*					_program;
