@@ -209,7 +209,7 @@ int Core::init()
 	if (_config.general.envmap.type == Options::DEBUG && !_config.general.envmap.path.empty())
 		_GLResources["tex:cubemap"] = (new gk::GLTexture())->createTextureCube(gk::GLTexture::UNIT4, gk::readImageArray(_config.general.envmap.path.c_str(), 6));
 	else
-		_GLResources["tex:cubemap"] = (new gk::GLTexture())->createTextureCube(gk::GLTexture::UNIT4, _config.general.envmap.size.width, _config.general.envmap.size.height);
+		_GLResources["tex:cubemap"]	= (new gk::GLTexture())->createTextureCube(gk::GLTexture::UNIT4, _config.general.envmap.size.width, _config.general.envmap.size.height);
 	getGLResource<gk::GLFramebuffer>("fbf:cubemap")->attach(GL_DRAW_FRAMEBUFFER, gk::GLFramebuffer::COLOR0, getGLResource<gk::GLTexture>("tex:cubemap"));
 
 	_envmap.init(getGLResource<gk::GLProgram>("prg:build_cubemap"), getGLResource<gk::GLFramebuffer>("fbf:cubemap"));
@@ -321,11 +321,11 @@ int Core::draw()
 			for (Symbol& symbol : _scanner->scan(_cameras[0]->frame()))
 				try {
 					// LEGACY MODE FOR CUBE
-					try 				{	model = parseSymbolToModel(	symbol.data, _config.markers.size															) * toGL;	}
-					catch (...)	{ model = parseMatx33f_tr		(	symbol.data, _config.markers.size *cv::Matx31f(0.5, 0.5, 0.5)	) * toGL;	}
+					try					{	model		= parseSymbolToModel(	symbol.data, _config.markers.size															) * toGL;	}
+					catch (...)	{ model		= parseMatx33f_tr		(	symbol.data, _config.markers.size *cv::Matx31f(0.5, 0.5, 0.5)	) * toGL;	}
 					symbol.extrinsic(_cameras[0]->A(), _cameras[0]->K(), Scanner::pattern(_config.markers.size, _config.markers.scale));
-					view								=	_cameras[0]->orientation().inv() * viewFromSymbol(symbol.rvec, symbol.tvec) * model;
-					position_fresh			= !isNull(view);
+					view									=	_cameras[0]->orientation().inv() * viewFromSymbol(symbol.rvec, symbol.tvec) * model;
+					position_fresh				= !isNull(view);
 					if (position_fresh)
 					{
 						position_duration		= _config.general.defaultValues.persistency;
@@ -369,7 +369,7 @@ int Core::draw()
 
 	if ((_buildenvmap && position_fresh) || _rebuild & 0x0001)
 	{
-		_rebuild ^= 0x0001;	// disable rebuild shoftshadow bit
+		_rebuild &= !0x0001;	// disable rebuild shoftshadow bit
 		_occlusion.render(getGLResource<gk::GLTexture>("tex:cubemap"), _method);
 		_occlusion.generateMipMap();
 	}
