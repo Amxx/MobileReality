@@ -32,5 +32,4 @@ struct Occlusion
 	float										_box_bottom;
 };
 
-
 #endif

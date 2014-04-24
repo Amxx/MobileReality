@@ -1,9 +1,14 @@
 #include "occlusion.hh"
 
+//==================================================================================================
 #define SHADOWSIZE	3
-gk::Vec3 Occlusion::bbox() const { return gk::Vec3(SHADOWSIZE * _box_radius, _box_bottom, SHADOWSIZE * _box_radius); }
-
-
+gk::Vec3 Occlusion::bbox() const
+{
+	return gk::Vec3(_box_center.x + SHADOWSIZE * _box_radius,
+									_box_bottom,
+									_box_center.z + SHADOWSIZE * _box_radius);
+}
+//==================================================================================================
 
 void Occlusion::init(gk::GLProgram* p, gk::GLFramebuffer* f, const gk::BBox& bbox)
 {
@@ -66,9 +71,3 @@ void Occlusion::generateMipMap()
 	glBindTexture(_framebuffer->texture(gk::GLFramebuffer::COLOR0)->target, _framebuffer->texture(gk::GLFramebuffer::COLOR0)->name);
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
-
-
-
-
-
-
