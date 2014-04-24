@@ -74,10 +74,6 @@ class Core : public gk::App
 		void processMouseMotionEvent(SDL_MouseMotionEvent&);
 };
 
-
-
-
 template<typename T> T* Core::getGLResource(const std::string& str) { return static_cast<T*>(_GLResources[str.c_str()]); }
-
 
 #endif
