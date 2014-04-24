@@ -111,7 +111,7 @@ int Core::compute()
 	glActiveTexture		(GL_TEXTURE0);
 	glBindTexture			(getGLResource<gk::GLTexture>("tex:blender")->target,	0);
 	
-	glBindFramebuffer	(GL_FRAMEBUFFER, getGLResource<gk::GLFramebuffer>("fbf:blender")->name);
+	glBindFramebuffer	(GL_FRAMEBUFFER, _GLResources["fbf:blender"]->name);
 	glViewport				(0, 0, getGLResource<gk::GLFramebuffer>("fbf:blender")->width,	getGLResource<gk::GLFramebuffer>("fbf:blender")->height);
 	glClear						(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
@@ -134,11 +134,11 @@ int Core::compute()
 		glActiveTexture		(GL_TEXTURE0);
 		glBindTexture			(getGLResource<gk::GLTexture>("tex:light")->target, 0);
 	
-		glBindFramebuffer	(GL_FRAMEBUFFER, getGLResource<gk::GLFramebuffer>("fbf:light")->name);
+		glBindFramebuffer	(GL_FRAMEBUFFER, _GLResources["fbf:light"]->name);
 		glViewport				(0, 0, getGLResource<gk::GLFramebuffer>("fbf:light")->width, getGLResource<gk::GLFramebuffer>("fbf:light")->height);
 		glClear						(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-		glUseProgram(getGLResource<gk::GLProgram>("prg:light")->name);
+		glUseProgram(_GLResources["prg:light"]->name);
 		getGLResource<gk::GLProgram>("prg:light")->uniform("mvp")					= ( proj * modelview ).matrix();
 		object->draw();
 	
@@ -148,19 +148,19 @@ int Core::compute()
 		glDisable(GL_CULL_FACE);
 		
 		glActiveTexture		(GL_TEXTURE0);
-		glBindTexture			(getGLResource<gk::GLTexture>("tex:texture")->target, 0																								);
-		glBindTexture			(getGLResource<gk::GLTexture>("tex:light"  )->target, getGLResource<gk::GLTexture>("tex:light")->name	);
+		glBindTexture			(getGLResource<gk::GLTexture>("tex:texture")->target, 0																);
+		glBindTexture			(getGLResource<gk::GLTexture>("tex:light"  )->target, _GLResources["tex:light"]->name	);
 		glGenerateMipmap	(GL_TEXTURE_2D);
 	
-		glBindFramebuffer	(GL_FRAMEBUFFER, getGLResource<gk::GLFramebuffer>("fbf:texture")->name);
+		glBindFramebuffer	(GL_FRAMEBUFFER, _GLResources["fbf:texture"]->name);
 		glViewport				(0, 0, getGLResource<gk::GLFramebuffer>("fbf:texture")->width, getGLResource<gk::GLFramebuffer>("fbf:texture")->height);
 		glClear						(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUseProgram(getGLResource<gk::GLProgram>("prg:texture")->name);
-		getGLResource<gk::GLProgram>("prg:texture")->uniform("height")		= (float) getGLResource<gk::GLFramebuffer>("fbf:texture")->height;
-		getGLResource<gk::GLProgram>("prg:texture")->uniform("width")			= (float) getGLResource<gk::GLFramebuffer>("fbf:texture")->width;
-		getGLResource<gk::GLProgram>("prg:texture")->uniform("mv")				= (        modelview ).matrix();
-		getGLResource<gk::GLProgram>("prg:texture")->uniform("mvp")				= ( proj * modelview ).matrix();
+		glUseProgram(_GLResources["prg:texture"]->name);
+		getGLResource<gk::GLProgram>("prg:texture")->uniform("height"		) = (float) getGLResource<gk::GLFramebuffer>("fbf:texture")->height;
+		getGLResource<gk::GLProgram>("prg:texture")->uniform("width"		) = (float) getGLResource<gk::GLFramebuffer>("fbf:texture")->width;
+		getGLResource<gk::GLProgram>("prg:texture")->uniform("mv"				) = (        modelview ).matrix();
+		getGLResource<gk::GLProgram>("prg:texture")->uniform("mvp"			) = ( proj * modelview ).matrix();
 		getGLResource<gk::GLProgram>("prg:texture")->sampler("light_map")	= 0;
 		object->draw();
 		
@@ -170,17 +170,17 @@ int Core::compute()
 		glDisable(GL_CULL_FACE);
 		
 		glActiveTexture		(GL_TEXTURE0);
-		glBindTexture			(getGLResource<gk::GLTexture>("tex:blender")->target, 0																									);
-		glBindTexture			(getGLResource<gk::GLTexture>("tex:texture")->target, getGLResource<gk::GLTexture>("tex:texture")->name	);
+		glBindTexture			(getGLResource<gk::GLTexture>("tex:blender")->target, 0																	);
+		glBindTexture			(getGLResource<gk::GLTexture>("tex:texture")->target, _GLResources["tex:texture"]->name	);
 		glGenerateMipmap	(GL_TEXTURE_2D);
 
-		glBindFramebuffer	(GL_FRAMEBUFFER, getGLResource<gk::GLFramebuffer>("fbf:blender")->name);
+		glBindFramebuffer	(GL_FRAMEBUFFER, _GLResources["fbf:blender"]->name);
 		glViewport				(0, 0, getGLResource<gk::GLFramebuffer>("fbf:blender")->width,	getGLResource<gk::GLFramebuffer>("fbf:blender")->height);
 		glClear						(GL_DEPTH_BUFFER_BIT);
 		
-		glUseProgram(getGLResource<gk::GLProgram>("prg:blender")->name);
-		getGLResource<gk::GLProgram>("prg:blender")->sampler("ambient")		= 0;
-		getGLResource<gk::GLProgram>("prg:blender")->uniform("light_nb")	= (int) COUNT;
+		glUseProgram(_GLResources["prg:blender"]->name);
+		getGLResource<gk::GLProgram>("prg:blender")->sampler("ambient"	) = 0;
+		getGLResource<gk::GLProgram>("prg:blender")->uniform("light_nb"	) = (int) COUNT;
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		// --------------------------------------------------------------------------
 	}
@@ -191,15 +191,15 @@ int Core::compute()
 	glDisable(GL_CULL_FACE);
 	
 	glActiveTexture		(GL_TEXTURE0);
-	glBindTexture			(getGLResource<gk::GLTexture>("tex:clamp"  )->target, 0																									);
-	glBindTexture			(getGLResource<gk::GLTexture>("tex:blender")->target, getGLResource<gk::GLTexture>("tex:blender")->name	);
+	glBindTexture			(getGLResource<gk::GLTexture>("tex:clamp"  )->target, 0																	);
+	glBindTexture			(getGLResource<gk::GLTexture>("tex:blender")->target, _GLResources["tex:blender"]->name	);
 	glGenerateMipmap	(GL_TEXTURE_2D);
 
-	glBindFramebuffer	(GL_FRAMEBUFFER, getGLResource<gk::GLFramebuffer>("fbf:clamp")->name);
+	glBindFramebuffer	(GL_FRAMEBUFFER, _GLResources["fbf:clamp"]->name);
 	glViewport				(0, 0, getGLResource<gk::GLFramebuffer>("fbf:clamp")->width,	getGLResource<gk::GLFramebuffer>("fbf:clamp")->height);
 	glClear						(GL_DEPTH_BUFFER_BIT);
 		
-	glUseProgram(getGLResource<gk::GLProgram>("prg:clamp")->name);
+	glUseProgram(_GLResources["prg:clamp"]->name);
 	getGLResource<gk::GLProgram>("prg:clamp")->sampler("data")				= 0;
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -209,7 +209,7 @@ int Core::compute()
 	// --------------------------------------------------------------------------
 			
 	glActiveTexture					(GL_TEXTURE0);
-	glBindTexture						(getGLResource<gk::GLTexture>("tex:clamp")->target, getGLResource<gk::GLTexture>("tex:clamp")->name	);
+	glBindTexture						(getGLResource<gk::GLTexture>("tex:clamp")->target, _GLResources["tex:clamp"]->name	);
 	glGenerateMipmap				(GL_TEXTURE_2D);
 	
 	gk::Image* finalAmbient = getGLResource<gk::GLTexture>("tex:clamp")->image(0);
@@ -267,7 +267,7 @@ int Core::draw()
 	gk::Transform modelview	= orbiter.view();
 	gk::Transform proj			= orbiter.projection(windowWidth(), windowHeight());
 	
-	glUseProgram(getGLResource<gk::GLProgram>("prg:viewer")->name);
+	glUseProgram(_GLResources["prg:viewer"]->name);
 	getGLResource<gk::GLProgram>("prg:viewer")->uniform("mvp")			= ( proj * modelview ).matrix();
 	getGLResource<gk::GLProgram>("prg:viewer")->sampler("blended")	= 0;
 	object->draw();
