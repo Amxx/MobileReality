@@ -113,7 +113,7 @@ int Core::compute()
 	
 	glBindFramebuffer	(GL_FRAMEBUFFER, _GLResources["fbf:blender"]->name);
 	glViewport				(0, 0, getGLResource<gk::GLFramebuffer>("fbf:blender")->width,	getGLResource<gk::GLFramebuffer>("fbf:blender")->height);
-	glClear						(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear						(GL_COLOR_BUFFER_BIT);
 	
 	
 	for (int i=0; i<COUNT; ++i)
@@ -154,7 +154,7 @@ int Core::compute()
 	
 		glBindFramebuffer	(GL_FRAMEBUFFER, _GLResources["fbf:texture"]->name);
 		glViewport				(0, 0, getGLResource<gk::GLFramebuffer>("fbf:texture")->width, getGLResource<gk::GLFramebuffer>("fbf:texture")->height);
-		glClear						(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear						(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(_GLResources["prg:texture"]->name);
 		getGLResource<gk::GLProgram>("prg:texture")->uniform("height"		) = (float) getGLResource<gk::GLFramebuffer>("fbf:texture")->height;
@@ -176,7 +176,6 @@ int Core::compute()
 
 		glBindFramebuffer	(GL_FRAMEBUFFER, _GLResources["fbf:blender"]->name);
 		glViewport				(0, 0, getGLResource<gk::GLFramebuffer>("fbf:blender")->width,	getGLResource<gk::GLFramebuffer>("fbf:blender")->height);
-		glClear						(GL_DEPTH_BUFFER_BIT);
 		
 		glUseProgram(_GLResources["prg:blender"]->name);
 		getGLResource<gk::GLProgram>("prg:blender")->sampler("ambient"	) = 0;
@@ -197,7 +196,6 @@ int Core::compute()
 
 	glBindFramebuffer	(GL_FRAMEBUFFER, _GLResources["fbf:clamp"]->name);
 	glViewport				(0, 0, getGLResource<gk::GLFramebuffer>("fbf:clamp")->width,	getGLResource<gk::GLFramebuffer>("fbf:clamp")->height);
-	glClear						(GL_DEPTH_BUFFER_BIT);
 		
 	glUseProgram(_GLResources["prg:clamp"]->name);
 	getGLResource<gk::GLProgram>("prg:clamp")->sampler("data")				= 0;
@@ -256,20 +254,20 @@ int Core::draw()
 	glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glViewport(0, 0, windowWidth(), windowHeight());
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer	(GL_DRAW_FRAMEBUFFER, 0);
+	glViewport				(0, 0, windowWidth(), windowHeight());
+	glClear						(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(getGLResource<gk::GLTexture>("tex:clamp")->target, _GLResources["tex:clamp"]->name);
+	glActiveTexture	(GL_TEXTURE0);
+	glBindTexture		(getGLResource<gk::GLTexture>("tex:clamp")->target, _GLResources["tex:clamp"]->name);
 	
 	gk::Transform modelview	= orbiter.view();
 	gk::Transform proj			= orbiter.projection(windowWidth(), windowHeight());
 	
 	glUseProgram(_GLResources["prg:viewer"]->name);
-	getGLResource<gk::GLProgram>("prg:viewer")->uniform("mvp")			= ( proj * modelview ).matrix();
-	getGLResource<gk::GLProgram>("prg:viewer")->sampler("blended")	= 0;
+	getGLResource<gk::GLProgram>("prg:viewer")->uniform("mvp"			) = ( proj * modelview ).matrix();
+	getGLResource<gk::GLProgram>("prg:viewer")->sampler("blended"	) = 0;
 	object->draw();
 	
 	
