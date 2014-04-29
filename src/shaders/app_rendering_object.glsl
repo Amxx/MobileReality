@@ -48,18 +48,18 @@ void main()
 	vertex_normal_g		= normal;	
 	vertex_texcoord		= texcoord;
 	
-	int		size				= textureSize(envmap, 0).x;
+	float	size				= float(textureSize(envmap, 0).x);
 	diffuse_level			= log2(size);
-	specular_level		= log2(size * sqrt(3.0)) - 0.5 * log2(ns + 1);
+	specular_level		= log2(size * sqrt(3.0)) - 0.5 * log2(ns + 1.0);
 	
 	vec3	n						=	normalize(normal);
 	if ((method & 0x0001) == 0)
-		diffuse_light		= (	textureLod(envmap, vec3(+1.0, +0.0, +0.0), diffuse_level) * pow(max(0.75 + n.x, 0), 2.0)
-											+ textureLod(envmap, vec3(-1.0, +0.0, +0.0), diffuse_level) * pow(max(0.75 - n.x, 0), 2.0)
-											+ textureLod(envmap, vec3(+0.0, +1.0, +0.0), diffuse_level) * pow(max(0.75 + n.y, 0), 2.0)
-											+ textureLod(envmap, vec3(+0.0, -1.0, +0.0), diffuse_level) * pow(max(0.75 - n.y, 0), 2.0)
-											+ textureLod(envmap, vec3(+0.0, +0.0, +1.0), diffuse_level) * pow(max(0.75 + n.z, 0), 2.0)
-											+ textureLod(envmap, vec3(+0.0, +0.0, -1.0), diffuse_level) * pow(max(0.75 - n.z, 0), 2.0) ) / 1.75 / PI;
+		diffuse_light		= (	textureLod(envmap, vec3(+1.0, +0.0, +0.0), diffuse_level) * pow(max(0.75 + n.x, 0.0), 2.0)
+											+ textureLod(envmap, vec3(-1.0, +0.0, +0.0), diffuse_level) * pow(max(0.75 - n.x, 0.0), 2.0)
+											+ textureLod(envmap, vec3(+0.0, +1.0, +0.0), diffuse_level) * pow(max(0.75 + n.y, 0.0), 2.0)
+											+ textureLod(envmap, vec3(+0.0, -1.0, +0.0), diffuse_level) * pow(max(0.75 - n.y, 0.0), 2.0)
+											+ textureLod(envmap, vec3(+0.0, +0.0, +1.0), diffuse_level) * pow(max(0.75 + n.z, 0.0), 2.0)
+											+ textureLod(envmap, vec3(+0.0, +0.0, -1.0), diffuse_level) * pow(max(0.75 - n.z, 0.0), 2.0) ) / 1.75 / PI;
 	else
 		diffuse_light		= textureLod(envmap, n,	diffuse_level);
 }
@@ -102,44 +102,100 @@ in														float 			specular_level;
 
 out														vec4				fragment_color;
 
+
+
+
+float erfc(float x)
+{
+	return 2.0*exp(-x*x)/(2.319*x+sqrt(4.0+1.52*x*x));
+}
+vec2 simpleDs(float gaussian, float cos_theta)
+{
+	float	sin_theta	=	1.0-sqrt(cos_theta*cos_theta);
+	float	cot_theta	=	cos_theta/sin_theta;
+	float	E1				=	sqrt(0.5*gaussian/PI)*exp(-0.5*cot_theta*cot_theta/gaussian);
+	float	E2				=	1.0-0.5*erfc(cot_theta/sqrt(2.0*gaussian));
+	float	I2				=	-cot_theta*E1+gaussian*E2;
+	float	I3				=	-2.0*gaussian*E1-cot_theta*cot_theta*E1;
+	float	N					=	(+sin_theta*E1+cos_theta*E2);
+	float	ds_para0	=	(-sin_theta*I2-cos_theta*E1)/N;
+	float	shift			=	ds_para0;
+	float	aniso			=	(-sin_theta*I3+cos_theta*I2)/N-ds_para0*ds_para0;
+	return vec2(shift, aniso);
+}
+
+
 void main() 
 {
 	//if (ni > 0.f) discard;
 
-	vec3	p_v	= vertex_position_v;
-	vec3	p_g	= vertex_position_g;
-	vec3	n_v	= normalize(vertex_normal_v);
-	vec3	n_g	= normalize(vertex_normal_g);
-	vec3	l_v	= reflect(normalize(p_v), n_v);
-	vec3	l_g	= mat3(mvMatrixInv) * l_v;
+	vec3	p_v		= vertex_position_v;
+	vec3	p_g		= vertex_position_g;
+	vec3	n_v		= normalize(vertex_normal_v);
+	vec3	n_g		= normalize(vertex_normal_g);
+
+
+	vec2	Ds		= simpleDs(1.0/(ns+1.0), dot(n_v, normalize(p_v)));
+	vec3	Dn_v	=	normalize(n_v+Ds.x*normalize(p_v));
 	
+	vec3	l_v		= ((method & 0x0000)==0) ? normalize(reflect(normalize(p_v), n_v)) : normalize(reflect(normalize(p_v), Dn_v));
+	vec3	l_g		= normalize(mat3(mvMatrixInv) * l_v);
+
 	//-----------------------------------------------------------------
 	
 	vec4	env_diffuse = kd * diffuse_color  * diffuse_light;
-	if ((method & 0x0002) == 0 && n_g.y < 0)
+	if ((method & 0x0002) == 0 && n_g.y < 0.0)
 	{
 		float	dist					= (bbox.y - p_g.y) / n_g.y;
 		vec2	shadowpos			= p_g.xz + dist * n_g.xz;
-		vec2	shadowcoords	= shadowpos.xy / bbox.xz / 2 + vec2(.5, .5);
-		float shadowlevel		= log2(2*dist);
+		vec2	shadowcoords	= shadowpos.xy / bbox.xz / 2.0 + vec2(.5, .5);
+		float shadowlevel		= log2(2.0*dist);
 
-		if ( shadowcoords.x > 0 && shadowcoords.x < 1 && shadowcoords.y > 0 && shadowcoords.y < 1 )
-			env_diffuse *= 1 - textureLod(softshadow, shadowcoords.xy, shadowlevel).w;
+		if ( shadowcoords.x > 0.0 && shadowcoords.x < 1.0 && shadowcoords.y > 0.0 && shadowcoords.y < 1.0 )
+			env_diffuse *= 1.0 - textureLod(softshadow, shadowcoords.xy, shadowlevel).w;
 	}
 	if (use_diffuse_texture) env_diffuse *= texture(diffuse_texture, vertex_texcoord.st);
 	
 	//-----------------------------------------------------------------
 	
-	vec4	env_specular = ks * specular_color * textureLod(envmap, l_g, specular_level);
-	if ((method & 0x0004) == 0 && l_g.y < 0)
+
+
+
+
+	vec4	env_specular;
+
+	if ((method & 0x0008)==0)
+	{
+		vec2	dF	= vec2( 100.f, 100.f )
+							* length(dFdx(l_g) + dFdy(l_g));
+		vec3	dX	= normalize(n_g-dot(n_g, l_g)*l_g	) * dF.x;
+		vec3	dY	= normalize(cross(n_g, l_g)				) * dF.y;
+		env_specular	= ks * specular_color * textureGrad(envmap, l_g, dX, dY);
+
+		// vec3	dx				= dFdx(l_g);
+		// vec3	dy				= dFdy(l_g);
+		// float	dlength		=	length(dx+dy);
+		// vec3	ddir			= normalize(dx * dot(dx, l_g) + dy * dot(l_g, dy)) * dlength * 1.0;
+		// vec3	dort			= normalize(dy * dot(dx, l_g) - dx * dot(l_g, dy)) * dlength * 1.0;
+		// env_specular	= ks * specular_color * textureGrad(envmap, l_g, ddir, dort);
+	}
+	else
+	{
+		env_specular = ks * specular_color * textureLod(envmap, l_g, specular_level);
+	}
+
+
+
+
+	if ((method & 0x0004) == 0 && l_g.y < 0.0)
 	{
 		float	dist				= (bbox.y - p_g.y) / l_g.y;
 		vec2 shadowpos		= p_g.xz + dist * l_g.xz; 
-		vec2 shadowcoords	= shadowpos.xy / bbox.xz / 2 + vec2(.5, .5);
-		float shadowlevel	= log2(2*dist * sqrt(3.0)) - 0.5 * log2(ns + 1);
+		vec2 shadowcoords	= shadowpos.xy / bbox.xz / 2.0 + vec2(0.5, 0.5);
+		float shadowlevel	= log2(2.0*dist * sqrt(3.0)) - 0.5 * log2(ns + 1.0);
 
-		if ( shadowcoords.x > 0 && shadowcoords.x < 1 && shadowcoords.y > 0 && shadowcoords.y < 1 )
-			env_specular *= 1 - textureLod(softshadow, shadowcoords.xy, shadowlevel).w;
+		if ( shadowcoords.x > 0.0 && shadowcoords.x < 1.0 && shadowcoords.y > 0.0 && shadowcoords.y < 1.0 )
+			env_specular *= 1.0 - textureLod(softshadow, shadowcoords.xy, shadowlevel).w;
 	}
 	if (use_specular_texture) env_specular *= texture(specular_texture, vertex_texcoord.st);
 	
