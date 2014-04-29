@@ -10,8 +10,8 @@ void main()
 															vec2(+1.0, -1.0),
 															vec2(+1.0, +1.0) );
 
-	gl_Position = vec4( coords[gl_VertexID].xy, 0.0, 1.0 );
-	texcoords		= vec2( coords[gl_VertexID].xy / 2 + 0.5 );
+	gl_Position = vec4( coords[gl_VertexID].xy, 0.0, 1.0);
+	texcoords		= vec2( coords[gl_VertexID].xy*0.5+0.5	);
 }
 #endif
 
@@ -24,7 +24,7 @@ out				vec4				fragment_color;
 
 void main()
 {
-	fragment_color	= vec4( clamp(texture(data, texcoords).rgba, 0.f, 1.f) );
+	fragment_color	= vec4( clamp(texture(data, texcoords).rgba, 0.0, 1.0) );
 }
 
 

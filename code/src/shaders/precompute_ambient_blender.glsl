@@ -10,8 +10,8 @@ void main()
 															vec2(+1.0, -1.0),
 															vec2(+1.0, +1.0) );
 
-	gl_Position = vec4( coords[gl_VertexID].xy, 0.0, 1.0 );
-	texcoords		= vec2( coords[gl_VertexID].xy / 2 + 0.5 );
+	gl_Position = vec4( coords[gl_VertexID].xy, 0.0, 1.0);
+	texcoords		= vec2( coords[gl_VertexID].xy*0.5+0.5	);
 }
 #endif
 

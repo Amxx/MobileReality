@@ -27,18 +27,18 @@ void main()
 															4,  9,	8,
 															5,	10, 9,
 															1,	6,	10 );
-	vec3 pos[12]	= vec3[12]	(	vec3(+0.000f, +0.000f, +1.000f),
-															vec3(+0.894f, +0.000f, +0.447f),
-															vec3(+0.276f, +0.851f, +0.447f),
-															vec3(-0.724f, +0.526f, +0.447f),
-															vec3(-0.724f, -0.526f, +0.447f),
-															vec3(+0.276f, -0.851f, +0.447f),
-															vec3(+0.724f, +0.526f, -0.447f),
-															vec3(-0.276f, +0.851f, -0.447f),
-															vec3(-0.894f, +0.000f, -0.447f),
-															vec3(-0.276f, -0.851f, -0.447f),
-															vec3(+0.724f, -0.526f, -0.447f),
-															vec3(+0.000f, +0.000f, -1.000f) );
+	vec3 pos[12]	= vec3[12]	(	vec3(+0.000, +0.000, +1.000),
+															vec3(+0.894, +0.000, +0.447),
+															vec3(+0.276, +0.851, +0.447),
+															vec3(-0.724, +0.526, +0.447),
+															vec3(-0.724, -0.526, +0.447),
+															vec3(+0.276, -0.851, +0.447),
+															vec3(+0.724, +0.526, -0.447),
+															vec3(-0.276, +0.851, -0.447),
+															vec3(-0.894, +0.000, -0.447),
+															vec3(-0.276, -0.851, -0.447),
+															vec3(+0.724, -0.526, -0.447),
+															vec3(+0.000, +0.000, -1.000) );
 															
 	vertex_position = pos[faces[gl_VertexID]];
 }
@@ -48,7 +48,7 @@ void main()
 
 #ifdef CONTROL_SHADER
 layout(vertices = 3) out;
-uniform		vec2				tesselation_level = vec2(3.f, 3.f);
+uniform		vec2				tesselation_level = vec2(3.0, 3.0);
 in				vec3				vertex_position[];
 out				vec3				control_position[];
  
@@ -83,7 +83,7 @@ void main( void )
 	
 	evaluation_normal		= normalize(p0 + p1 + p2);
 	evaluation_position	= evaluation_normal * sphere.w + sphere.xyz;
-	gl_Position					= mvp * vec4(evaluation_position, 1.f);
+	gl_Position					= mvp * vec4(evaluation_position, 1.0);
 	
 }
 #endif
@@ -122,8 +122,8 @@ void main()
 {
 	vec3 color = vec3(1.0, 0.6, 0.2);
 
-	float n = dot(evaluation_normal, normalize(vec3(0.1,1.0,0.3))) * 0.5f + 0.5f;
-	fragment_color = vec4(color * n, 1.f);
+	float n = dot(evaluation_normal, normalize(vec3(0.1, 1.0, 0.3))) * 0.5 + 0.5;
+	fragment_color = vec4(color * n, 1.0);
 	
 //fragment_color = vec4(evaluation_normal * 0.5f + 0.5f, 1.f);	
 //fragment_color = vec4(1.f, 1.f, 1.f, 1.f);

@@ -34,7 +34,7 @@ out				vec4				fragment_color;
 void main()
 {
 	vec4 cubecoords;
-	if (sce_rad > 0.f)	cubecoords = reproject * vec4(normalize(normalize(position).xyz*sce_rad-cam_pos.xyz), 1.0 );
+	if (sce_rad > 0.0)	cubecoords = reproject * vec4(normalize(normalize(position).xyz*sce_rad-cam_pos.xyz), 1.0 );
 	else								cubecoords = reproject * vec4(normalize(          position                         ), 1.0 );	
 	
 	if (cubecoords.z <= 0.0) discard;

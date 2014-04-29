@@ -12,8 +12,27 @@
 *.la
 *.a
 
-.debugviewpoint.save
-build/
-install/
-data/objects/*/
-data/view/
+# Latex temporary
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.idx
+*.ilg
+*.ind
+*.locode
+*.lof
+*.log
+*.lot
+*.out
+*.synctex.gz
+*.thm
+*.toc
+
+code/.debugviewpoint.save
+code/build/
+code/install/
+code/data/objects/*/
+code/data/view/
+
+rapport/build

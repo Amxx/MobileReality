@@ -9,7 +9,7 @@ out											vec3				vertex_normal;
 
 void main()
 {
-	gl_Position			= vec4( 2*texcoord.st-vec2(1.0, 1.0), 0.0, 1.0 );
+	gl_Position			= vec4( 2.0*texcoord.st-vec2(1.0, 1.0), 0.0, 1.0 );
 	vertex_position	=	position;
 	vertex_normal		=	normal;
 }
@@ -33,10 +33,10 @@ in										vec3				vertex_normal[];
 out										vec3				geometry_position;
 out										vec3				geometry_normal;
 
-vec4 BL(vec4 p)	{	return vec4(p.x-2/width, p.y-2/height, p.zw); }
-vec4 BR(vec4 p) { return vec4(p.x+2/width, p.y-2/height, p.zw); }
-vec4 TL(vec4 p)	{	return vec4(p.x-2/width, p.y+2/height, p.zw); }
-vec4 TR(vec4 p)	{	return vec4(p.x+2/width, p.y+2/height, p.zw); }
+vec4 BL(vec4 p)	{	return vec4(p.x-2.0/width, p.y-2.0/height, p.zw); }
+vec4 BR(vec4 p) { return vec4(p.x+2.0/width, p.y-2.0/height, p.zw); }
+vec4 TL(vec4 p)	{	return vec4(p.x-2.0/width, p.y+2.0/height, p.zw); }
+vec4 TR(vec4 p)	{	return vec4(p.x+2.0/width, p.y+2.0/height, p.zw); }
 
 
 void main()
@@ -237,7 +237,7 @@ void main()
 	float	depth					= texture(light_map, coords.xy).z;
 
 	vec4	oriented			= vec4( mv   * vec4(normalize( geometry_normal   ), 0.0) );
-	float value 				= max(0.f, oriented.z);	
+	float value 				= max(0.0, oriented.z);	
 	float bias					= 0.005*tan(acos(value));
 
 	if ( coords.z <= depth+bias )	fragment_color = vec4(value, value, value, 1.0);

@@ -38,8 +38,8 @@ void main()
 {	
 	vec3 color = vec3(0.2, 0.6, 1.0);
 
-	float n = dot(vertex_normal, normalize(vec3(0.1,1.0,0.3))) * 0.5f + 0.5f;
-	fragment_color = vec4(color * n, 1.f);
+	float n = dot(vertex_normal, normalize(vec3(0.1, 1.0, 0.3))) * 0.5 + 0.5;
+	fragment_color = vec4(color * n, 1.0);
 }
 #endif
 

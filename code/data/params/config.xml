@@ -10,8 +10,8 @@
 		<obj>data/objects/Ford_Mustang_1966/Ford_Mustang_1966.obj</obj>
 		<obj>data/objects/MRX22_Recon_Flyer/MRX22_Recon_Flyer.obj</obj>
 		-->
-		<obj>data/objects/bigguy/bigguy.obj</obj>
-		<spheres>data/objects/bigguy/bigguy.obj.spheres</spheres>
+		<obj>data/objects/sphere.obj</obj>
+		<!--<spheres>data/objects/bigguy/bigguy.obj.spheres</spheres>-->
 		<scale>1.0</scale>
 	</object>
 	
@@ -50,7 +50,8 @@
 			<type>debug</type>												<!-- dynamic | debug					-->
 			<size>512 512</size>
 			<dual>off</dual>													<!-- on | off									-->
-			<path>data/envmap/6/%03d.jpg</path>
+			<!--<path>data/envmap/0/%03d.jpg</path>-->
+			<path>data/envmap/test/%03d.png</path>
 		</envmap>
 		
 		<localisation>

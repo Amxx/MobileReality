@@ -57,16 +57,16 @@ Core::Core(int argc, char* argv[]) :
 		{
 			int brightness	= (_config.general.defaultValues.brightness<0)?_cameras[0]->getParameter(VideoDevice::BRIGHTNESS):_config.general.defaultValues.brightness;
 			int gain				= (_config.general.defaultValues.gain      <0)?_cameras[0]->getParameter(VideoDevice::GAIN)      :_config.general.defaultValues.gain;
-			_cameras[0]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
-			_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	brightness);
-			_cameras[0]->setParameter(VideoDevice::GAIN,				gain);
+			_cameras[0]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE	);
+			_cameras[0]->setParameter(VideoDevice::BRIGHTNESS,	brightness									);
+			_cameras[0]->setParameter(VideoDevice::GAIN,				gain												);
 			if (_config.general.verbose)
 			{
 				printf("┌─────────────────────────────────────────────────────────────────────┐\n");
 				printf("│                           C A M E R A   0                           │\n");
 				printf("├─────────────────────────────────────────────────────────────────────┤\n");
-				printf("│ brightness : %-54d │\n", brightness);
-				printf("│ gain       : %-54d │\n", gain);
+				printf("│ brightness : %-54d │\n", brightness																			);
+				printf("│ gain       : %-54d │\n", gain																						);
 				printf("└─────────────────────────────────────────────────────────────────────┘\n");
 				// _cameras[0]->showParameters();
 			}
@@ -76,16 +76,16 @@ Core::Core(int argc, char* argv[]) :
 		{
 			int brightness	= (_config.general.defaultValues.brightness==-1)?_cameras[1]->getParameter(VideoDevice::BRIGHTNESS):_config.general.defaultValues.brightness;
 			int gain				= (_config.general.defaultValues.gain      ==-1)?_cameras[1]->getParameter(VideoDevice::GAIN)      :_config.general.defaultValues.gain;
-			_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE);
-			_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	brightness);
-			_cameras[1]->setParameter(VideoDevice::GAIN,				gain);
+			_cameras[1]->setParameter(VideoDevice::MODE,				VideoDevice::MANUALEXPOSURE	);
+			_cameras[1]->setParameter(VideoDevice::BRIGHTNESS,	brightness									);
+			_cameras[1]->setParameter(VideoDevice::GAIN,				gain												);
 			if (_config.general.verbose)
 			{
 				printf("┌─────────────────────────────────────────────────────────────────────┐\n");
 				printf("│                           C A M E R A   1                           │\n");
 				printf("├─────────────────────────────────────────────────────────────────────┤\n");
-				printf("│ brightness : %-54d │\n", brightness);
-				printf("│ gain       : %-54d │\n", gain);
+				printf("│ brightness : %-54d │\n", brightness																			);
+				printf("│ gain       : %-54d │\n", gain																						);
 				printf("└─────────────────────────────────────────────────────────────────────┘\n");
 				// _cameras[1]->showParameters();
 			}
@@ -99,7 +99,7 @@ Core::Core(int argc, char* argv[]) :
 	gk::AppSettings settings;
 	settings.setGLVersion(4,1);
 	// settings.setFullscreen();
-	if(createWindow(800, 600, settings) < 0) closeWindow();
+	if(createWindow(1280, 720, settings) < 0) closeWindow();
 	
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -460,7 +460,6 @@ int Core::draw()
 				glActiveTexture(GL_TEXTURE0+2);
 				glBindTexture(getGLResource<gk::GLTexture>(grp.material.diffuse_texture)->target, _GLResources[grp.material.diffuse_texture]->name);
 			}
-			
 			if (!grp.material.specular_texture.empty())
 			{
 				glActiveTexture(GL_TEXTURE0+3);
@@ -537,6 +536,9 @@ void Core::processKeyboardEvent()
 	if (key('r') && !(key('r')=0) )	{	_method ^= 0x0001;	_rebuild |= 0x0000;	if (_config.general.verbose) printf("- switch to %s object render methode\n", ((_method & 0x0001)?std::string("old"):std::string("new")).c_str()					);	}
 	if (key('f') && !(key('f')=0) )	{	_method ^= 0x0002;	_rebuild |= 0x0000;	if (_config.general.verbose) printf("- diffuse shadow %s\n", 									((_method & 0x0002)?std::string("disabled"):std::string("enabled")).c_str()	);	}
 	if (key('v') && !(key('v')=0) )	{	_method ^= 0x0004;	_rebuild |= 0x0000;	if (_config.general.verbose) printf("- specular shadow %s\n", 								((_method & 0x0004)?std::string("disabled"):std::string("enabled")).c_str()	);	}
+
+	if (key('g') && !(key('g')=0) )	{	_method ^= 0x0008;	_rebuild |= 0x0000;	if (_config.general.verbose) printf("- microfacet model %s\n", 								((_method & 0x0008)?std::string("disabled"):std::string("enabled")).c_str()	);	}
+
 	if (key('e') && !(key('e')=0) )	{	_method ^= 0x0010;	_rebuild |= 0x0001;	if (_config.general.verbose) printf("- switch to %s shadow render methode\n", ((_method & 0x0010)?std::string("old"):std::string("new")).c_str()					);	}
 	if (key('d') && !(key('d')=0) )	{	_method ^= 0x0020;	_rebuild |= 0x0000;	if (_config.general.verbose) printf("- shadow rendering %s\n",                ((_method & 0x0020)?std::string("disabled"):std::string("enabled")).c_str()	);	}	
 }
@@ -637,7 +639,7 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				break;
 			}
 			default:
-				if (_config.general.verbose  > 1) printf("Key %d unmapped\n", (int) event.keysym.sym);
+				if (_config.general.verbose > 1) printf("Key %d unmapped\n", (int) event.keysym.sym);
 				break;
 		}
 }

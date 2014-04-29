@@ -46,13 +46,13 @@ float energy(vec4	color) 				{ return length(color.rgb); }
 
 void main() 
 {
-	float value					= 0.f;
+	float value					= 0.0;
 	vec3	top						= vec3(0.0, 1.0, 0.0);
 	
 	vec3	direction		=	vertex_sphere.xyz - vertex_position;
 	float distance		= length(direction);
 		
-	float	size				= textureSize(envmap, 0).x;
+	float	size				= float(textureSize(envmap, 0).x);
 	float	viewsize		=	size * vertex_sphere.w / distance;
 	
 	float	ambiant			=	energy(	textureLod(envmap, vec3(+0.0, +1.0, +0.0), log2(size) 		) * 0.56
@@ -65,8 +65,8 @@ void main()
 	float solidfactor	=	dot(top, normalize(direction)) * pow(vertex_sphere.w/distance, 2.0);
 	float	occult			=	solidfactor * min(local/ambiant, PI);
 		
-	if (ambiant == 0.f)								fragment_color = vec4(0.f, 0.f, 0.f, 0.f);
-	else if ((method & 0x0010) == 0)	fragment_color = vec4(0.f, 0.f, 0.f, occult);
-	else															fragment_color = vec4(0.f, 0.f, 0.f, solidfactor);
+	if (ambiant == 0.0)								fragment_color = vec4(0.0, 0.0, 0.0, 0.0);
+	else if ((method & 0x0010) == 0)	fragment_color = vec4(0.0, 0.0, 0.0, occult);
+	else															fragment_color = vec4(0.0, 0.0, 0.0, solidfactor);
 }
 #endif

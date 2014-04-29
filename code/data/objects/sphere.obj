@@ -1,5 +1,5 @@
 mtllib simple.mtl
-usemtl glossy
+usemtl mirror
 
 g default
 v -1 0 1.40385e-007
