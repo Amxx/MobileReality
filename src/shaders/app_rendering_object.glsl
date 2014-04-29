@@ -166,25 +166,23 @@ void main()
 
 	if ((method & 0x0008)==0)
 	{
-		vec2	dF	= vec2( 100.f, 100.f )
-							* length(dFdx(l_g) + dFdy(l_g));
-		vec3	dX	= normalize(n_g-dot(n_g, l_g)*l_g	) * dF.x;
-		vec3	dY	= normalize(cross(n_g, l_g)				) * dF.y;
-		env_specular	= ks * specular_color * textureGrad(envmap, l_g, dX, dY);
-
-		// vec3	dx				= dFdx(l_g);
-		// vec3	dy				= dFdy(l_g);
-		// float	dlength		=	length(dx+dy);
-		// vec3	ddir			= normalize(dx * dot(dx, l_g) + dy * dot(l_g, dy)) * dlength * 1.0;
-		// vec3	dort			= normalize(dy * dot(dx, l_g) - dx * dot(l_g, dy)) * dlength * 1.0;
-		// env_specular	= ks * specular_color * textureGrad(envmap, l_g, ddir, dort);
+		env_specular = ks * specular_color * textureLod(envmap, l_g, specular_level);
 	}
 	else
 	{
-		env_specular = ks * specular_color * textureLod(envmap, l_g, specular_level);
+		// vec2	dF	= vec2( 100.f, 100.f )
+		// 					* length(dFdx(l_g) + dFdy(l_g));
+		// vec3	dX	= normalize(n_g-dot(n_g, l_g)*l_g	) * dF.x;
+		// vec3	dY	= normalize(cross(n_g, l_g)				) * dF.y;
+		// env_specular	= ks * specular_color * textureGrad(envmap, l_g, dX, dY);
+
+		vec3	dx				= dFdx(l_g);
+		vec3	dy				= dFdy(l_g);
+		float	dlength		=	length(dx+dy);
+		vec3	ddir			= normalize(dx * dot(dx, l_g) + dy * dot(l_g, dy)) * dlength * 1.0;
+		vec3	dort			= normalize(dy * dot(dx, l_g) - dx * dot(l_g, dy)) * dlength * 1.0;
+		env_specular	= ks * specular_color * textureGrad(envmap, l_g, ddir, dort);
 	}
-
-
 
 
 	if ((method & 0x0004) == 0 && l_g.y < 0.0)
