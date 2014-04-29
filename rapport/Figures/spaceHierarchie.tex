@@ -1,0 +1,117 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\input{../Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{../}
+
+\begin{document}
+\begin{tikzpicture}[persp]
+
+	\def\i{80}
+	\pgfmathparse{cos(\i)}\let\ci\pgfmathresult
+	\pgfmathparse{sin(\i)}\let\si\pgfmathresult	
+	\def\t{5}
+	\pgfmathparse{cos(\t)}\let\ct\pgfmathresult
+	\pgfmathparse{sin(\t)}\let\st\pgfmathresult
+	\def\p{110}
+	\pgfmathparse{cos(\p)}\let\cp\pgfmathresult
+	\pgfmathparse{sin(\p)}\let\sp\pgfmathresult
+		
+	\coordinate	(Ocube)	at (0,0,0);
+	\coordinate	(Xcube)	at (\ci,\si,0);
+	\coordinate	(Ycube)	at (-\si,\ci,0);
+	\coordinate	(Zcube)	at (0,0,1);
+	\coordinate	(Ocamera)	at ($(Ocube)-2*(Xcube)-5*(Ycube)+3*(Zcube)$);
+	\coordinate	(Xcamera)	at (\ct*\cp,\ct*\sp,\st);
+	\coordinate	(Ycamera)	at (-\sp,\cp,0);
+	\coordinate	(Zcamera)	at (\st*\cp,\st*\sp,\ct);
+	\coordinate	(Oqrcode)	at ($(Ocube)-.85*(Xcube)-(Ycube)-.85*(Zcube)$);
+	\coordinate	(Xqrcode)	at ($+.8*(Xcube)$);
+	\coordinate	(Yqrcode)	at ($+.8*(Zcube)$);
+	\coordinate	(Zqrcode)	at ($-.8*(Ycube)$);
+	
+	%%   C U B E
+	\coordinate (C0) at ($(Ocube)-(Xcube)-(Ycube)-(Zcube)$);
+	\coordinate (C1) at ($(Ocube)+(Xcube)-(Ycube)-(Zcube)$);
+	\coordinate (C2) at ($(Ocube)-(Xcube)+(Ycube)-(Zcube)$);
+	\coordinate (C3) at ($(Ocube)+(Xcube)+(Ycube)-(Zcube)$);
+	\coordinate (C4) at ($(Ocube)-(Xcube)-(Ycube)+(Zcube)$);
+	\coordinate (C5) at ($(Ocube)+(Xcube)-(Ycube)+(Zcube)$);
+	\coordinate (C6) at ($(Ocube)-(Xcube)+(Ycube)+(Zcube)$);
+	\coordinate (C7) at ($(Ocube)+(Xcube)+(Ycube)+(Zcube)$);
+	\draw[cube] (C4)--(C5)--(C7)--(C6)--cycle;
+	\draw[cube] (C0)--(C1)--(C5)--(C4)--cycle;
+	\draw[cube] (C1)--(C3)--(C7)--(C5)--cycle;
+	\draw[cube hidden] (C2) -- (C0);
+	\draw[cube hidden] (C2) -- (C3);
+	\draw[cube hidden] (C2) -- (C6);
+
+	%%   Q R C O D E
+	\coordinate (Q0) at ($(Oqrcode)$);
+	\coordinate (Q1) at ($(Oqrcode)+2*(Xqrcode)$);
+	\coordinate (Q2) at ($(Oqrcode)+2*(Yqrcode)$);
+	\coordinate (Q3) at ($(Oqrcode)+2*(Xqrcode)+2*(Yqrcode)$);
+	\node[yslant=-0.71,anchor=center,opacity=0.4]  at ($(Ocube)-(Ycube)$){\includegraphics[width=3.9cm,height=6.0cm]{\rootPath Imgs/qrcodes/A.png}};
+	%\node[yslant=0.35,anchor=center,opacity=0.2]  at ($(Ocube)+(Xcube)$){\includegraphics[width=5.5cm,height=6.0cm]{C.png}};		
+
+	%%   S M A R T P H O N E
+	\coordinate (S0) at ($(Ocamera)-.2*(Xcamera)-1.2*(Ycamera)-2.0*(Zcamera)$);
+	\coordinate (S1) at ($(Ocamera)+.0*(Xcamera)-1.2*(Ycamera)-2.0*(Zcamera)$);
+	\coordinate (S2) at ($(Ocamera)-.2*(Xcamera)+0.4*(Ycamera)-2.0*(Zcamera)$);
+	\coordinate (S3) at ($(Ocamera)+.0*(Xcamera)+0.4*(Ycamera)-2.0*(Zcamera)$);
+	\coordinate (S4) at ($(Ocamera)-.2*(Xcamera)-1.2*(Ycamera)+.5*(Zcamera)$);
+	\coordinate (S5) at ($(Ocamera)+.0*(Xcamera)-1.2*(Ycamera)+.5*(Zcamera)$);
+	\coordinate (S6) at ($(Ocamera)-.2*(Xcamera)+0.4*(Ycamera)+.5*(Zcamera)$);
+	\coordinate (S7) at ($(Ocamera)+.0*(Xcamera)+0.4*(Ycamera)+.5*(Zcamera)$);
+%%	\draw[cube, fill=black, opacity=0.6] (S4)--(S5)--(S7)--(S6)--cycle;
+%%	\draw[cube, fill=black, opacity=0.6] (S0)--(S1)--(S5)--(S4)--cycle;
+%%	\draw[cube, fill=black] (S1)--(S3)--(S7)--(S5)--cycle;
+%%	\draw[cube hidden] (S2)--(S0);
+%%	\draw[cube hidden] (S2)--(S3);
+%%	\draw[cube hidden] (S2)--(S6);
+		\draw[cube, fill=black, opacity=0.5, rounded corners] (S1)--(S3)--(S7)--(S5)--cycle;
+		\draw[cube, fill=black, opacity=0.6, rounded corners] (S0)--(S1)--(S3)--(S7)--(S6)--(S4)--cycle;
+
+	\draw[gray, fill=white!20] ($(Ocamera)+.1*(Ycamera)+0*(Zcamera)$)
+		\foreach \rho in {5,10,...,355} {--($(Ocamera)+.1*cos(\rho)*(Ycamera)+.1*sin(\rho)*(Zcamera)$)}--cycle;	
+
+	\coordinate (SV0) at ($(Ocamera)+(Xcamera)-.6*(Ycamera)-.4*(Zcamera)$);	
+	\coordinate (SV1) at ($(Ocamera)+(Xcamera)-.6*(Ycamera)+.4*(Zcamera)$);	
+	\coordinate (SV2) at ($(Ocamera)+(Xcamera)+.6*(Ycamera)-.4*(Zcamera)$);	
+	\coordinate (SV3) at ($(Ocamera)+(Xcamera)+.6*(Ycamera)+.4*(Zcamera)$);	
+	\draw[dashed] (SV0)--(SV1)--(SV3)--(SV2)--cycle;
+	\draw[dashed] (Ocamera)--(SV0);
+	\draw[dashed] (Ocamera)--(SV1);
+	\draw[dashed] (Ocamera)--(SV2);
+	\draw[dashed] (Ocamera)--(SV3);
+	
+	
+	
+	\draw[axis, red		] (Ocamera) -- ++($-1*(Ycamera)$);
+	\draw[axis, green	] (Ocamera) -- ++($-1*(Zcamera)$);
+	\draw[axis, blue	] (Ocamera) -- ++($+1*(Xcamera)$);
+	%%   R E P E R E   C A M E R A   G L
+%	\draw[axis, red		] (Ocamera) -- ++($-1*(Ycamera)$);
+%	\draw[axis, green	] (Ocamera) -- ++($+1*(Zcamera)$);
+%	\draw[axis, blue	] (Ocamera) -- ++($-1*(Xcamera)$);
+	%%   R E P E R E   C A M E R A
+%	\draw[axis, red		] (Ocamera) -- ++(Xcamera);
+%	\draw[axis, green	] (Ocamera) -- ++(Ycamera);
+%	\draw[axis, blue	] (Ocamera) -- ++(Zcamera);	
+	%%   R E P E R E  C U B E
+	\draw[axis, red		] (Ocube) -- ++(Xcube);
+	\draw[axis, green	] (Ocube) -- ++(Ycube);
+	\draw[axis, blue	] (Ocube) -- ++(Zcube);	
+	%%   R E P E R E  Q R C O D E
+	\draw[axis, red		] (Oqrcode) -- ++(Xqrcode);
+	\draw[axis, green	] (Oqrcode) -- ++(Yqrcode);
+	\draw[axis, blue	] (Oqrcode) -- ++(Zqrcode);
+
+	%   M A T R I C E   V I E W
+	\draw[->, black, ultra thick] (Ocube)..controls(3,0,4)..(Ocamera) node[midway, above, sloped]{\Huge\textbf{View}};	
+	\draw[->, black, ultra thick] (Oqrcode)..controls(.6,.4,0)..(Ocube) node[midway, below, sloped]{\Huge\textbf{Model}};
+%	\draw[->, black, ultra thick] (Oqrcode)--(Oface) node[midway, above, sloped]{CVtoGL};
+%	\draw[->, black, ultra thick] (Oface)--(Ocube) node[midway, above, sloped]{Model};	
+	
+		
+\end{tikzpicture}
+\end{document}

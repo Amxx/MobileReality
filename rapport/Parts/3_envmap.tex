@@ -1,0 +1,27 @@
+\documentclass[10pt,a4paper,twoside, twocolumn]{report}
+\input{../Annexes/PackagesReport.tex}
+\input{../Annexes/ParametersReport.tex}
+\input{../Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{../}
+\standalonetrue
+
+\begin{document}
+
+\chapter{Les cartes d'environnement}
+\section{Principe}
+\section{Reconstruction dynamique}
+\section{Détails d'implémentation}
+
+
+
+
+%=====================================================================
+%=====================================================================
+\ifstandalone
+	\addcontentsline{toc}{chapter}{Bibliographie}
+	\bibliographystyle{apalike}
+	\bibliography{\rootPath Annexes/biblio}
+\fi
+%=====================================================================
+%=====================================================================
+\end{document}

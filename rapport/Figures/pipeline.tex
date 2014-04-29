@@ -1,0 +1,41 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\input{../Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{../}
+
+\begin{document}
+\begin{tikzpicture}[>=stealth',bend angle=45,auto]
+	
+	\begin{scope}
+		\node [block] (object) 				at (-3,0)					{Objet};
+		\node	[anchor=center]					at (-3,1.5)				{\includegraphics[width=2cm]{\rootPath Imgs/steps/object.png}};
+		\node [block] (envmap) 				at (2,0)					{Envmap};
+		\node	[anchor=center]					at (2,1.5)				{\includegraphics[width=2cm]{\rootPath Imgs/steps/envmap.png}};
+  	\node [block] (ambient)				at (-5,-1.2)			{Ambient}
+			edge [pre,bend left		= 15] (object);   
+		\node [block] (spheres)				at (-1,-1.2)			{Spheres}
+			edge [pre,bend right	= 15] (object);      
+  	\node [block] (shadow)				at (+1,-2.4)			{Ombre}
+			edge [pre,bend right	= 15] (spheres)
+			edge [pre,bend left		= 15] (envmap);			
+	  \node [block] (rendershadow)	at (+1,-3.6)			{Rendu ombre}
+			edge [pre]									(shadow);
+  	\node [block] (renderobject)	at (-3,-3.6)			{Rendu objet}
+			edge [pre, bend left	= 15]	(ambient)
+			edge [pre]									(object)
+			edge [pre, bend right	= 15]	(shadow)
+			edge [pre, bend right = 10]	(envmap);			
+		\node	[anchor=center]					at (0,-6.4)			{\includegraphics[width=6cm]{\rootPath Imgs/steps/rendered.png}};		
+	\end{scope}
+
+	\begin{pgfonlayer}{background}
+    \filldraw [line width=4mm, join=round, red!25		]	(-6.2,-0.9)  rectangle (6.2, -1.5);
+    \filldraw [line width=4mm, join=round, green!25	]	(-6.2,-2.1)  rectangle (6.2, -2.7);
+    \filldraw [line width=4mm, join=round, blue!25	]	(-6.2,-3.3)  rectangle (6.2, -3.9);
+    \node[text=black!80,	font=\bfseries, anchor=east] at (6.2, -1.2) {Pr{\'e}calcul};
+    \node[text=black!80,	font=\bfseries, anchor=east] at (6.2, -2.4) {Calcul temps r{\'e}el};
+    \node[text=black!80, 	font=\bfseries, anchor=east] at (6.2, -3.6) {Rendu temps r{\'e}el};
+	\end{pgfonlayer}
+  
+\end{tikzpicture}
+\end{document}

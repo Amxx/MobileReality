@@ -1,0 +1,64 @@
+\documentclass[10pt,a4paper,twoside, twocolumn]{report}
+\input{Annexes/PackagesReport.tex}
+\input{Annexes/ParametersReport.tex}
+\input{Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{}
+
+\makeindex 
+
+%======================================================================
+\begin{document}
+\nocite{*}
+%======================================================================
+\pagenumbering{gobble}
+\onecolumn
+\input{\rootPath Parts/0a_titlepage}
+
+%----------------------------------------------------------------------
+\pagenumbering{roman}\setcounter{page}{1} 
+\onecolumn
+\addcontentsline{toc}{section}{Remerciements}
+\input{\rootPath Parts/0b_remerciements}
+
+%----------------------------------------------------------------------
+
+\tableofcontents
+
+%----------------------------------------------------------------------
+\pagenumbering{arabic}\setcounter{page}{1} 
+\twocolumn
+
+\input{\rootPath Parts/1_acquisition}
+\input{\rootPath Parts/2_hierarchie}
+\input{\rootPath Parts/3_envmap}
+\input{\rootPath Parts/4_rendu}
+\input{\rootPath Parts/5_precalcul}
+\input{\rootPath Parts/6_application}
+\input{\rootPath Parts/7_perspectives}
+
+%----------------------------------------------------------------------
+\newpage
+\appendix
+\chapter{Annexes}
+\pagenumbering{Roman}\setcounter{page}{1} 
+
+%----------------------------------------------------------------------
+\addcontentsline{toc}{chapter}{Bibliographie}
+\bibliographystyle{apalike}
+\bibliography{\rootPath Annexes/biblio}
+
+\addcontentsline{toc}{chapter}{Liste des tableaux}
+\listoftables
+
+\addcontentsline{toc}{chapter}{Liste des exemples de code}
+\listof{code}{Liste des exemples de code}
+
+\addcontentsline{toc}{chapter}{Liste des figures}
+\listoffigures
+
+%\addcontentsline{toc}{section}{Table des matières}
+%\printindex
+
+%======================================================================
+\end{document}
+%======================================================================

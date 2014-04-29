@@ -1,0 +1,87 @@
+\frenchbsetup{StandardEnumerateEnv=true}
+
+\numberwithin{equation}{subsection}
+%\graphicspath{{Imgs/}}
+
+\fancypagestyle{empty}{%
+  \fancyhf{}
+  \fancyhead[L]{}
+  \fancyhead[C]{}
+  \fancyhead[R]{}
+  \fancyfoot[L]{}
+  \fancyfoot[C]{}
+  \fancyfoot[R]{}
+}
+\fancypagestyle{basicstyle}{
+	\fancyhf{}	
+	\fancyhead[L]{}
+	\fancyhead[C]{Rendu réalise et temps réel pour la réalité augmentée}
+	\fancyhead[R]{}
+	\fancyfoot[L]{hadrien.croubois@ens-lyon.fr}
+	\fancyfoot[C]{--~\thepage~--}
+	\fancyfoot[R]{}
+}
+\pagestyle{basicstyle}
+
+
+
+
+\usepackage{titlesec}
+	\titleformat{\section}[frame]
+	{\normalfont}
+	{\filright
+	\footnotesize
+	\enspace Partie \thesection\enspace}
+	{6pt}
+	{\bfseries\filcenter}
+	
+	\titleformat{\subsection}[frame]
+	{\normalfont}
+	{\filright
+	\footnotesize
+	\enspace \thesubsection\enspace}
+	{6pt}
+	{\filcenter}
+%	{\titlerule
+%	\vspace{.8ex}%
+%	\normalfont\itshape}
+%	{\thesubsection.}{.5em}{}
+
+	\titleformat{\subsubsection}
+	{\titlerule
+	\vspace{.8ex}%
+	\normalfont\itshape}
+	{\thesubsubsection}{.5em}{}
+
+\titleformat{\chapter}[display]
+	{\normalfont\bfseries\filcenter}
+	{}
+	{1ex}
+	{\titlerule[2pt]
+	\vspace{2ex}%
+	\LARGE}
+	[\vspace{1ex}%
+	{\titlerule[2pt]}]
+	
+\parindent=10pt
+
+
+
+
+
+
+		
+		
+
+\addto\captionsfrench{%
+  \renewcommand{\listfigurename}{Liste des figures}%
+  \renewcommand{\listtablename}{Liste des tableaux}%
+}
+\floatstyle{ruled}
+\restylefloat{table}
+\newfloat{code}{!h}{locode}{}
+\floatname{code}{\textsc{code}}
+
+
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}

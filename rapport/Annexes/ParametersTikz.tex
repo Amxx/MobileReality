@@ -1,0 +1,20 @@
+\usetikzlibrary{3d,arrows, calc, backgrounds, petri, positioning, shapes.geometric}
+
+\tikzset{
+	persp/.style={scale=3.0,x={(-0.8cm,-0.4cm)},y={(0.8cm,-0.4cm)}, z={(0cm,1cm)}},
+	points/.style={fill=white,draw=black,thick}
+	grid/.style={very thin,gray},
+	axis/.style={->,blue,ultra thick},
+	cube/.style={thick, fill=black!15,opacity=0.5},
+	cube hidden/.style={dashed},
+	block/.style={
+		rectangle, rounded corners,
+		draw=black!80,
+		fill=black!10, fill opacity=0.5,
+		text=black!90, text opacity=1.0,
+    text height=1.5ex,
+    text depth=.25ex,
+    text width=6em,
+    text centered
+	}
+}

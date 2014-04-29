@@ -1,0 +1,76 @@
+\documentclass[10pt,a4paper,twoside, twocolumn]{report}
+\input{../Annexes/PackagesReport.tex}
+\input{../Annexes/ParametersReport.tex}
+\input{../Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{../}
+\standalonetrue
+
+\begin{document}
+
+\chapter{Repérage dans l'espace}
+
+
+\section{Hiérarchie de référentiels}
+
+Afin de mettre en place les différents mécanismes de repérage, il à été nécessaire de hiérarchiser les repères relatifs aux différents référentiels considères.
+
+Le référentiel principal est le référentiel du monde. Il est par définition fixe au cours du temps et est définit par rapport à la mire utilisé pour l'acquisition. Ce repère est centré au centre géométrique de la mire et servira aussi bien à positionner l'objet à afficher qu'à définir servir de référentiel de base pour l'EnvMap.
+
+Les différentes faces de la mire sont elle même fixes dans le repère du monde car lié a l'objet physique (la mire) qui le définit. Les transformation entre le repère de chacune des faces de la mire et le repère du monde sont codées dans les marqueur présents sur les faces (matrice $model$).
+
+Ainsi, ayant identifier une des faces à l'aide du marqueur présent sur cette dernière, il est possible, en appliquant la transformation codé par ce marqueur, de reconstruire le repère du monde.
+
+L'interface d'acquisition est elle aussi repéré vis a vis du repère principal. La transformation entre ces deux repère est codé par la matrice $view$ et changera au cours du temps, l'utilisateur se déplaçant par rapport à la mire.
+
+\begin{figure}[!ht]
+	\centering
+	\includestandalone[width=0.4\textwidth]{\rootPath Figures/spaceHierarchie}
+	\caption{Les différents référentiels}
+	\label{fig:tikz:spaceHierarchie}
+\end{figure}
+
+Les différentes cameras présentes sur l'interface d'acquisition seront à leur tour positionnées relativement à l'interface d'acquisition. Cette dernière transformation est disponible dans les fichiers de configurations de camera chargés au démarrage.
+
+\begin{table}[!ht]
+	\centering
+	\begin{tabular}{rcl}
+																			& \textbf{QRcode}				&																\\[.2cm]
+		$ $																& $\updownharpoons$			& $ $														\\[.2cm]
+																			& \textbf{Face}					&																\\[.2cm]
+		$model^{-1}				\lcurvearrowup$	&												& $\lcurvearrowdown model$			\\[.2cm]
+																			& \textbf{Monde}				&																\\[.2cm]
+		$view^{-1}				\lcurvearrowup$	& 											& $\lcurvearrowdown view$				\\[.2cm]
+																			& \textbf{Smartphone}		&																\\[.2cm]
+		$orientation^{-1}	\lcurvearrowup$	& 											& $\lcurvearrowdown orientation$\\[.2cm]
+																			& \textbf{Camera}				&																\\[.2cm]
+		$cvToGl^{-1}			\lcurvearrowup$	& 											& $\lcurvearrowdown cvToGl $		\\[.2cm]
+																			& \textbf{Vue OpenGL}		&																\\[.2cm]
+		$projection^{-1}	\lcurvearrowup$	&												& $\lcurvearrowdown projection$	\\[.2cm]
+																			& \textbf{Image rendu}	&
+	\end{tabular}
+	\caption{Hiérarchie des matrices de transformations}
+	\label{ref:table:hierarchie}
+\end{table}
+
+
+
+\section{Évaluation des transformations}
+
+Compte tenu de la hiérarchie de référentiel décrite dans la section précédente, il est nécessaire, pour décrire complètement le système, de décrire chacune des matrices de transformation. 
+
+\subsection{Calibration de la camera}
+\subsection{Identification des marqueurs}
+\subsection{Models OpenCV / OpenGL}
+
+
+
+%=====================================================================
+%=====================================================================
+\ifstandalone
+	\addcontentsline{toc}{chapter}{Bibliographie}
+	\bibliographystyle{apalike}
+	\bibliography{\rootPath Annexes/biblio}
+\fi
+%=====================================================================
+%=====================================================================
+\end{document}
