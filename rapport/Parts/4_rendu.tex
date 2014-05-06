@@ -5,6 +5,8 @@
 \newcommand*{\rootPath}{../}
 \standalonetrue
 
+\newcommand{\Hs}{\operatorname{HS}}
+
 \begin{document}
 
 \chapter{Rendu}
@@ -15,7 +17,7 @@
 
 %%=====================================================================
 
-\section{Éclairage ambiant}
+\section{Éclairage ambiant}\label{section:ambiant}
 
 \subsection{De la physique aux mathématiques}
 Le calcul de l'énergie reçu en un point de l'objet revient à intégrer le flux lumineux sur l'ensemble des direction visibles.
@@ -39,7 +41,7 @@ On obtient donc l'équation
 
 On fait alors la supposition que les phénomènes d'auto-occultation influencent de manière moyenne et globale l'énergie reçu en un point. Cela nous permet de revenir à une intégration sur tout le demi espace $\mathcal H^2(\vec{n})$ en ajoutant simplement un coefficient de $\mathcal P_{\mathcal V}(p)$ valant $1$ en l'absence d'auto-occultation et $0$ pour une auto-occultation totale.
 
-Ce coefficient définit sur la surface de l'objet pourra être pré-calculé et fournit sous forme de texture.\todo{reference}
+Ce coefficient définit sur la surface de l'objet pourra être pré-calculé et fournit sous forme de texture (voir section~\ref{section:precomputation_ambiant}, page~\pageref{section:precomputation_ambiant}).
 
 \begin{align}
 	\mathcal P_{\mathcal V}(p)	&= \frac{\int_{\mathcal V(p, \vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega}{\int_{\mathcal H(\vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega}	\notag\\
@@ -57,7 +59,6 @@ Si l'on oublie un instants les problèmes d'auto-occultation et que l'on s'inté
 \end{equation}
 
 L'angle solide sur une face partiellement visible (selon une demi sphère caractérisée par l'hyperplan de vecteur $\vec n$)est alors défini par
-\newcommand{\Hs}{\operatorname{HS}}
 \begin{equation}
 	\Omega_F(\vec n) = \iint_{F}\frac{\Hs(\vec\omega.\vec n)}{\|\vec\omega\|^3}\, \mathrm d\omega
 \end{equation}
@@ -151,7 +152,7 @@ La méthode développée ici repose sur l'approximation de la formule~(\ref{ref:
 
 Plusieurs formules ont été étudiée pour des domaines d'intégration hémisphériques ou partiellement hémisphérique ainsi que pour des polygones entièrement visibles \cite{Snyder1996} (ce qui fait disparaître le terme de $\Hs$).
 
-Il aurait été possible d'adapter un modèle polygonale évoqué dans \cite{Snyder1996} mais les polygones sur lesquels il aurait fallu intégrer variant selon les conditions de visibilités il aurait été nécessaire d'effectuer de couteux calculs de géométrie.
+Il aurait été possible d'adapter un modèle polygonale évoqué dans \cite{Snyder1996} mais les polygones sur lesquels il aurait fallu intégrer variant selon les conditions de visibilités il aurait été nécessaire d'effectuer de coûteux calculs de géométrie.
 
 L'objectif principal étant ici une grande vitesse d'exécution, l'inexactitude des résultats étant de toute façon largement oubliée au regard des approximations faites précédemment on préféra utiliser une fonction grossièrement approché mais simple à calculer.
 
@@ -174,15 +175,15 @@ Le calcul d'ombre douces est alors fait en décomposant l'objet en une hiérarch
 Pour évaluer l'ombre douce projeté par une sphère il suffit alors d'évaluer le manque d'illumination.
 On rappel les formules suivantes
 \begin{align*}
-	\mathcal E_{ambient}(p, \vec n)	&=	\frac{1}{\pi}\int_{\mathcal{H}^2(\vec{n})}\mathcal L_{glob}(\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega \\
-	\mathcal E_{ombre}(p, \vec n)		&=	\mathcal E_{ambient}(p, \vec n) - \frac{1}{\pi}\int_{\mathcal{S}(p)}\mathcal L_{glob}(\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega
+	\mathcal E_{ambiant}(p, \vec n)	&=	\frac{1}{\pi}\int_{\mathcal{H}^2(\vec{n})}\mathcal L_{glob}(\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega \\
+	\mathcal E_{ombre}(p, \vec n)		&=	\mathcal E_{ambiant}(p, \vec n) - \frac{1}{\pi}\int_{\mathcal{S}(p)}\mathcal L_{glob}(\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega
 \end{align*}
 
 avec $\mathcal S(p)$ la portion de sphère visible depuis la point considéré.
 
 L'ombre est rendu en assombrissant le pixel associé ce point d'un facteur
 \begin{align}
-	\mathcal F(p)	&=	\frac{\mathcal E_{ombre}(p, \vec n)}{\mathcal E_{ambient}(p, \vec n)}	\\
+	\mathcal F(p)	&=	\frac{\mathcal E_{ombre}(p, \vec n)}{\mathcal E_{ambiant}(p, \vec n)}	\\
 								&=	1 - \frac{\int_{\mathcal{S}(p)}\mathcal L_{glob}(\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega}{\int_{\mathcal{H}^2(\vec{n})}\mathcal L_{glob}(\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega}	
 \end{align}
 
@@ -229,7 +230,7 @@ Cet éclairage spéculaire permet de rendre de manière intéressante des surfac
 
 Dans notre cas l'évaluation du reflet se fait naturellement en calculant la réflexion du rayon incident, donné par la position du point considéré dans l'espace de la camera, relativement à la normale de l'objet dans ce même espace. On accédera ensuite à la valeur d'éclairage directement dans l'envmap.
 
-Une fois de plus on pourra utiliser les différents niveaux de mipmap à notre avantage, la considération du niveau de mipmap revenant la considérer l'angle d'un cône autour de l'axe du reflet. Un tel cône permet ainsi de caractériser la spécularitée de l'objet, cette dernière pouvant varier d'un reflet parfait --miroir-- à un reflet plus diffus --plastique--.
+Une fois de plus on pourra utiliser les différents niveaux de mipmap à notre avantage, la considération du niveau de mipmap revenant la considérer l'angle d'un cône autour de l'axe du reflet. Un tel cône permet ainsi de caractériser le caractère spéculaire de l'objet, cette dernière pouvant varier d'un reflet parfait --miroir-- à un reflet plus diffus --plastique--.
 On utilisera également l'ombre projeté calculé précédemment afin de moduler les reflets.
 
 %=====================================================================
@@ -252,7 +253,12 @@ L’intégration complète d'un tel modèle à été envisagé de la manière su
 Au delà des calcul complexes, mais heureusement déjà documentées, du premier point\cite{Heitz2013a}, l'évaluation de l'envmap selon des distributions anisotrope nécessite de lourds calculs.
 Il serait possible de les réduire fortement via un pré-calcule (convolution) mais dans notre cas le caractère dynamique de l'environnement ne permet pas un telle approche.
 
-Une autre solution est d'approximer cette intégration de l'envmap par le biais d'un filtrage judicieux. \todo{expliquer que textureGrad c'est de la merde et ca ne marche pas}
+Dans notre cas, il serait nécessaire d'évaluer, sans pré-calcul, l’intégration anisotrope de l'envmap.
+Les outils de filtrages anisotropes ne sont ici pas exploitable en l’état car une filtre anisotrope est définit entre autre par le facteur d'anisotropie qui le caractérise. Le nombre d'unité de texture étant grandement limité, il n'est pas possible de charger plusieurs fois l'envmap avec des filtrages différents qui couvriraient toutes nos attentes.
+
+Les outils de lecture de texture par gradient\footnote{\href{https://www.opengl.org/sdk/docs/man/html/textureGrad.xhtml}{\texttt{textureGrad()}}} mis en place dans openGL ne conviennent pas non plus car même si les vecteurs fournis (\texttt{dX} et \texttt{dY}) sont caractéristique d'une forte anisotropie, seul celui de norme maximal compte dans l'évaluation de l’accès au niveau de texture. 
+
+Il conviendrait donc, pour permettre en place les mécanismes d'évaluation anisotrope voulus, d'approximer l’intégration vis de multiples accès à la texture, le long de la direction privilégie d’anisotropie pour procéder à une intégration implicite.
 
 %=====================================================================
 
@@ -269,8 +275,8 @@ Compte tenu des méthodes décrites précédemment, le pipeline de rendu se déc
 \begin{enumerate}
 	\item L'étape de pré-calcul permet l'évaluation de données propres au modèle. Ces données n'étant pas influencé par la localisation dans l'espace ni par les caractéristiques d'environnement lumineux, il n'est pas nécessaire de les recalculer en temps réelle et on préféra donc stocker les résultats pré-calculés.
 		\begin{description}
-			\item[Ambient :] information d'auto-occultation ($\mathcal P_{\mathcal V}(p)$), stocké dans une \texttt{texture2D};
-			\item[Spheres :] décomposition de l'objet comme union de sphères, stocké sous forme de \texttt{vec4[]}.
+			\item[Ambiant :] information d'auto-occultation ($\mathcal P_{\mathcal V}(p)$), stocké dans une \texttt{texture2D};
+			\item[Sphères :] décomposition de l'objet comme union de sphères, stocké sous forme de \texttt{vec4[]}.
 		\end{description}
 
 	\item L'étape de calcul temps réel, qui évalue des résultats temporaires nécessaires à la réalisation du rendu final. Ces résultats doivent êtres réévaluer dynamiquement car ils dépendent de paramètres dynamique tel que les données d'environnement.

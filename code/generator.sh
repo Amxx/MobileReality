@@ -5,11 +5,12 @@ case "$HOSTNAME" in
 	Arcteryx)
 		install_path="$PWD/install"
 		options="-DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF"
-		;;
+		optimus=true;;
 	*) echo "Your platform is not defined in $0. Using default parameters."
 		install_path="$PWD/install"
     options="-DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF"
-    ;;
+    optimus=false
+		;;
 esac
 
 # Functions
@@ -30,7 +31,11 @@ function launch
 	else
 		cfg=data/params/config.xml 
 	fi
-	./install/bin/Reality $cfg
+	if $optimus; then 
+		optirun ./install/bin/Reality $cfg
+	else
+		./install/bin/Reality $cfg
+	fi
 }
 function remove
 {

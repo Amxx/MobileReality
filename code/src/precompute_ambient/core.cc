@@ -22,7 +22,7 @@ Core::Core(int argc, char* argv[]) :
 	
 	gk::AppSettings settings;
 	settings.setGLVersion(4,1);
-	if(createWindow(800, 600, settings) < 0) closeWindow();
+	if(createWindow(1000, 1000, settings) < 0) closeWindow();
 }
 
 
@@ -141,7 +141,11 @@ int Core::compute()
 		glUseProgram(_GLResources["prg:light"]->name);
 		getGLResource<gk::GLProgram>("prg:light")->uniform("mvp")					= ( proj * modelview ).matrix();
 		object->draw();
-	
+
+		// glActiveTexture					(GL_TEXTURE0);
+		// glBindTexture						(getGLResource<gk::GLTexture>("tex:light")->target, _GLResources["tex:light"]->name	);
+		// gk::ImageIO::writeImage("tex:light.png", getGLResource<gk::GLTexture>("tex:light")->image(0));
+
 		// --------------------------------------------------------------------------
 		
 		glDisable(GL_BLEND);
@@ -163,7 +167,11 @@ int Core::compute()
 		getGLResource<gk::GLProgram>("prg:texture")->uniform("mvp"			) = ( proj * modelview ).matrix();
 		getGLResource<gk::GLProgram>("prg:texture")->sampler("light_map")	= 0;
 		object->draw();
-		
+
+		// glActiveTexture					(GL_TEXTURE0);
+		// glBindTexture						(getGLResource<gk::GLTexture>("tex:texture")->target, _GLResources["tex:texture"]->name	);
+		// gk::ImageIO::writeImage("tex:texture.png", getGLResource<gk::GLTexture>("tex:texture")->image(0));
+
 		// --------------------------------------------------------------------------
 		
 		glEnable(GL_BLEND);
@@ -204,8 +212,7 @@ int Core::compute()
 	// --------------------------------------------------------------------------
 	timer end = now();
 	std::cout << "Ambient texture computed in " << formatTimer(end - begin) << std::endl;
-	// --------------------------------------------------------------------------
-			
+	// --------------------------------------------------------------------------	
 	glActiveTexture					(GL_TEXTURE0);
 	glBindTexture						(getGLResource<gk::GLTexture>("tex:clamp")->target, _GLResources["tex:clamp"]->name	);
 	glGenerateMipmap				(GL_TEXTURE_2D);

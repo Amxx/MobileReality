@@ -5,11 +5,80 @@
 \newcommand*{\rootPath}{../}
 \standalonetrue
 
+\newcommand{\Hs}{\operatorname{HS}}
+
 \begin{document}
 
 \chapter{Precalcul}
-\section{Éclairage ambient sous forme de texture}
-\section{Decomposition en spheres}
+
+Nous avons détaillés dans le chapitre précédent les différentes étapes de rendu pour l'intégration d'un objet 3D dans une scène dynamique acquise en temps réel. Certaines des données nécessaire à un tel rendu étant indépendantes de la scène nous nous sommes proposés de les pré-calculer. 
+
+\section{Éclairage ambiant sous forme de texture}\label{section:precomputation_ambiant}
+
+Nous avons vu dans la section~\ref{section:ambiant}, page~\pageref{section:ambiant}, le calcul de l'éclairage ambiant. Dans ce calcul intervenait un terme d'auto-occultation propre à l'objet 3D considéré.
+\begin{align}
+	\mathcal P_{\mathcal V}(p) = \frac{1}{\pi}\int_{\mathcal V(p, \vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega
+\end{align}
+
+\subsection{Intégration statistique}
+Si s’agit donc d'évaluer, en tout point de l'objet, l’intégrale du produit scalaire entre le vecteur d’intégration et la normale à l'objet, pour un vecteur d’intégration parcourant l’espace visible.
+
+On peut alors reformuler le calcul comme suit.
+
+\begin{align}
+\mathcal P_{\mathcal V}(p)	&= \frac{1}{\pi}\int_{\mathcal V(p, \vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega \notag\\
+														&= \frac{1}{\pi}\int_{\mathcal H(\vec n(p))}\vec\omega.\vec n\times visible(p, \vec \omega)\, \mathrm d\vec\omega \notag\\
+														&= \frac{1}{\pi}\int_{\mathcal S}\vec\omega.\vec n\times \Hs(\vec \omega.\vec n)\times visible(p, \vec n)\, \mathrm d\vec\omega
+\end{align}
+
+Pour évaluer une elle intégrale, on procède par une intégration statistique (Monte Carlo). Pour cela on simule le domaine d'intégration sur l'espace de définition en tirant $n$ points uniformément sur une sphère. Ces points représentes les vecteurs $\vec\omega$.
+
+Pour chacun de ces points in s’agit d'évaluer :
+	$$\vec\omega.\vec n\times \Hs(\vec \omega.\vec n)\times visible(p, \vec n)$$
+En réalité le terme $\Hs(\vec \omega.\vec n)$ car tout point pour lequel $visible(p, \vec n)$ sera non nul sera assuré d’être dans l’hémisphère décrit par $\Hs(\vec \omega.\vec n)$. La fonction à intégrer peut donc se résumer à :
+	$$\vec\omega.\vec n\times visible(p, \vec n)$$
+
+\subsection{Évaluation de la visibilité}
+L'évaluation la visibilité est faite à l'aide d'une shadowmap. Étant donnée un point de vue (vecteur $\vec\omega$ aléatoire) il s’agit d’effectuer une première étape de rendu, avec une projection orthographique pour en conserver que les informations de profondeurs retenus dans le Z-buffer (voir figure~\ref{fig:precompute_ambiant:zbuffer}).
+
+\begin{figure}[!ht]\centering
+	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/zbuffer.png}
+	\caption{Z-buffer issue de la première étape de rendu (shadowmap)}
+	\label{fig:precompute_ambiant:zbuffer}
+\end{figure}
+
+
+Ces données de profondeurs permettent ensuite d'évaluer si un texel est visible ou non, simplement en comparant la profondeur du texel considéré et celui retenu dans la texture et qui caractérise le texel le plus proche selon le rayon associé.
+
+La seconde étape de rendu consiste alors à écrire, dans l’espace texture associé a l'objet, les informations de visibilités qui auront été calculé (voir figure~\ref{fig:precompute_ambiant:singlesource}). A cette étape, il est important de s'assurer que la texture est bien écrite, y comprit au niveau des jointures entre les différents éléments.\todo{référence}
+
+\begin{figure}[!ht]\centering
+	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/singlesource.png}
+	\caption{Rendu en espace texture pour une source}
+	\label{fig:precompute_ambiant:singlesource}
+\end{figure}
+
+\subsection{Post traitement}
+Une fois évalué pour une source, les résultats sont ajoutés à une texture qui somme les contributions des différentes sources. Cette texture contient ainsi le résultat de l'intégration considère.
+
+Une fois toutes les sources évaluées, il reste quelques étapes de post traitement :
+\begin{itemize}
+	\item L'intégration étant normalisé, les valeurs calculées sont théoriquement entre $0.0$ et $1.0$. Cependant du fait de la distribution aléatoire des sources utilisées pour l'intégration, il peut arriver qu'en certains points ne pressentant pas d'auto-occultation la valeur dépasse $1.0$. Les valeurs sont alors seuillés afin de ne pas poser de problème au moment du stockage au format \texttt{.png}.
+
+	Les données étant quantifiées entre $0$ et $255$, un dépassement de la valeur flottante à stoker peut provoquer une traduction en un entier supérieur à $255$. Ces nombres étant stockés sous forme de caractère ASCII, un dépassement à $256$ ou $257$ peut alors provoquer une évaluation modulo $256$ soit un stockage sous forme de $0$ ou de $1$.
+
+	\item Les parties de l'image ne correspondant pas a des coordonnées de textures valides étant jusque la vides. L'évaluation des niveaux de mipmap pour la texture considéré risque de prendre en compte des éléments qui ne sont par représentatives de la réalité géométrique de l'objet. Afin de limiter ce biais dans l'évaluation des niveaux de mipmap, on remplit les parties vides et non représentative avec la valeur moyenne calculée sur les parties représentatives. Ainsi on limite l’incohérence des données considère en bordure de patch pour les niveaux de mipmap les plus élevés.
+\end{itemize}
+
+A l'issue de ces différents post-traitement, il ne reste qu'a exporter la textures sous forme d'image (voir figure~\ref{fig:precompute_ambiant:postprocess}) qui sera chargée le moment voulu.
+
+\begin{figure}[!ht]\centering
+	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/postprocess.png}
+	\caption{Données pré-calculées en espace texture après post-traitement (1000 sources)}
+	\label{fig:precompute_ambiant:postprocess}
+\end{figure}
+
+\section{Décomposition en sphères}
 
 
 

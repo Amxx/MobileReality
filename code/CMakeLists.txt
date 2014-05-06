@@ -58,6 +58,9 @@ add_subdirectory(src/precompute_spheres)
 add_subdirectory(src/shaders)
 
 
+add_subdirectory(src/sandbox)
+
+
 
 
 

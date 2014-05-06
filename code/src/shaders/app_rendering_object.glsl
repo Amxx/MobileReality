@@ -176,12 +176,21 @@ void main()
 		// vec3	dY	= normalize(cross(n_g, l_g)				) * dF.y;
 		// env_specular	= ks * specular_color * textureGrad(envmap, l_g, dX, dY);
 
-		vec3	dx				= dFdx(l_g);
-		vec3	dy				= dFdy(l_g);
-		float	dlength		=	length(dx+dy);
-		vec3	ddir			= normalize(dx * dot(dx, l_g) + dy * dot(l_g, dy)) * dlength * 1.0;
-		vec3	dort			= normalize(dy * dot(dx, l_g) - dx * dot(l_g, dy)) * dlength * 1.0;
-		env_specular	= ks * specular_color * textureGrad(envmap, l_g, ddir, dort);
+		// vec3	dx				= dFdx(l_g);
+		// vec3	dy				= dFdy(l_g);
+		// float	dlength		=	length(dx+dy);
+		// vec3	ddir			= normalize(dx * dot(dx, l_g) + dy * dot(l_g, dy)) * dlength * 1.0;
+		// vec3	dort			= normalize(dy * dot(dx, l_g) - dx * dot(l_g, dy)) * dlength * 1.0;
+		// env_specular	= ks * specular_color * textureGrad(envmap, l_g, ddir, dort);
+
+		vec3	dX						= dFdx(l_g);
+		vec3	dY						= dFdy(l_g);
+		float minLength			= sqrt(min(dot(dX, dX), dot(dY, dY)));
+		float desiredLength	= pow(2.0, specular_level);
+		float scale					= desiredLength / minLength;
+		dX									*= scale;
+		dY									*= scale;
+		env_specular	= ks * specular_color * textureGrad(envmap, l_g, dX, dY);
 	}
 
 

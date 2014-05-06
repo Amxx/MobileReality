@@ -50,8 +50,8 @@
 			<type>debug</type>												<!-- dynamic | debug					-->
 			<size>512 512</size>
 			<dual>off</dual>													<!-- on | off									-->
-			<!--<path>data/envmap/0/%03d.jpg</path>-->
-			<path>data/envmap/test/%03d.png</path>
+			<path>data/envmap/0/%03d.jpg</path>
+			<!-- <path>data/envmap/test/%03d.png</path> -->
 		</envmap>
 		
 		<localisation>
