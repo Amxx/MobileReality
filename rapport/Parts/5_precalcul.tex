@@ -5,8 +5,6 @@
 \newcommand*{\rootPath}{../}
 \standalonetrue
 
-\newcommand{\Hs}{\operatorname{HS}}
-
 \begin{document}
 
 \chapter{Precalcul}
@@ -27,22 +25,22 @@ On peut alors reformuler le calcul comme suit.
 
 \begin{align}
 \mathcal P_{\mathcal V}(p)	&= \frac{1}{\pi}\int_{\mathcal V(p, \vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega \notag\\
-														&= \frac{1}{\pi}\int_{\mathcal H(\vec n(p))}\vec\omega.\vec n\times visible(p, \vec \omega)\, \mathrm d\vec\omega \notag\\
+														&= \frac{1}{\pi}\int_{\mathcal H^2(\vec n(p))}\vec\omega.\vec n\times visible(p, \vec \omega)\, \mathrm d\vec\omega \notag\\
 														&= \frac{1}{\pi}\int_{\mathcal S}\vec\omega.\vec n\times \Hs(\vec \omega.\vec n)\times visible(p, \vec n)\, \mathrm d\vec\omega
 \end{align}
 
-Pour évaluer une elle intégrale, on procède par une intégration statistique (Monte Carlo). Pour cela on simule le domaine d'intégration sur l'espace de définition en tirant $n$ points uniformément sur une sphère. Ces points représentes les vecteurs $\vec\omega$.
+Pour évaluer une elle intégrale, on procède par une intégration statistique (Monte Carlo). Pour cela on simule le domaine d'intégration sur l'espace de définition en tirant $n$ points uniformément sur une sphère. Ces points représentent les vecteurs $\vec\omega$.
 
 Pour chacun de ces points in s’agit d'évaluer :
 	$$\vec\omega.\vec n\times \Hs(\vec \omega.\vec n)\times visible(p, \vec n)$$
-En réalité le terme $\Hs(\vec \omega.\vec n)$ car tout point pour lequel $visible(p, \vec n)$ sera non nul sera assuré d’être dans l’hémisphère décrit par $\Hs(\vec \omega.\vec n)$. La fonction à intégrer peut donc se résumer à :
+Le terme $\Hs(\vec \omega.\vec n)$ est en fait inutile car tout point pour lequel $visible(p, \vec n)$ sera non nul sera assuré d’être dans l’hémisphère décrit par $\Hs(\vec \omega.\vec n)$. La fonction à intégrer peut donc se résumer à :
 	$$\vec\omega.\vec n\times visible(p, \vec n)$$
 
 \subsection{Évaluation de la visibilité}
 L'évaluation la visibilité est faite à l'aide d'une shadowmap. Étant donnée un point de vue (vecteur $\vec\omega$ aléatoire) il s’agit d’effectuer une première étape de rendu, avec une projection orthographique pour en conserver que les informations de profondeurs retenus dans le Z-buffer (voir figure~\ref{fig:precompute_ambiant:zbuffer}).
 
 \begin{figure}[!ht]\centering
-	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/zbuffer.png}
+	\includegraphics[width=0.3\textwidth]{\rootPath Imgs/precompute_ambiant/zbuffer.png}
 	\caption{Z-buffer issue de la première étape de rendu (shadowmap)}
 	\label{fig:precompute_ambiant:zbuffer}
 \end{figure}
@@ -53,7 +51,7 @@ Ces données de profondeurs permettent ensuite d'évaluer si un texel est visibl
 La seconde étape de rendu consiste alors à écrire, dans l’espace texture associé a l'objet, les informations de visibilités qui auront été calculé (voir figure~\ref{fig:precompute_ambiant:singlesource}). A cette étape, il est important de s'assurer que la texture est bien écrite, y comprit au niveau des jointures entre les différents éléments.\todo{référence}
 
 \begin{figure}[!ht]\centering
-	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/singlesource.png}
+	\includegraphics[width=0.3\textwidth]{\rootPath Imgs/precompute_ambiant/singlesource.png}
 	\caption{Rendu en espace texture pour une source}
 	\label{fig:precompute_ambiant:singlesource}
 \end{figure}
@@ -86,10 +84,111 @@ A l'issue de ces différents post-traitement, il ne reste qu'a exporter la textu
 	\label{fig:precompute_ambiant:view}
 \end{figure}
 
+
+
+
+
+
 \section{Décomposition en sphères}
+La section~\ref{section:ombres}, page~\pageref{section:ombres}, traite du rendu d'ombres portées issus de l'objet 3D ajouté à la scène. Cette étape nécessite une représentation de l'objet en question comme union de sphères.
+
+Le pré-calcul étudié ici consiste donc à construire, étant donné un maillage, à calculer un ensemble limité de sphère qui s'approche au mieux de la surface correspondant au maillage.
 
 
 
+\todo{... blablabla, ont peut faire plein de chose mais voila ...}
+
+\begin{algorithm}[h]
+	\SetKwData{Mesh}{Maillage}
+	\SetKwData{Point}{Point}
+	\SetKwData{Sphere}{Sphere}
+	\SetKwData{int}{int}
+	\SetKwFunction{UniformSample}{EchantionnageUniforme}
+	\SetKwFunction{Clustering}{Appareillement}
+	\SetKwFunction{BestMatchingSphere}{SphereOptimale}
+
+	\Entree{\Mesh $m$, \int $n$, \int $s$}
+	\BlankLine
+	\tcc{Échantillonnage du maillage}
+	\Point $pts[s]$\;
+	\Pour{$i \leftarrow [1..s]$}{
+		$pts[i] \leftarrow \UniformSample(m)$\;
+	}
+	\BlankLine
+	\tcc{Initialisation des sphères}
+	\Pour{$i \leftarrow [1..n]$}{
+		$sphs[i] \leftarrow pts[i]$\;
+	}
+	\BlankLine
+	\Tq{$sphs$ n'est pas stable}{
+		\Point $clsts[n][]$\;
+		\Pour{$i \leftarrow [1..n]$}{
+			$clsts[i] \leftarrow \Clustering(pts, sphs[i])$\;
+		}
+		\Pour{$i \leftarrow [1..n]$}{
+			$sphs[i] \leftarrow \BestMatchingSphere(clsts[i])$\;
+		}
+	}
+	\Retour{$sphs$}\;
+	\caption{Ajustement de sphères à un maillage}
+\end{algorithm}
+
+
+
+\subsection{Échantillonnage du maillage}
+
+Afin d'obtenir une distribution uniforme de points à la surface de l'objet, on procède a un échantillonnage par importance\footnote{Importance sampling}.
+
+Pour construire un point uniformément a la surface du maillage on sélectionne d'abord une face proportionnellement à sa surface avant de choisir un point uniformément sur la face considéré.
+
+En répétant cette opération un grand nombre de fois on obtient un nuage de points qui représente correctement les grandes faces. Ce sont ces points qui seront utilisés par la suite pour la construction des sphères représentatives.
+
+\subsection{Approximations successives}
+
+
+
+
+
+
+
+
+\begin{align*}
+	f(P, S) &= \begin{Vmatrix} P.x - S.x \\ P.y - S.y \\ P.z - S.z\end{Vmatrix}							\\
+					&= (P.x-S.x)^2 + (P.y-S.y)^2 + (P.z-S.z)^2																			\\
+					&= (P.x^2-2P.xS.x+S.x^2) + (P.y^2-2P.yS.y+S.y^2) + (P.z^2-2P.zS.z+S.z^2)				\\
+					&= (P.x^2 + P.y^2+P.z^2) - 2(P.xS.x + P.yS.y + P.zS.z) + (S.x^2+S.y^2+S.z^2)		\\
+					&= \|P\| - 2(P.xS.x + P.yS.y + P.zS.z) + \|S\|
+\end{align*}
+
+\begin{figure*}
+	\begin{align*}
+		& \left.\begin{pmatrix} S.x \\ S.y \\ S.z \\ \|S\| \end{pmatrix}\right\}X \\
+		\underbrace{\begin{pmatrix}
+				-2P_1.x & -2P_1.y & -2P_1.z & 1 \\
+				-2P_2.x & -2P_2.y & -2P_2.z & 1 \\
+				-2P_3.x & -2P_3.y & -2P_3.z & 1 \\
+								& \ldots	&							\\
+				-2P_n.x & -2P_n.y & -2P_n.z & 1
+			\end{pmatrix}}_A
+		&	\begin{pmatrix}
+				\\ \\ ~\ldots~ \\ \\ \\
+			\end{pmatrix}
+		+ \underbrace{\begin{pmatrix}
+				\|P_1\| \\
+				\|P_2\| \\
+				\|P_3\| \\
+				\ldots	\\
+				\|P_n\|
+			\end{pmatrix}}_B
+		= \begin{pmatrix}
+				f(P_1,S) \\
+				f(P_2,S) \\
+				f(P_3,S) \\
+				\ldots \\
+				f(P_n,S)
+			\end{pmatrix}
+	\end{align*}
+\end{figure*}
 
 
 %=====================================================================
