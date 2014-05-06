@@ -32,6 +32,7 @@ function launch
 		cfg=data/params/config.xml 
 	fi
 	if $optimus; then 
+		echo "Starting gpu ..."
 		optirun ./install/bin/Reality $cfg
 	else
 		./install/bin/Reality $cfg

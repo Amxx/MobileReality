@@ -3,7 +3,7 @@ Kd			0.75 0.75 0.75
 Ns			0
 
 newmtl white
-Kd			0.75 0.75 0.75
+Kd			1.00 1.00 1.00
 map_Kd	bigguy_ambient_HD.png
 
 
