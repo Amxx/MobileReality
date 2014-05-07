@@ -45,6 +45,7 @@ class Core : public gk::App
     int draw();
 	
 		void processKeyboardEvent(SDL_KeyboardEvent&);
+		void processWindowResize(SDL_WindowEvent&);
 };
 
 #endif

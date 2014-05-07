@@ -51,7 +51,7 @@ Ces données de profondeurs permettent ensuite d'évaluer si un texel est visibl
 La seconde étape de rendu consiste alors à écrire, dans l’espace texture associé a l'objet, les informations de visibilités qui auront été calculé (voir figure~\ref{fig:precompute_ambiant:singlesource}). A cette étape, il est important de s'assurer que la texture est bien écrite, y comprit au niveau des jointures entre les différents éléments.\todo{référence}
 
 \begin{figure}[!ht]\centering
-	\includegraphics[width=0.3\textwidth]{\rootPath Imgs/precompute_ambiant/singlesource.png}
+	\includegraphics[width=0.3\textwidth]{\rootPath Imgs/precompute_ambiant/singlesource_red.png}
 	\caption{Rendu en espace texture pour une source}
 	\label{fig:precompute_ambiant:singlesource}
 \end{figure}
@@ -95,10 +95,9 @@ La section~\ref{section:ombres}, page~\pageref{section:ombres}, traite du rendu 
 Le pré-calcul étudié ici consiste donc à construire, étant donné un maillage, à calculer un ensemble limité de sphère qui s'approche au mieux de la surface correspondant au maillage.
 
 
-
 \todo{... blablabla, ont peut faire plein de chose mais voila ...}
 
-\begin{algorithm}[h]
+\begin{algorithm}[ht]
 	\SetKwData{Mesh}{Maillage}
 	\SetKwData{Point}{Point}
 	\SetKwData{Sphere}{Sphere}
@@ -143,52 +142,79 @@ Pour construire un point uniformément a la surface du maillage on sélectionne 
 
 En répétant cette opération un grand nombre de fois on obtient un nuage de points qui représente correctement les grandes faces. Ce sont ces points qui seront utilisés par la suite pour la construction des sphères représentatives.
 
-\subsection{Approximations successives}
+\subsection{Appareillement de points et calcul de sphère optimale}
+
+La phase d'appareillement de l'algorithme consiste à organiser les points en clusters relatifs aux sphères déjà construites. Il s’agit donc d’établir une métrique qui caractérise la proximité d'un point à une sphère. De la même manière, la phase de calcul de sphère optimale consiste à calculer la sphère qui minimisera la métrique considère précédemment sur le cluster qui lui a été associé.
+
+La principale difficulté ici est de construire un métrique représentative des critères de qualités voulus, pour laquelle le calcul d'un élément optimal n'est pas trop complexe et qui converge vers un état stable.
+
+Une métrique envisagéz est d'évaluer la distance d'un point à la surface de la sphère associé :
+\begin{align}
+	f(P, S) &= \left\|\begin{pmatrix} P.x - S.x \\ P.y - S.y \\ P.z - S.z\end{pmatrix}\right\|^2 - S.r^2	\label{eq:metrique}	\\
+					&= (P.x-S.x)^2 + (P.y-S.y)^2 + (P.z-S.z)^2 - S.r^2																						\notag \\
+					&= (P.x^2 + P.y^2+P.z^2) + (S.x^2+S.y^2+S.z^2)																								\notag \\
+					&\quad - 2(P.xS.x + P.yS.y + P.zS.z)  - S.r^2																									\notag \\
+					&= \|P\|^2 + \|S\|^2 - 2(P.xS.x + P.yS.y + P.zS.z) - S.r^2																		\notag
+\end{align}
+
+Ce calcul de la sphère optimal associé a un cluster peut ensuite se faire par l'optimisation d'un système matriciel $AX-B$, la matrice $A$ représentant les données en entrée (points échantillonnées), le vecteur $X$ représentant la solution à optimiser et le vecteur $B$ étant l'objectif à atteindre.
+
+L'équation~\ref{eq:metrique} nous indique comment construire $A$, $X$ et $B$ :
+\begin{subequations}
+\begin{align}
+		A	&=	\begin{pmatrix}
+						-2P_1.x & -2P_1.y & -2P_1.z & 1 			\\
+						-2P_2.x & -2P_2.y & -2P_2.z & 1 			\\
+						\vdots	& \vdots	&	\vdots	& \vdots	\\
+						-2P_n.x & -2P_n.y & -2P_n.z & 1
+					\end{pmatrix}																												\\
+		X &=	\begin{pmatrix} S.x \\ S.y \\ S.z \\ \|S\|^2 - S.r^2 \end{pmatrix}	\\
+		B	&=	\begin{pmatrix}
+						-\|P_1\|^2	\\
+						-\|P_2\|^2	\\
+						\vdots			\\
+						-\|P_n\|^2
+					\end{pmatrix}																												\\
+\intertext{Ainsi on a :}
+	A.X-B &= \begin{pmatrix}
+						f(P_1, S)	\\
+						f(P_2, S)	\\
+						\vdots		\\
+						f(P_n, S)
+					\end{pmatrix}
+\end{align}
+\end{subequations}
+
+Cette première considération géométrique n'est cependant pas satisfaisante. La simple proximité entre un point et la surface d'une sphère ne prend pas en compte les différences d'orientation de normale entre une face du maillage et la sphère qui le modélise, lesquels sont des éléments de qualité essentiels dans notre cas. Au delà de ce problème d'orientation, cette métrique fait aussi face au problème des outliers présents sur les modèles non convexes. Si quatre points extrémaux se retrouvent loin de tout, il est possible qu'une sphère viennent les adopter comme point d'attache, englobant alors tout le modèle et cachant la géométrie que l'on voulais représenter.
+
+Par ailleurs la métrique proposé précédemment ne garanti pas la convergence du système.
+
+Finalement la solution adopté, bien que géométriquement pauvre, nous donne des résultats visuellement acceptables tout en garantissant une convergence rapide. L'idée est de paver la surface du maillage à l'aide de sphères de rayon uniforme, ce qui correspond à la minimisation de la distance entre les points et le centre des sphère qui leur sont associés.
+
+La distance considérée
+\begin{align}
+	(P, S)	&= \left\|\begin{pmatrix} P.x - S.x \\ P.y - S.y \\ P.z - S.z\end{pmatrix}\right\|	\\
+\intertext{s'optimisant trivialement sur un cluster $C$ par}
+	S				&= \left\{ \left(\overline p, \overline{\|p-s\|}\right)\;|\;p \in C \right\}
+\end{align}
 
 
 
+\begin{figure}[!ht]\centering
+	\includegraphics[width=0.175\textwidth]{\rootPath Imgs/precompute_spheres/MRX22_both.png}
+	\vspace{0.5cm}
+	\includegraphics[width=0.175\textwidth]{\rootPath Imgs/precompute_spheres/MRX22_spheres.png}
+	
+	\includegraphics[width=0.175\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_both.png}
+	\vspace{0.5cm}
+	\includegraphics[width=0.175\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_spheres.png}
+	
+	\caption{Décomposition en sphères d'objets 3D (100 sphères par objet)}
+	\label{fig:precompute_sphere:result}
+\end{figure}
 
 
 
-
-
-\begin{align*}
-	f(P, S) &= \begin{Vmatrix} P.x - S.x \\ P.y - S.y \\ P.z - S.z\end{Vmatrix}							\\
-					&= (P.x-S.x)^2 + (P.y-S.y)^2 + (P.z-S.z)^2																			\\
-					&= (P.x^2-2P.xS.x+S.x^2) + (P.y^2-2P.yS.y+S.y^2) + (P.z^2-2P.zS.z+S.z^2)				\\
-					&= (P.x^2 + P.y^2+P.z^2) - 2(P.xS.x + P.yS.y + P.zS.z) + (S.x^2+S.y^2+S.z^2)		\\
-					&= \|P\| - 2(P.xS.x + P.yS.y + P.zS.z) + \|S\|
-\end{align*}
-
-\begin{figure*}
-	\begin{align*}
-		& \left.\begin{pmatrix} S.x \\ S.y \\ S.z \\ \|S\| \end{pmatrix}\right\}X \\
-		\underbrace{\begin{pmatrix}
-				-2P_1.x & -2P_1.y & -2P_1.z & 1 \\
-				-2P_2.x & -2P_2.y & -2P_2.z & 1 \\
-				-2P_3.x & -2P_3.y & -2P_3.z & 1 \\
-								& \ldots	&							\\
-				-2P_n.x & -2P_n.y & -2P_n.z & 1
-			\end{pmatrix}}_A
-		&	\begin{pmatrix}
-				\\ \\ ~\ldots~ \\ \\ \\
-			\end{pmatrix}
-		+ \underbrace{\begin{pmatrix}
-				\|P_1\| \\
-				\|P_2\| \\
-				\|P_3\| \\
-				\ldots	\\
-				\|P_n\|
-			\end{pmatrix}}_B
-		= \begin{pmatrix}
-				f(P_1,S) \\
-				f(P_2,S) \\
-				f(P_3,S) \\
-				\ldots \\
-				f(P_n,S)
-			\end{pmatrix}
-	\end{align*}
-\end{figure*}
 
 
 %=====================================================================

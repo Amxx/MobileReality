@@ -310,5 +310,9 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 		}
 }
 
-
 // ############################################################################
+
+void Core::processWindowResize(SDL_WindowEvent&)
+{
+	glViewport(0, 0, windowWidth(), windowHeight());
+}

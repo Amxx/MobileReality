@@ -5,8 +5,6 @@
 \newcommand*{\rootPath}{../}
 \standalonetrue
 
-\newcommand{\Hs}{\operatorname{HS}}
-
 \begin{document}
 
 \chapter{Rendu}
@@ -30,7 +28,7 @@ L'intégrale selon $\int_{\mathcal{H}(\vec n)}\mathrm d\omega$ correspond à une
 \begin{equation}
 	\mathcal E(p, \vec n)=\frac{1}{\pi}\int_{\mathcal V(p, \vec n )}\mathcal L(p, \vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega
 \end{equation}
-Ou $\mathcal V(p, \vec n)$ est la restriction de l'hémisphère suivant le vecteur $\vec n$ a l'espace effectivement visible depuis le point $p$ (ce qui renvient à considérer $\mathcal H(\vec n)$ privée des direction correspondants à de l'auto-occultation).
+Ou $\mathcal V(p, \vec n)$ est la restriction de l'hémisphère suivant le vecteur $\vec n$ a l'espace effectivement visible depuis le point $p$ (ce qui renvient à considérer $\mathcal H^2(\vec n)$ privée des direction correspondants à de l'auto-occultation).
 
 Ici on fait d'abord la supposition que l'éclairement selon une direction $\vec{\omega}$ est indépendant du point considéré. Cette approximation, est nécessaire pour utiliser, sans reconstruction 3D complexe, l'envmap reconstruite dynamiquement.
 
@@ -44,10 +42,10 @@ On fait alors la supposition que les phénomènes d'auto-occultation influencent
 Ce coefficient définit sur la surface de l'objet pourra être pré-calculé et fournit sous forme de texture (voir section~\ref{section:precomputation_ambiant}, page~\pageref{section:precomputation_ambiant}).
 
 \begin{align}
-	\mathcal P_{\mathcal V}(p)	&= \frac{\int_{\mathcal V(p, \vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega}{\int_{\mathcal H(\vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega}	\notag\\
+	\mathcal P_{\mathcal V}(p)	&= \frac{\int_{\mathcal V(p, \vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega}{\int_{\mathcal H^2(\vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega}	\notag\\
 															&= \frac{1}{\pi}\int_{\mathcal V(p, \vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega \\
 \intertext{d'ou}
-	\mathcal E(p, \vec n)				&= \frac{\mathcal P_{\mathcal V}(p)}{\pi}\int_{\mathcal H(p, \vec n )}\mathcal L_{glob}(\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega
+	\mathcal E(p, \vec n)				&= \frac{\mathcal P_{\mathcal V}(p)}{\pi}\int_{\mathcal H^2(p, \vec n )}\mathcal L_{glob}(\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega
 \end{align}
 
 Enfin, on fera une dernière approximation suivant la méthode proposé dans \cite{Mcguire} : on considère la fonction $\mathcal L_{glob}$ (décrite par l'envmap) comme constante sur chaque face de l'envmap. Le niveau de mipmap le moins détaillé nous donne en effet une valeur moyenne pour la face considérée.
@@ -160,7 +158,7 @@ L'objectif principal étant ici une grande vitesse d'exécution, l'inexactitude 
 %%=====================================================================
 
 
-\section{Ombrage}
+\section{Ombrage}\label{section:ombres}
 
 \subsection{Modèle}
 

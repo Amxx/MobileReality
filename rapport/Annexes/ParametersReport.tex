@@ -1,7 +1,6 @@
 \frenchbsetup{StandardEnumerateEnv=true}
 
 \numberwithin{equation}{subsection}
-%\graphicspath{{Imgs/}}
 
 \fancypagestyle{empty}{%
   \fancyhf{}
@@ -66,22 +65,25 @@
 \parindent=10pt
 
 
-
-
-
-
-		
-		
-
 \addto\captionsfrench{%
   \renewcommand{\listfigurename}{Liste des figures}%
   \renewcommand{\listtablename}{Liste des tableaux}%
 }
+
+
 \floatstyle{ruled}
+% \restylefloat{figure}
 \restylefloat{table}
-\newfloat{code}{!h}{locode}{}
-\floatname{code}{\textsc{code}}
-
-
+% \newfloat{code}{!h}{locode}{}
+% \floatname{code}{\textsc{code}}
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\newcommand{\Hs}{\operatorname{HS}}
+
+
+
+
+\DeclareUnicodeCharacter{00A0}{~}
+
+
+

@@ -45,7 +45,7 @@ int Core::init()
 {
 	renderoptions = 0x02 | 0x01;
 	
-	glClearColor(0.0, 0.0, 0.0, 0.0);	
+	glClearColor(1.0, 1.0, 1.0, 1.0);	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	present();
 	
@@ -151,4 +151,11 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 			break;
 		}
 	}
+}
+
+// ############################################################################
+
+void Core::processWindowResize(SDL_WindowEvent&)
+{
+	glViewport(0, 0, windowWidth(), windowHeight());
 }

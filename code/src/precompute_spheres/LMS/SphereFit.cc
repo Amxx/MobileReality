@@ -15,7 +15,7 @@ bool SphereFit::fitfunc(clustertype& cluster, const std::vector<sampletype>& sam
 			A(i,1) = -2.f*samples[i].y;
 			A(i,2) = -2.f*samples[i].z;
 			A(i,3) = +1.f;
-			B(i)   = gk::Vector(samples[i]).LengthSquared();
+			B(i)   = - gk::Vector(samples[i]).LengthSquared();
 		}
 		
 		Eigen::MatrixXf S = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(B);
