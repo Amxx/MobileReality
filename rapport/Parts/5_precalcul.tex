@@ -150,11 +150,11 @@ La principale difficulté ici est de construire un métrique représentative des
 
 Une métrique envisagéz est d'évaluer la distance d'un point à la surface de la sphère associé :
 \begin{align}
-	f(P, S) &= \left\|\begin{pmatrix} P.x - S.x \\ P.y - S.y \\ P.z - S.z\end{pmatrix}\right\|^2 - S.r^2	\label{eq:metrique}	\\
-					&= (P.x-S.x)^2 + (P.y-S.y)^2 + (P.z-S.z)^2 - S.r^2																						\notag \\
-					&= (P.x^2 + P.y^2+P.z^2) + (S.x^2+S.y^2+S.z^2)																								\notag \\
-					&\quad - 2(P.xS.x + P.yS.y + P.zS.z)  - S.r^2																									\notag \\
-					&= \|P\|^2 + \|S\|^2 - 2(P.xS.x + P.yS.y + P.zS.z) - S.r^2																		\notag
+	f(P, S) &= \left\|P-S\right\|^2 - S.r^2															\label{eq:metrique}	\\
+					&= (P.x-S.x)^2 + (P.y-S.y)^2 + (P.z-S.z)^2 - S.r^2					\notag \\
+					&= (P.x^2 + P.y^2+P.z^2) + (S.x^2+S.y^2+S.z^2)							\notag \\
+					&\quad - 2(P.xS.x + P.yS.y + P.zS.z)  - S.r^2								\notag \\
+					&= \|P\|^2 + \|S\|^2 - 2(P.xS.x + P.yS.y + P.zS.z) - S.r^2	\notag
 \end{align}
 
 Ce calcul de la sphère optimal associé a un cluster peut ensuite se faire par l'optimisation d'un système matriciel $AX-B$, la matrice $A$ représentant les données en entrée (points échantillonnées), le vecteur $X$ représentant la solution à optimiser et le vecteur $B$ étant l'objectif à atteindre.
@@ -193,23 +193,28 @@ Finalement la solution adopté, bien que géométriquement pauvre, nous donne de
 
 La distance considérée
 \begin{align}
-	(P, S)	&= \left\|\begin{pmatrix} P.x - S.x \\ P.y - S.y \\ P.z - S.z\end{pmatrix}\right\|	\\
+	f(P, S)			&= \left\|P-S\right\|	\\
 \intertext{s'optimisant trivialement sur un cluster $C$ par}
-	S				&= \left\{ \left(\overline p, \overline{\|p-s\|}\right)\;|\;p \in C \right\}
+	\overline S	&= \left\{ \left(\overline p, \overline{\|p-s\|}\right)\;|\;p \in C \right\}
 \end{align}
 
 
 
 \begin{figure}[!ht]\centering
-	\includegraphics[width=0.175\textwidth]{\rootPath Imgs/precompute_spheres/MRX22_both.png}
-	\vspace{0.5cm}
-	\includegraphics[width=0.175\textwidth]{\rootPath Imgs/precompute_spheres/MRX22_spheres.png}
+	\begin{subfigure}[b]{0.4\textwidth}\centering
+		\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_spheres/MRX22_both.png}
+		\vspace{0.5cm}
+		\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_spheres/MRX22_spheres.png}
+		\caption{MRX22 (157781 sommets, 287776 triangles)}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}\centering
+		\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_both.png}
+		\vspace{0.5cm}
+		\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_spheres.png}
+		\caption{Bigguy (1754 sommets, 2900 triangles)}
+	\end{subfigure}
 	
-	\includegraphics[width=0.175\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_both.png}
-	\vspace{0.5cm}
-	\includegraphics[width=0.175\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_spheres.png}
-	
-	\caption{Décomposition en sphères d'objets 3D (100 sphères par objet)}
+	\caption{Décomposition en sphères d'objets 3D ($100000$ échantillons, $100$ sphères)}
 	\label{fig:precompute_sphere:result}
 \end{figure}
 

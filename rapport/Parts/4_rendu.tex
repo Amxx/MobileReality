@@ -119,9 +119,15 @@ En considérant la face $F_{Z^+}$ on obtient (sans perte de généralité)
 Le problème est alors de trouver un moyen de calculer, ou au moins d'approcher, la fonction $W_F(\vec n)$. Ce calcul étant par ailleurs fait  en chaque nœud du maillage, il est primordial de le faire en utilisant un minimum de ressource, quitte à évaluer une valeur approchée qui affectera le résultat de manière faible comparativement avec l'approximation faite précédemment et selon laquelle $\mathcal L$ est constante sur chacune faces.
 
 \begin{figure}[!ht]\centering
-	\subfloat[$W(\theta)$]{\includegraphics[width=0.4\textwidth]{\rootPath Imgs/graphs/wn.pdf}}
-	
-	\subfloat[$W(\theta,\phi)$]{\includegraphics[width=0.4\textwidth]{\rootPath Imgs/graphs/wn3D.pdf}}
+	\begin{subfigure}[b]{0.4\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/graphs/wn.pdf}
+		\caption{$W(\theta)$}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/graphs/wn3D.pdf}
+		\caption{$W(\theta,\phi)$}
+	\end{subfigure}
+
 	\caption{Évolution de $W_F(\vec n)$ selon l'orientation de $\vec n$ }
 	\label{fig:curve:w_theta_phi}
 \end{figure}
@@ -136,9 +142,14 @@ Une approximation simple est la fonction
 Comme le montre la figure \ref{fig:curve:w_approx}, cette fonction est, malgré sa grande simplicité proche de la fonction $W_F(\vec n)$.
 
 \begin{figure}[!ht]\centering
-	\subfloat[$W(\theta)$ et $approx(\cos(\theta))$]{\includegraphics[width=0.4\textwidth]{\rootPath Imgs/graphs/approxw.pdf}}
-
-	\subfloat[$\Delta W$]{\includegraphics[width=0.4\textwidth]{\rootPath Imgs/graphs/deltaw.pdf}}
+	\begin{subfigure}[b]{0.4\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/graphs/approxw.pdf}
+		\caption{$W(\theta)$ et $approx(\cos(\theta))$}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/graphs/deltaw.pdf}
+		\caption{$\Delta W$}
+	\end{subfigure}
 	\caption{Comparaison entre $W_F(\vec n)$ et $approx(\cos(\theta))$ }
 	\label{fig:curve:w_approx}
 \end{figure}
@@ -181,7 +192,7 @@ avec $\mathcal S(p)$ la portion de sphère visible depuis la point considéré.
 
 L'ombre est rendu en assombrissant le pixel associé ce point d'un facteur
 \begin{align}
-	\mathcal F(p)	&=	\frac{\mathcal E_{ombre}(p, \vec n)}{\mathcal E_{ambiant}(p, \vec n)}	\\
+	\mathcal F(p)	&=	\frac{\mathcal E_{ombre}(p, \vec n)}{\mathcal E_{ambiant}(p, \vec n)}	\notag \\
 								&=	1 - \frac{\int_{\mathcal{S}(p)}\mathcal L_{glob}(\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega}{\int_{\mathcal{H}^2(\vec{n})}\mathcal L_{glob}(\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega}	
 \end{align}
 
