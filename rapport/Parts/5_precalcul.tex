@@ -40,7 +40,7 @@ Le terme $\Hs(\vec \omega.\vec n)$ est en fait inutile car tout point pour leque
 L'évaluation la visibilité est faite à l'aide d'une shadowmap. Étant donnée un point de vue (vecteur $\vec\omega$ aléatoire) il s’agit d’effectuer une première étape de rendu, avec une projection orthographique pour en conserver que les informations de profondeurs retenus dans le Z-buffer (voir figure~\ref{fig:precompute_ambiant:zbuffer}).
 
 \begin{figure}[!ht]\centering
-	\includegraphics[width=0.3\textwidth]{\rootPath Imgs/precompute_ambiant/zbuffer.png}
+	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/zbuffer.png}
 	\caption{Z-buffer issue de la première étape de rendu (shadowmap)}
 	\label{fig:precompute_ambiant:zbuffer}
 \end{figure}
@@ -51,7 +51,7 @@ Ces données de profondeurs permettent ensuite d'évaluer si un texel est visibl
 La seconde étape de rendu consiste alors à écrire, dans l’espace texture associé a l'objet, les informations de visibilités qui auront été calculé (voir figure~\ref{fig:precompute_ambiant:singlesource}). A cette étape, il est important de s'assurer que la texture est bien écrite, y comprit au niveau des jointures entre les différents éléments.\todo{référence}
 
 \begin{figure}[!ht]\centering
-	\includegraphics[width=0.3\textwidth]{\rootPath Imgs/precompute_ambiant/singlesource_red.png}
+	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/singlesource_red.png}
 	\caption{Rendu en espace texture pour une source}
 	\label{fig:precompute_ambiant:singlesource}
 \end{figure}
@@ -86,14 +86,10 @@ A l'issue de ces différents post-traitement, il ne reste qu'a exporter la textu
 
 
 
-
-
-
 \section{Décomposition en sphères}
 La section~\ref{section:ombres}, page~\pageref{section:ombres}, traite du rendu d'ombres portées issus de l'objet 3D ajouté à la scène. Cette étape nécessite une représentation de l'objet en question comme union de sphères.
 
 Le pré-calcul étudié ici consiste donc à construire, étant donné un maillage, à calculer un ensemble limité de sphère qui s'approche au mieux de la surface correspondant au maillage.
-
 
 \todo{... blablabla, ont peut faire plein de chose mais voila ...}
 
@@ -131,8 +127,6 @@ Le pré-calcul étudié ici consiste donc à construire, étant donné un mailla
 	\Retour{$sphs$}\;
 	\caption{Ajustement de sphères à un maillage}
 \end{algorithm}
-
-
 
 \subsection{Échantillonnage du maillage}
 
@@ -191,8 +185,6 @@ Cette première considération géométrique n'est cependant pas satisfaisante. 
 
 Par ailleurs la métrique proposé précédemment ne garanti pas la convergence du système.
 
-\subsubsection{Méthode adoptée}
-
 \begin{figure}[!ht]\centering
 	\begin{subfigure}[b]{0.4\textwidth}\centering
 		\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_spheres/MRX22_both.png}
@@ -211,7 +203,9 @@ Par ailleurs la métrique proposé précédemment ne garanti pas la convergence 
 	\label{fig:precompute_sphere:result}
 \end{figure}
 
-Finalement la solution adoptée, bien que géométriquement pauvre, nous donne des résultats visuellement acceptables tout en garantissant une convergence rapide. L'idée est de paver la surface du maillage à l'aide de sphères de rayon uniforme, ce qui correspond à la minimisation de la distance entre les points et le centre des sphère qui leur sont associés.
+\subsubsection{Méthode adoptée}
+
+Finalement la solution adoptée, bien que géométriquement pauvre, nous donne des résultats visuellement acceptables tout en garantissant une convergence rapide. L'idée est de paver la surface du maillage à l'aide de sphères de rayon uniforme, ce qui correspond à la minimisation de la distance entre les points et le centre des sphère qui leur sont associés (voir figure~\ref{fig:precompute_sphere:result}).
 
 La distance considérée
 \begin{align}
@@ -219,7 +213,6 @@ La distance considérée
 \intertext{s'optimisant trivialement sur un cluster $C$ par}
 	\overline S	&= \left\{ \left(\overline p, \overline{\|p-s\|}\right)\;|\;p \in C \right\}
 \end{align}
-
 
 %=====================================================================
 %=====================================================================

@@ -11,14 +11,16 @@
 \nocite{*}
 %======================================================================
 
-\pagenumbering{gobble}
+\clearpage
 \onecolumn
+\pagenumbering{gobble}
 \input{\rootPath Parts/0a_titlepage}
 
 %----------------------------------------------------------------------
 
-\pagenumbering{roman}\setcounter{page}{1} 
+\clearpage
 \onecolumn
+\pagenumbering{roman}\setcounter{page}{1} 
 \input{\rootPath Parts/0b_remerciements}
 
 %----------------------------------------------------------------------
@@ -26,8 +28,10 @@
 \tableofcontents
 
 %----------------------------------------------------------------------
-\pagenumbering{arabic}\setcounter{page}{1} 
+
+\clearpage
 \twocolumn
+\pagenumbering{arabic}\setcounter{page}{1} 
 
 \input{\rootPath Parts/1_acquisition}
 \input{\rootPath Parts/2_hierarchie}
