@@ -68,7 +68,9 @@ void LMS<S,C,P>::run(int max_step)
 {
 	timer begin = now();
 	
-	int step = 0;
+	step(); // needed for one single cluster
+
+	int step = 1;
 	while (computegroups() && max_step != step++)
 	{		
 		computefit();
@@ -91,10 +93,8 @@ void LMS<S,C,P>::run(int max_step)
 template<typename S, typename C, typename P>	
 void LMS<S,C,P>::step()
 {
-	printf("computing step ... "); fflush(stdout);
 	computegroups();
 	computefit();
-	printf("done\n");
 }
 
 template<typename S, typename C, typename P>	

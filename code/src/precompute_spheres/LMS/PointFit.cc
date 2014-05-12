@@ -20,6 +20,7 @@ bool PointFit::fitfunc(clustertype& cluster, const std::vector<sampletype>& samp
 	float 		r(0.f);
 	for (sampletype sample : samples) c += gk::Vector(sample)            / samples.size();
 	for (sampletype sample : samples) r += gk::Vector(c-sample).Length() / samples.size();
+	// for (sampletype sample : samples) r = std::max(r, gk::Vector(c-sample).Length());
 	cluster = clustertype(c, r);
 	return true;
 }

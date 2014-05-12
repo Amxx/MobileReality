@@ -20,6 +20,7 @@
 *.idx
 *.ilg
 *.ind
+*.loa
 *.locode
 *.lof
 *.log

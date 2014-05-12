@@ -131,12 +131,20 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 	if (event.state == SDL_PRESSED)
 	switch (event.keysym.sym)
 	{
-		case SDLK_ESCAPE: {	closeWindow();					break; }
-		case SDLK_F1:			{ renderoptions ^= 0x01;	break; }
-		case SDLK_F2:			{ renderoptions ^= 0x02;	break; }
-		case SDLK_F9:			{ lms->step();						break; }
-		case SDLK_F10:		{ lms->finalize();				break; }
-		case SDLK_F5:			{	gk::reloadPrograms();		break; }
+		case SDLK_ESCAPE: closeWindow();					break;
+		case SDLK_F1:			renderoptions ^= 0x01;	break;
+		case SDLK_F2:			renderoptions ^= 0x02;	break;
+		case SDLK_F5:			gk::reloadPrograms();		break;
+		case SDLK_F10:		lms->finalize();				break;
+
+		case SDLK_SPACE:
+		{
+			printf("computing step ... "); fflush(stdout);
+			lms->step();
+			printf("done\n");
+			break;
+		}
+
 		case SDLK_RETURN:
 		{
 			std::stringstream spherepath;
