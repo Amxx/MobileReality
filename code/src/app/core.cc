@@ -99,7 +99,7 @@ Core::Core(int argc, char* argv[]) :
 	gk::AppSettings settings;
 	settings.setGLVersion(4,1);
 	// settings.setFullscreen();
-	if(createWindow(1280, 720, settings) < 0) closeWindow();
+	if(createWindow(1920, 1080, settings) < 0) closeWindow();
 	
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -180,12 +180,17 @@ int Core::init()
 	// ===============================================================
 	// =                  S E A M L E S S   C U B E                  =
 	// ===============================================================
-	_GLResources["spl:linear"] = gk::createLinearSampler();
+	_GLResources["spl:linear"			] = gk::createLinearSampler();
+	_GLResources["spl:anisotropic"] = gk::createAnisotropicSampler(16);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-	glBindSampler(0, _GLResources["spl:linear"]->name);
-	glBindSampler(1, _GLResources["spl:linear"]->name);
-	glBindSampler(2, _GLResources["spl:linear"]->name);
-	glBindSampler(3, _GLResources["spl:linear"]->name);
+	glBindSampler(0, _GLResources["spl:linear"			]->name);
+	glBindSampler(1, _GLResources["spl:linear"			]->name);
+	glBindSampler(2, _GLResources["spl:linear"			]->name);
+	glBindSampler(3, _GLResources["spl:linear"			]->name);
+	glBindSampler(4, _GLResources["spl:anisotropic"	]->name);
+	glBindSampler(5, _GLResources["spl:anisotropic"	]->name);
+	glBindSampler(6, _GLResources["spl:anisotropic"	]->name);
+	glBindSampler(7, _GLResources["spl:anisotropic"	]->name);
 
 	// ===============================================================
 	// =          C R E A T E   F R A M E   T E X T U R E S          =
@@ -425,7 +430,7 @@ int Core::draw()
 	
 	
 	glActiveTexture(GL_TEXTURE0+0);	glBindTexture(getGLResource<gk::GLTexture>("tex:softshadow"	)->target, _GLResources["tex:softshadow"]->name);
-	glActiveTexture(GL_TEXTURE0+1);	glBindTexture(getGLResource<gk::GLTexture>("tex:cubemap"		)->target, _GLResources["tex:cubemap"		]->name);
+	glActiveTexture(GL_TEXTURE0+4);	glBindTexture(getGLResource<gk::GLTexture>("tex:cubemap"		)->target, _GLResources["tex:cubemap"		]->name); // with anystropic filter
 		
 	if (_config.general.rendering.scene && (_config.general.localisation.type == Options::DEBUG || (position_duration && position_duration--)))
 	{
@@ -451,7 +456,7 @@ int Core::draw()
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("mvpMatrix"		) = tr_mvp.matrix();
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("method"			) = _method;
 		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("softshadow"	) = 0;
-		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("envmap"			) = 1;
+		getGLResource<gk::GLProgram>("prg:rendering_object")->sampler("envmap"			) = 4;
 		getGLResource<gk::GLProgram>("prg:rendering_object")->uniform("bbox"				) =	_occlusion.bbox();
 		
 		for (const gk::MeshGroup& grp : _meshGroups)

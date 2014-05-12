@@ -53,7 +53,8 @@ int Core::init()
 	_GLResources["vao"] = (new gk::GLVertexArray())->create();
 	_GLResources["tex"]	= (new gk::GLTexture())->createTexture2D(gk::GLTexture::UNIT0, gk::readImage(_texturePath));
 	// _GLResources["spl"] = gk::createLinearSampler();
-	// glBindSampler(0, _GLResources["spl"]->name);
+	_GLResources["spl"] = gk::createAnisotropicSampler(16);
+	glBindSampler(0, _GLResources["spl"]->name);
 
 	#if 0
 	GLint num = 0;

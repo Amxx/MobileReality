@@ -185,11 +185,11 @@ void main()
 
 		vec3	dX						= dFdx(l_g);
 		vec3	dY						= dFdy(l_g);
-		float minLength			= sqrt(min(dot(dX, dX), dot(dY, dY)));
-		float desiredLength	= pow(2.0, specular_level);
-		float scale					= desiredLength / minLength;
-		dX									*= scale;
-		dY									*= scale;
+		// float minLength			= sqrt(min(dot(dX, dX), dot(dY, dY)));
+		// float desiredLength	= pow(2.0, specular_level);
+		// float scale					= desiredLength / minLength;
+		dX									*= 30;
+		dY									*= 2;
 		env_specular	= ks * specular_color * textureGrad(envmap, l_g, dX, dY);
 	}
 
