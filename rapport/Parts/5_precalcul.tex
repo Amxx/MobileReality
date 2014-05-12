@@ -148,6 +148,8 @@ La phase d'appareillement de l'algorithme consiste à organiser les points en cl
 
 La principale difficulté ici est de construire un métrique représentative des critères de qualités voulus, pour laquelle le calcul d'un élément optimal n'est pas trop complexe et qui converge vers un état stable.
 
+\subsubsection{Première approche}
+
 Une métrique envisagéz est d'évaluer la distance d'un point à la surface de la sphère associé :
 \begin{align}
 	f(P, S) &= \left\|P-S\right\|^2 - S.r^2															\label{eq:metrique}	\\
@@ -189,16 +191,7 @@ Cette première considération géométrique n'est cependant pas satisfaisante. 
 
 Par ailleurs la métrique proposé précédemment ne garanti pas la convergence du système.
 
-Finalement la solution adopté, bien que géométriquement pauvre, nous donne des résultats visuellement acceptables tout en garantissant une convergence rapide. L'idée est de paver la surface du maillage à l'aide de sphères de rayon uniforme, ce qui correspond à la minimisation de la distance entre les points et le centre des sphère qui leur sont associés.
-
-La distance considérée
-\begin{align}
-	f(P, S)			&= \left\|P-S\right\|	\\
-\intertext{s'optimisant trivialement sur un cluster $C$ par}
-	\overline S	&= \left\{ \left(\overline p, \overline{\|p-s\|}\right)\;|\;p \in C \right\}
-\end{align}
-
-
+\subsubsection{Méthode adoptée}
 
 \begin{figure}[!ht]\centering
 	\begin{subfigure}[b]{0.4\textwidth}\centering
@@ -218,8 +211,14 @@ La distance considérée
 	\label{fig:precompute_sphere:result}
 \end{figure}
 
+Finalement la solution adoptée, bien que géométriquement pauvre, nous donne des résultats visuellement acceptables tout en garantissant une convergence rapide. L'idée est de paver la surface du maillage à l'aide de sphères de rayon uniforme, ce qui correspond à la minimisation de la distance entre les points et le centre des sphère qui leur sont associés.
 
-
+La distance considérée
+\begin{align}
+	f(P, S)			&= \left\|P-S\right\|	\\
+\intertext{s'optimisant trivialement sur un cluster $C$ par}
+	\overline S	&= \left\{ \left(\overline p, \overline{\|p-s\|}\right)\;|\;p \in C \right\}
+\end{align}
 
 
 %=====================================================================

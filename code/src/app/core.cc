@@ -496,17 +496,20 @@ int Core::draw()
 	// ===============================================================
 	timer t8 = now();
 	
+	#ifndef DISABLE_OPENCV_GUI
 	if (_config.general.rendering.view)
 	{
 		if (_config.devices.front.enable)	cv::imshow("camera 0", cv::Mat(_cameras[0]->frame()));
 		if (_config.devices.back.enable	)	cv::imshow("camera 1", cv::Mat(_cameras[1]->frame()));
 	}
+	#endif
 	
 	// ===============================================================
 	// =                         T I M E R S                         =
 	// ===============================================================
 	timer t9 = now();
 	
+	#ifndef DISABLE_OPENCV_GUI
 	if (_config.general.verbose > 1)
 	{
 		cv::Mat timers(160, 280, CV_8UC1, cv::Scalar(25,25,25));
@@ -520,7 +523,8 @@ int Core::draw()
 		putText(timers, "Rendering - frames",			cv::Point(5,150), 0, 0.36, cv::Scalar(230,230,230));	putText(timers, formatTimer(t9-t8), cv::Point(155,150), 0, 0.32, cv::Scalar(230,230,230));
 		cv::imshow("timers", timers);
 	}
-	
+	#endif
+
 	present();
 	cv::waitKey(3);
 

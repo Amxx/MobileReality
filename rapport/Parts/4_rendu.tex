@@ -23,7 +23,7 @@ Le calcul de l'énergie reçu en un point de l'objet revient à intégrer le flu
 	\mathcal E(p, \vec n)=\frac{1}{\pi}\int_{\mathcal{H}^2(\vec{n})}\mathcal L(p,\vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega
 \end{equation}
 
-L'intégrale selon $\int_{\mathcal{H}(\vec n)}\mathrm d\omega$ correspond à une intégrale suivant l'hémisphère visible et pondéré par l'angle solide en supposant qu'il n'y a pas d'occultation. Afin de modéliser les phénomènes d'auto-occultation on devrai utiliser la formule suivante
+L'intégrale selon $\int_{\mathcal{H}^2(\vec n)}\mathrm d\omega$ correspond à une intégrale suivant l'hémisphère visible et pondéré par l'angle solide en supposant qu'il n'y a pas d'occultation. Afin de modéliser les phénomènes d'auto-occultation on devrai utiliser la formule suivante
 
 \begin{equation}
 	\mathcal E(p, \vec n)=\frac{1}{\pi}\int_{\mathcal V(p, \vec n )}\mathcal L(p, \vec\omega)\times\vec\omega.\vec n\, \mathrm d\vec\omega
@@ -265,7 +265,7 @@ Il serait possible de les réduire fortement via un pré-calcule (convolution) m
 Dans notre cas, il serait nécessaire d'évaluer, sans pré-calcul, l’intégration anisotrope de l'envmap.
 Les outils de filtrages anisotropes ne sont ici pas exploitable en l’état car une filtre anisotrope est définit entre autre par le facteur d'anisotropie qui le caractérise. Le nombre d'unité de texture étant grandement limité, il n'est pas possible de charger plusieurs fois l'envmap avec des filtrages différents qui couvriraient toutes nos attentes.
 
-Les outils de lecture de texture par gradient\footnote{\href{https://www.opengl.org/sdk/docs/man/html/textureGrad.xhtml}{\texttt{textureGrad()}}} mis en place dans openGL ne conviennent pas non plus car même si les vecteurs fournis (\texttt{dX} et \texttt{dY}) sont caractéristique d'une forte anisotropie, seul celui de norme maximal compte dans l'évaluation de l’accès au niveau de texture. 
+Les outils de lecture de texture par gradient\footnote{\href{https://www.opengl.org/sdk/docs/man/html/textureGrad.xhtml}{\texttt{textureGrad()}}} mis en place dans openGL ne conviennent pas non plus car même si les vecteurs fournis (\texttt{dX} et \texttt{dY}) sont caractéristique d'une forte anisotropie, le filtrage anisotropique est en l'état limité aux faces constituant l'envmap cubique. Il en résulte des défaults aux jonctions entre les faces.
 
 Il conviendrait donc, pour permettre en place les mécanismes d'évaluation anisotrope voulus, d'approximer l’intégration vis de multiples accès à la texture, le long de la direction privilégie d’anisotropie pour procéder à une intégration implicite.
 
@@ -273,7 +273,7 @@ Il conviendrait donc, pour permettre en place les mécanismes d'évaluation anis
 
 \section{Pipeline}
 
-\begin{figure*}
+\begin{figure*}[ht!]
 	\centering
 	\includestandalone[width=0.8\textwidth]{\rootPath Figures/pipeline}
 	\caption{Pipeline développé}

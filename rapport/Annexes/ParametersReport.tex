@@ -2,6 +2,8 @@
 
 \numberwithin{equation}{subsection}
 
+%% =======================================================================
+
 \fancypagestyle{empty}{%
   \fancyhf{}
   \fancyhead[L]{}
@@ -22,53 +24,37 @@
 }
 \pagestyle{basicstyle}
 
+%% =======================================================================
 
-
-
-\usepackage{titlesec}
-	\titleformat{\section}[frame]
-	{\normalfont}
-	{\filright
-	\footnotesize
-	\enspace Partie \thesection\enspace}
-	{6pt}
-	{\bfseries\filcenter}
+\titleformat{\section}[frame]
+{\normalfont}
+{\filright \footnotesize \enspace Partie \thesection\enspace}
+{6pt}
+{\bfseries\filcenter}
 	
-	\titleformat{\subsection}[frame]
-	{\normalfont}
-	{\filright
-	\footnotesize
-	\enspace \thesubsection\enspace}
-	{6pt}
-	{\filcenter}
-%	{\titlerule
-%	\vspace{.8ex}%
-%	\normalfont\itshape}
-%	{\thesubsection.}{.5em}{}
+\titleformat{\subsection}[frame]
+{\normalfont}
+{\filright \footnotesize \enspace \thesubsection\enspace}
+{6pt}
+{\filcenter}
 
-	\titleformat{\subsubsection}
-	{\titlerule
-	\vspace{.8ex}%
-	\normalfont\itshape}
-	{\thesubsubsection}{.5em}{}
+\titleformat{\subsubsection}
+{\titlerule \vspace{.8ex} \normalfont\itshape}
+{\thesubsubsection}
+{.5em}
+{}
 
 \titleformat{\chapter}[display]
-	{\normalfont\bfseries\filcenter}
-	{}
-	{1ex}
-	{\titlerule[2pt]
-	\vspace{2ex}%
-	\LARGE}
-	[\vspace{1ex}%
-	{\titlerule[2pt]}]
-	
+{\normalfont\bfseries\filcenter}
+{}
+{1ex}
+{\titlerule[2pt] \vspace{2ex} \LARGE}
+[\vspace{1ex} {\titlerule[2pt]}]
+
 \parindent=10pt
+\DeclareUnicodeCharacter{00A0}{~}
 
-
-\addto\captionsfrench{%
-  \renewcommand{\listfigurename}{Liste des figures}%
-  \renewcommand{\listtablename}{Liste des tableaux}%
-}
+%% =======================================================================
 
 
 \floatstyle{ruled}
@@ -77,13 +63,25 @@
 % \newfloat{code}{!h}{locode}{}
 % \floatname{code}{\textsc{code}}
 
+
+\addto\captionsfrench{%
+  \renewcommand{\listfigurename}{Liste des figures}%
+  \renewcommand{\listtablename}{Liste des tableaux}%
+  \renewcommand{\listalgorithmcfname}{Liste des algorithmes}%
+}
+	
+
+
+
+
+
+
+
+
+
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \newcommand{\Hs}{\operatorname{HS}}
 
-
-
-
-\DeclareUnicodeCharacter{00A0}{~}
 
 
 
