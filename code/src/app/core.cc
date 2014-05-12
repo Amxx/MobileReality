@@ -126,6 +126,7 @@ Core::~Core()
 		r.second->release();
 		printf("done\n");
 	}
+	printf("All ressources released\n");
 }
 
 

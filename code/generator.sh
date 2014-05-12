@@ -34,6 +34,7 @@ function launch
 	if $optimus; then 
 		echo "Starting gpu ..."
 		optirun ./install/bin/Reality $cfg
+	#	primusrun ./install/bin/Reality $cfg
 	else
 		./install/bin/Reality $cfg
 	fi
