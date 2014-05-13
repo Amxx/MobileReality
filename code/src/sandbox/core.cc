@@ -50,11 +50,11 @@ int Core::init()
 	_GLResources["prg"]	= gk::createProgram("sandbox.glsl");
 	if (getGLResource<gk::GLProgram>("prg")	== gk::GLProgram::null()) { printf("[ERROR] #1\n"); exit(1); }
 
-	_GLResources["vao"] = (new gk::GLVertexArray())->create();
-	_GLResources["tex"]	= (new gk::GLTexture())->createTexture2D(gk::GLTexture::UNIT0, gk::readImage(_texturePath));
-	// _GLResources["spl"] = gk::createLinearSampler();
-	_GLResources["spl"] = gk::createAnisotropicSampler(16);
-	glBindSampler(0, _GLResources["spl"]->name);
+	_GLResources["vao"						] = (new gk::GLVertexArray())->create();
+	_GLResources["tex"						]	= (new gk::GLTexture())->createTexture2D(gk::GLTexture::UNIT0, gk::readImage(_texturePath));
+	_GLResources["spl:linear"			] = gk::createLinearSampler();
+	_GLResources["spl:anisotropic"] = gk::createAnisotropicSampler(16, GL_CLAMP_TO_EDGE);
+	glBindSampler(0, _GLResources["spl:anisotropic"]->name);
 
 	#if 0
 	GLint num = 0;
@@ -67,7 +67,7 @@ int Core::init()
 
 	float maxA;
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxA);
-	printf("maxA : %ld\n", maxA);
+	printf("maxA : %f\n", maxA);
 
 	return 1;
 }  
@@ -125,10 +125,10 @@ void Core::processKeyboardEvent(SDL_KeyboardEvent& event)
 				gk::reloadPrograms();
 				break;
 			}
-			case SDLK_UP:			_diff.x = std::min(_diff.x*2.0, 512.0); break;
-			case SDLK_DOWN:		_diff.x = std::max(_diff.x/2.0, 	1.0); break;
-			case SDLK_RIGHT:	_diff.y = std::min(_diff.y*2.0, 512.0); break;
-			case SDLK_LEFT:		_diff.y = std::max(_diff.y/2.0, 	1.0); break;
+			case SDLK_UP:			_diff.y = std::min(_diff.y*2.0, 512.0); break;
+			case SDLK_DOWN:		_diff.y = std::max(_diff.y/2.0, 	1.0); break;
+			case SDLK_RIGHT:	_diff.x = std::min(_diff.x*2.0, 512.0); break;
+			case SDLK_LEFT:		_diff.x = std::max(_diff.x/2.0, 	1.0); break;
 		}
 }
 

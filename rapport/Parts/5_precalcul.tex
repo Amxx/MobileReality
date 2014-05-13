@@ -48,7 +48,7 @@ L'évaluation la visibilité est faite à l'aide d'une shadowmap. Étant donnée
 
 Ces données de profondeurs permettent ensuite d'évaluer si un texel est visible ou non, simplement en comparant la profondeur du texel considéré et celui retenu dans la texture et qui caractérise le texel le plus proche selon le rayon associé.
 
-La seconde étape de rendu consiste alors à écrire, dans l’espace texture associé a l'objet, les informations de visibilités qui auront été calculé (voir figure~\ref{fig:precompute_ambiant:singlesource}). A cette étape, il est important de s'assurer que la texture est bien écrite, y comprit au niveau des jointures entre les différents éléments.\todo{référence}
+La seconde étape de rendu consiste alors à écrire, dans l’espace texture associé a l'objet, les informations de visibilités qui auront été calculé (voir figure~\ref{fig:precompute_ambiant:singlesource}). A cette étape, il est important de s'assurer que la texture est bien écrite, y comprit au niveau des jointures entre les différents éléments qui preuvent demander un ajustement.\cite{Aila2005}\cite{Manson2012}
 
 \begin{figure}[!ht]\centering
 	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/singlesource_red.png}
@@ -89,9 +89,11 @@ A l'issue de ces différents post-traitement, il ne reste qu'a exporter la textu
 \section{Décomposition en sphères}
 La section~\ref{section:ombres}, page~\pageref{section:ombres}, traite du rendu d'ombres portées issus de l'objet 3D ajouté à la scène. Cette étape nécessite une représentation de l'objet en question comme union de sphères.
 
-Le pré-calcul étudié ici consiste donc à construire, étant donné un maillage, à calculer un ensemble limité de sphère qui s'approche au mieux de la surface correspondant au maillage.
+Le pré-calcul étudié ici consiste donc à construire, étant donné un maillage, un ensemble limité de sphère qui s'approche au mieux de la surface correspondant au maillage.
 
-\todo{... blablabla, ont peut faire plein de chose mais voila ...}
+Ce problème d'optimisation est longuement développée dans la littérature\cite{Marshall1997}\cite{Gross2003}, notamment pour la reconstruction de surface implicite à partir de points (orientées ou non). La plupart des méthodes consistent à ajuster des surfaces contraintes à l'aide d'outils statistiques. Ces méthodes présentent cependant le défaut d’être mathématiquement complexe et numériquement complexes.
+
+Le choix s'est donc porté sur une méthode simple et inexacte mais suffisante au regard de l'utilisation des résultats par l'algorithme de calcul des ombrages.
 
 \begin{algorithm}[ht]
 	\SetKwData{Mesh}{Maillage}
