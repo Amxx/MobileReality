@@ -31,8 +31,9 @@
 
 \clearpage
 \twocolumn
-\pagenumbering{arabic}\setcounter{page}{1} 
+\pagenumbering{arabic}\setcounter{page}{1}
 
+\input{\rootPath Parts/0c_introduction}
 \input{\rootPath Parts/1_acquisition}
 \input{\rootPath Parts/2_hierarchie}
 \input{\rootPath Parts/3_envmap}
@@ -42,10 +43,13 @@
 \input{\rootPath Parts/7_perspectives}
 
 %----------------------------------------------------------------------
-\newpage
+
+\clearpage
+\pagenumbering{Roman}\setcounter{page}{1} 
 \appendix
 \chapter{Annexes}
-\pagenumbering{Roman}\setcounter{page}{1} 
+\input{\rootPath Extras/cube.tex}
+\input{\rootPath Extras/octo.tex}
 
 %----------------------------------------------------------------------
 

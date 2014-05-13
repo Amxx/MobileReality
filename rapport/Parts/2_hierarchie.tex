@@ -14,7 +14,7 @@
 
 Afin de mettre en place les différents mécanismes de repérage, il à été nécessaire de hiérarchiser les repères relatifs aux différents référentiels considères.
 
-Le référentiel principal est le référentiel du monde. Il est par définition fixe au cours du temps et est définit par rapport à la mire utilisé pour l'acquisition. Ce repère est centré au centre géométrique de la mire et servira aussi bien à positionner l'objet à afficher qu'à définir servir de référentiel de base pour l'EnvMap.
+Le référentiel principal est le référentiel du monde. Il est par définition fixe au cours du temps et est définit par rapport à la mire utilisé pour l'acquisition. Ce repère est centré au centre géométrique de la mire et servira aussi bien à positionner l'objet à afficher qu'à définir servir de référentiel de base pour l'envmap.
 
 Les différentes faces de la mire sont elle même fixes dans le repère du monde car lié a l'objet physique (la mire) qui le définit. Les transformation entre le repère de chacune des faces de la mire et le repère du monde sont codées dans les marqueur présents sur les faces (matrice $model$).
 
@@ -53,6 +53,18 @@ Les différentes cameras présentes sur l'interface d'acquisition seront à leur
 \end{table}
 
 
+
+\section{Utilisation de marqueurs}
+
+L'évaluation des transformations, qui est necessaire au positionnement dans la scène et donc à la reconstruction de l'environnement, necessite la reconnaissance de marqueurs. L'identification de ces marqeurs, fixes dans l'espace du monde, associé a la connaissance de la matrice $model$ correspondante permettent suffisent en effet à déduire l'orientation au regard de la scène.
+
+Afin de permettre la reconnaissance de la scène dans ca globalité, il est necessaire de construire une mire complete, disposant de plusieurs faces parmit lesquelles au moins une devra, pour toute orrientation, etre lisible. Les marqueurs constituants cette mire doivent par ailleur etre capable de porter les informations caractèristique de la matrice $model$ associé.
+
+Il est donc necessaire de choisir un modèle de marqueur permetant a la fois une localisation précise d'au moins trois points (necessaires au reperage) et portant des informations propres.
+
+Parmit les nombreux modèle de marqueurs repondant au prérequis, le choix d'une implementation s'est rapidement porté sur un modèle utilisant des QR codes\footnote{\url{http://www.qrcode.com/}}. L'adaptation à un autre modèle est particulièrement aisé puisqu'elle ne demande que le developpement d'un module\todo{reference modules} de scanner reconnaissant les marqueurs à integrer.
+
+Sont disponible en annexe les patrons des mires cubique (figure~\ref{extra:patron_cube}, page~\pageref{extra:patron_cube}) et hémisphérique octogonale (figure~\ref{extra:patron_octo}, page~\pageref{extra:patron_octo}) construites à base de QRCodes.
 
 \section{Évaluation des transformations}
 

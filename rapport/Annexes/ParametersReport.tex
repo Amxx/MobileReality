@@ -85,3 +85,9 @@
 
 
 
+\newcommand{\framedgraphics}[2]{%
+  \setlength{\fboxsep}{0pt}%
+  \setlength{\fboxrule}{1pt}%
+  \fbox{\includegraphics[{#1}]{{#2}}}%
+}
+

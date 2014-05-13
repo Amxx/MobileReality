@@ -188,8 +188,8 @@ void main()
 		// float minLength			= sqrt(min(dot(dX, dX), dot(dY, dY)));
 		// float desiredLength	= pow(2.0, specular_level);
 		// float scale					= desiredLength / minLength;
-		dX									*= 30;
-		dY									*= 2;
+		dX									*= 100;
+		dY									*= 100;
 		env_specular	= ks * specular_color * textureGrad(envmap, l_g, dX, dY);
 	}
 
