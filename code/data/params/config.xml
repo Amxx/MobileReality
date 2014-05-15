@@ -11,7 +11,11 @@
 		<obj>data/objects/MRX22_Recon_Flyer/MRX22_Recon_Flyer.obj</obj>
 		-->
 		<obj>data/objects/sphere.obj</obj>
-		<!--<spheres>data/objects/bigguy/bigguy.obj.spheres</spheres>-->
+		<!--
+		<spheres>data/objects/sphere.obj.spheres</spheres>
+		<spheres>data/objects/bigguy/bigguy.obj.spheres</spheres>
+		-->
+		<spheres>data/objects/sphere.obj.spheres</spheres>
 		<scale>1.0</scale>
 	</object>
 	
@@ -47,11 +51,10 @@
 		</defaultValues>
 		
 		<envmap>
-			<type>debug</type>												<!-- dynamic | debug					-->
+			<path>data/envmap/0/%03d.jpg</path>				<!-- [path] | empty for clean	-->
+			<build>off</build>												<!-- on | off									-->
 			<size>512 512</size>
 			<dual>off</dual>													<!-- on | off									-->
-			<path>data/envmap/0/%03d.jpg</path>
-			<!-- <path>data/envmap/test/%03d.png</path> -->
 		</envmap>
 		
 		<localisation>

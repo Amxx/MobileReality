@@ -249,7 +249,15 @@ On utilisera également l'ombre projeté calculé précédemment afin de moduler
 Les modèles employés ici permettent un rendu rapide mais présentes des limitations en terme de qualité. Il serait intéressant, dans l'optique améliorer encore la qualité du rendu, de considérer un modèle à micro-facette. 
 Le principes des modèles à micro-facette est de considérer la surface de l'objet comme un ensemble de petites faces orientés selon des normales propres a chacune (micro-normales). La distribution statistique des micro-normales autour de la normale géométrique du maillage (macro-normale) permet de déterminer les mécanismes de réflexion. Parmi les nombreux avantages d'un telle méthode il y a la possibilité de caractériser des surfaces anisotropes par le biais de directions privilégiés dans la distribution de facettes.
 
-L'auto-occultation entre facettes, variable selon le point de vue, permet par ailleurs de calculer une normal intermédiaire entre la normale géométrique et les micro-normales des facette (mézo-normal) qui correspond à l’intégration des micro-normales sur l'ensemble des facette visible\cite{Bruneton2010}\cite{Heitz2013} \todo{figure}. Cette mézo-normale, utilisée à la place de normale géométrique, permet de corriger les reflets sur des surfaces vue sous un angle important.
+L'auto-occultation entre facettes, variable selon le point de vue, permet par ailleurs de calculer une normal intermédiaire entre la normale géométrique et les micro-normales des facette (mézo-normal) qui correspond à l’intégration des micro-normales sur l'ensemble des facette visible\cite{Bruneton2010}\cite{Dupuy2012}\cite{Heitz2013}.
+
+\begin{figure}\centering
+	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/vectorial/visible_NDF.pdf}
+	\caption{Mézo-normales et point de vue\\(source \cite{Dupuy2012})}
+	\label{fig:svg:mezonormales}
+\end{figure}
+
+Cette mézo-normale, utilisée à la place de normale géométrique, permet de corriger les reflets sur des surfaces vue sous un angle important.
 
 L’intégration complète d'un tel modèle à été envisagé de la manière suivante :
 \begin{enumerate}

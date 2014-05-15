@@ -1,0 +1,26 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\input{../Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{../}
+
+\begin{document}
+\begin{tikzpicture}
+	
+	\coordinate	(Ocube)	at (0,0,0);
+	\coordinate	(Xcube)	at (1,0,0);
+	\coordinate	(Ycube)	at (0,1,0);
+	\coordinate	(Zcube)	at (0,0,1);
+	\coordinate (A) at ($(Ocube)-1.5*(Xcube)-1.0*(Ycube)$);
+	\coordinate (B) at ($(Ocube)+1.5*(Xcube)-1.0*(Ycube)$);
+	\coordinate (C) at ($(Ocube)-1.5*(Xcube)+1.0*(Ycube)$);
+	\coordinate (D) at ($(Ocube)+1.5*(Xcube)+1.0*(Ycube)$);
+
+	\fill[black!50,opacity=0.3] (A)--(B)--(D)--(C)--cycle;
+	\foreach \t in {-1.50,-1.25,...,+1.50} { \draw[black!50,opacity=0.3] ($(Ocube)+\t*(Xcube)-1.0*(Ycube)$)--($(Ocube)+\t*(Xcube)+1.0*(Ycube)$); }
+	\foreach \t in {-1.00,-0.75,...,+1.00} { \draw[black!50,opacity=0.3] ($(Ocube)-1.5*(Xcube)+\t*(Ycube)$)--($(Ocube)+1.5*(Xcube)+\t*(Ycube)$); }
+
+	\draw[->,very thick,red]		(Ocube)--(Xcube)	node[black,midway,below]			{$\vec x$};
+	\draw[->,very thick,green]	(Ocube)--(Ycube)	node[black,midway,left]				{$\vec y$};
+	\draw[->,very thick,blue]		(Ocube)--(Zcube)	node[black,midway,above left]	{$\vec z$};
+\end{tikzpicture}
+\end{document}

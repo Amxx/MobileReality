@@ -61,9 +61,9 @@ Afin de permettre la reconnaissance de la scène dans ca globalité, il est nece
 
 Il est donc necessaire de choisir un modèle de marqueur permetant a la fois une localisation précise d'au moins trois points (necessaires au reperage) et portant des informations propres.
 
-Parmit les nombreux modèles de marqueurs repondant au prérequis, le choix d'une implementation s'est rapidement porté sur un modèle utilisant des QR codes\footnote{\url{http://www.qrcode.com/}}. L'adaptation à un autre modèle est particulièrement aisé puisqu'elle ne demande que le developpement d'un module\todo{reference modules} de scanner reconnaissant les marqueurs à integrer.
+Parmit les nombreux modèles de marqueurs repondant au prérequis, le choix d'une implementation s'est rapidement porté sur un modèle utilisant des QR codes\footnote{\url{http://www.qrcode.com/}}. L'adaptation à un autre modèle est particulièrement aisé puisqu'elle ne demande que le developpement d'un module de scanner reconnaissant les marqueurs (voir section~\ref{section:module:scanner}, page~\pageref{section:module:scanner}).
 
-Sont disponible en annexe les patrons des mires cubique (figure~\ref{extra:patron_cube}, page~\pageref{extra:patron_cube}) et hémisphérique octogonale (figure~\ref{extra:patron_octo}, page~\pageref{extra:patron_octo}) construites à base de QRCodes.
+Sont disponible en annexe les patrons des mires cubique (figure~\ref{extra:patron_cube}, page~\pageref{extra:patron_cube}) et hémisphérique octogonale (figure~\ref{extra:patron_octo}, page~\pageref{extra:patron_octo}) construites à base de QR codes.
 
 
 
@@ -71,11 +71,73 @@ Sont disponible en annexe les patrons des mires cubique (figure~\ref{extra:patro
 
 Compte tenu de la hiérarchie de référentiel décrite dans la section précédente, il est nécessaire, pour décrire complètement le système, de décrire chacune des matrices de transformation. 
 
+
 \subsection{Calibration de la camera}
-\subsection{Identification des marqueurs}
+
+L'étape de calibration de camera permet de calculer les differents termes de la matrice $projection$ propre à l'interface d'acquisition. Cela revient à ajuster le modèle de sténopé considere dans la section~\ref{section:modele} avec les paramètres physiques.
+
+La matrice $projection$ est de la forme suivante :
+
+\begin{equation}
+	\begin{pmatrix}
+		\alpha_x	&	\gamma		& u_0	\\
+		0					&	\alpha_x	&	v_0	\\
+		0					&	0					&	1
+	\end{pmatrix}
+\end{equation}
+avec 
+\begin{align*}
+	\alpha_x	&= f * m_x	\\
+	\alpha_y	&= f * m_y
+\end{align*}
+ou $f$ est la longueur focale, $m$ est la résolution du capteur selon les axes $\vec x$ et $\vec y$, $u_0$ et $v_0$ sont les coordonnées du centre optique sur le capteur et $\gamma$ est un coefficient qui décrit la non orthogonalité des axe principaux
+
+Le calcul de cette matrice est resolu par la minimisation d'un système linéaire sur de nombreuses prises de vue du marqueur. 
+
+Cette étape de calibration est implementé par la bibliothèque OpenCV\footnote{\url{http://opencv.org/}}.
+
+Une fois determinés, les paramètres relatif à la camera sont sauvegardés dans un fichier \texttt{xml}.
+
+\subsection{Positionnement à partir de marqueurs}
+
+Une fois la camera calibré, c'est a dire une fois les paramètre intrinseques déterminées il est possible d'utiliser la connaissance de la matrice $projection$ et des dimensions du marqueur pour reconstruire, à partir des coordonnées du marqueur dans l'espace image, la matrice de transformation $extrinseque$ correponsant au passage de l'espace du QR code (face de la mire) à l'espace de la camera.
+
+Les matrices $model$ et $orientation$ etant connus, la première grace aux informations écrites sur le QR code et la seconde etant pré enregistrés (fixe, lié a la géométrie du téléphone), il est possible d'en déduire la matrice $view$ qui caractèrise le positionnement dans la scène :
+
+\begin{align}
+	view	&=			orientation^{-1}	\notag \\
+%%			&\times cvToGl^{-1}				\notag \\
+				&\times extrinseque				\notag \\
+				&\times model^{-1}
+\end{align}
+
 \subsection{Models OpenCV / OpenGL}
 
+Les differentes bibliothèques ont chacune leur approche qui resultent dans des differences de conventions.
 
+OpenCV considère les images comme des matrices. À ce titre l'origine est placé en haut à gauche, avec le $\vec x$ pointant vers la gauche et le vecteur $\vec y$ pointant vers le bas. Ainsi regarder une image revient à regarder selon l'axe des $\vec z$ croissants.
+
+\begin{figure}[!ht]
+	\centering
+	\includestandalone[width=0.3\textwidth]{\rootPath Figures/space-opencv}
+	\caption{Convention d'orientation OpenCV}
+	\label{fig:tikz:space-opencv}
+\end{figure}
+
+À l'inverse OpenGL s'interesse à des espaces $3D$ complets et oriente donc naturellement le vecteur $\vec y$ vers le haut. L'utilisateur regarde donc selon l'axe des $\vec z$ décroissants.
+
+\begin{figure}[!ht]
+	\centering
+	\includestandalone[width=0.3\textwidth]{\rootPath Figures/space-opengl}
+	\caption{Convention d'orientation OpenGL}
+	\label{fig:tikz:space-opengl}
+\end{figure}
+
+Afin d'utiliser conjointement les deux bibliothèques, il convient de faire les transformations adequates.
+
+\begin{equation}
+	cvToGl = \begin{pmatrix}1 & 0 & 0 \\ 0 & -1 & 0 \\ 0 & 0 & -1\end{pmatrix}
+\end{equation}
 
 %=====================================================================
 %=====================================================================

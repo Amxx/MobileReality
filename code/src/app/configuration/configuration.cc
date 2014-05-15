@@ -56,7 +56,7 @@ Configuration& Configuration::load(const std::string& path)
 	if (!fs["generalParameters"]["defaultValues"]["brightness"].empty())				fs["generalParameters"]["defaultValues"]["brightness"]							>>	general.defaultValues.brightness;
 	if (!fs["generalParameters"]["defaultValues"]["gain"].empty())							fs["generalParameters"]["defaultValues"]["gain"]										>>	general.defaultValues.gain;
 	if (!fs["generalParameters"]["defaultValues"]["persistency"].empty())				fs["generalParameters"]["defaultValues"]["persistency"]							>>	general.defaultValues.persistency;
-	general.envmap.type						= strcmp(((std::string) fs["generalParameters"]["envmap"]["type"]).c_str(), "debug")?Options::DYNAMIC:Options::DEBUG;
+	general.envmap.build						= strcmp(((std::string) fs["generalParameters"]["envmap"]["type"]).c_str(), "on");
 	if (!fs["generalParameters"]["envmap"]["size"].empty())											fs["generalParameters"]["envmap"]["size"]														>>	general.envmap.size;
 	general.envmap.dual						= !strcmp(((std::string) fs["generalParameters"]["envmap"]["dual"]).c_str(), "on");
 	if (!fs["generalParameters"]["envmap"]["path"].empty())											fs["generalParameters"]["envmap"]["path"]														>>	general.envmap.path;
@@ -76,13 +76,11 @@ Configuration& Configuration::check()
 {
 	if (!devices.front.enable)
 	{
-		if (general.envmap.type == Options::DYNAMIC)
-		{ general.envmap.type = Options::DEBUG;		fprintf(stderr, "[WARNING] envmap has been set to debug as front device is not enable\n");				}
+		if (general.envmap.build)
+		{ general.envmap.build = false;									fprintf(stderr, "[WARNING] envmap building has been turned off as front device is not enable\n");	}
 		if (general.localisation.type == Options::DYNAMIC)
 		{ general.localisation.type	= Options::DEBUG;		fprintf(stderr, "[WARNING] localisation has been set to debug as front device is not enable\n");	}
 	}
-	if (general.envmap.type == Options::DYNAMIC && !general.envmap.path.empty())
-	{ fprintf(stderr, "[WARNING] envmap path as been discarded as type was set to dynamic\n");																													}
 	return *this;
 }
 
@@ -114,7 +112,7 @@ const Configuration& Configuration::display() const
 	printf("│ general.defaultValues.brightness  : %-31d │\n",												general.defaultValues.brightness );
 	printf("│ general.defaultValues.gain        : %-31d │\n",												general.defaultValues.gain);
 	printf("│ general.defaultValues.persistency : %-31d │\n",												general.defaultValues.persistency);
-	printf("│ general.envmap.type               : %-31s │\n",												(general.envmap.type?std::string("dynamic"):std::string("debug")).c_str());
+	printf("│ general.envmap.build              : %-31s │\n",												(general.envmap.build?std::string("on"):std::string("off")).c_str());
 	printf("│ general.envmap.size               : [%4d x %-4d]                   │\n",	general.envmap.size.width, general.envmap.size.height);
 	printf("│ general.envmap.dual               : %-31s │\n",												(general.envmap.dual?std::string("on"):std::string("off")).c_str());
 	printf("│ general.envmap.path               : %-31s │\n",												format(general.envmap.path, 31, 8).c_str());

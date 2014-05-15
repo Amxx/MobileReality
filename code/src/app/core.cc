@@ -14,7 +14,7 @@ Core::Core(int argc, char* argv[]) :
 	if (argc > 1) _config.load(argv[1]).check();
 	if (_config.general.verbose) _config.display();
 
-	_buildenvmap	= _config.general.envmap.type == Options::DYNAMIC;
+	_buildenvmap	= _config.general.envmap.build;
 	_method				= 0x0000;
 	_rebuild			= 0x0001;
 	// ===============================================================
@@ -212,7 +212,7 @@ int Core::init()
 	// ===============================================================
 
 	_GLResources["fbf:cubemap"] = (new gk::GLFramebuffer())->create(GL_DRAW_FRAMEBUFFER);
-	if (_config.general.envmap.type == Options::DEBUG && !_config.general.envmap.path.empty())
+	if (!_config.general.envmap.path.empty())
 		_GLResources["tex:cubemap"] = (new gk::GLTexture())->createTextureCube(gk::GLTexture::UNIT4, gk::readImageArray(_config.general.envmap.path.c_str(), 6));
 	else
 		_GLResources["tex:cubemap"]	= (new gk::GLTexture())->createTextureCube(gk::GLTexture::UNIT4, _config.general.envmap.size.width, _config.general.envmap.size.height);

@@ -49,8 +49,8 @@ namespace Options
 		};
 		struct Envmap
 		{
-			Envmap() : type(DYNAMIC), size(256,256), dual(false), path("") {}
-			Type				type;
+			Envmap() : build(true), size(256,256), dual(false), path("") {}
+			bool				build;
 			cv::Size		size;
 			bool				dual;
 			std::string	path;
