@@ -19,8 +19,8 @@
 	\foreach \t in {-0.125,+0.125,...,+2.85} { \draw[black!50,opacity=0.3] ($(Ocube)+\t*(Xcube)-0.125*(Ycube)$)--($(Ocube)+\t*(Xcube)+1.875*(Ycube)$); }
 	\foreach \t in {-0.125,+0.125,...,+1.85} { \draw[black!50,opacity=0.3] ($(Ocube)-0.125*(Xcube)+\t*(Ycube)$)--($(Ocube)+2.875*(Xcube)+\t*(Ycube)$); }
 
-	\draw[->,very thick,red]		(Ocube)--(Xcube)	node[black,midway,above]			{$\vec x$};
-	\draw[->,very thick,green]	(Ocube)--(Ycube)	node[black,midway,left]				{$\vec y$};
-	\draw[->,very thick,blue]		(Ocube)--(Zcube)	node[black,midway,above left]	{$\vec z$};
+	\draw[->,very thick,red]		(Ocube)--(Xcube)				node[black,below]				{$\vec x$};
+	\draw[->,very thick,green]	(Ocube)--(Ycube)				node[black,right]				{$\vec y$};
+	\node[blue]									(Ocube) {$\bigotimes$}	node[black,below right]	{$\vec z$};
 \end{tikzpicture}
 \end{document}
