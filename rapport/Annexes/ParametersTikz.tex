@@ -1,10 +1,11 @@
-\usetikzlibrary{3d,arrows, calc, backgrounds, petri, positioning, shapes.geometric}
+\usetikzlibrary{3d,arrows, calc, backgrounds, petri, positioning, shadows, shapes}
+
 
 \tikzset{
 	persp/.style={scale=3.0,x={(-0.8cm,-0.4cm)},y={(0.8cm,-0.4cm)}, z={(0cm,1cm)}},
 	points/.style={fill=white,draw=black,thick}
 	grid/.style={very thin,gray},
-	axis/.style={->,blue,ultra thick},
+	axis/.style={->,ultra thick},
 	cube/.style={thick, fill=black!15,opacity=0.5},
 	cube hidden/.style={dashed},
 	block/.style={
@@ -18,3 +19,11 @@
     text centered
 	}
 }
+
+\tikzstyle{class}			=[rectangle, rounded corners, draw=black, fill=blue!40, drop shadow, text centered, anchor=north, text=white,    text width=3cm]
+\tikzstyle{module}		=[rectangle, rounded corners, draw=black, fill=red!40, 	drop shadow, text centered, anchor=north, text=white,    text width=3cm]
+\tikzstyle{component}	=[rectangle, rounded corners, draw=black, fill=green,   drop shadow, text centered, anchor=north, text=black!90, text width=3cm]
+\tikzstyle{single}		=[text height=1.5ex, text depth=0.25ex]
+\tikzstyle{double}		=[text height=4.0ex, text depth=2.75ex]
+\tikzstyle{triple}		=[text height=6.5ex, text depth=5.25ex]
+\tikzstyle{quadru}		=[text height=9.0ex, text depth=7.75ex]

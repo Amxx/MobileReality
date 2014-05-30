@@ -1,7 +1,5 @@
 \frenchbsetup{StandardEnumerateEnv=true}
 
-\numberwithin{equation}{subsection}
-
 %% =======================================================================
 
 \fancypagestyle{empty}{%
@@ -57,30 +55,31 @@
 %% =======================================================================
 
 
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\newcommand{\Hs}{\operatorname{HS}}
+
+
+
+
 \floatstyle{ruled}
 \restylefloat{figure}
 \restylefloat{table}
-% \newfloat{code}{!h}{locode}{}
-% \floatname{code}{\textsc{code}}
-
+\newfloat{code}{!h}{locode}{}
+\floatname{code}{\textsc{code}}
 
 \addto\captionsfrench{%
   \renewcommand{\listfigurename}{Liste des figures}%
   \renewcommand{\listtablename}{Liste des tableaux}%
   \renewcommand{\listalgorithmcfname}{Liste des algorithmes}%
 }
-	
+\newcommand{\listofcode}{\listof{code}{Liste des codes}}
+
+\numberwithin{code}{chapter}
+\numberwithin{equation}{subsection}
+\counterwithout{footnote}{chapter}
 
 
-
-
-
-
-
-
-
-\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
-\newcommand{\Hs}{\operatorname{HS}}
 
 
 
@@ -91,3 +90,13 @@
   \fbox{\includegraphics[{#1}]{{#2}}}%
 }
 
+\newcommand*{\captionsource}[2]{%
+  \caption[{#1}]{%
+    #1%
+    \\\hspace{\linewidth}%
+    \textbf{\textsc{Source}} #2%
+  }%
+}
+
+\newcommand{\footurl}[2][]{\footnote{\textbf{#1}\href{#2}{#2}}}
+% \newcommand{\footurl}[2][]{\footnote{\textbf{#1}\url{#2}}}

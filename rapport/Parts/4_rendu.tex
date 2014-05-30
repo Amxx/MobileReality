@@ -247,13 +247,15 @@ On utilisera également l'ombre projeté calculé précédemment afin de moduler
 \section{Vers un modèles à micro-facettes}
 
 Les modèles employés ici permettent un rendu rapide mais présentes des limitations en terme de qualité. Il serait intéressant, dans l'optique améliorer encore la qualité du rendu, de considérer un modèle à micro-facette. 
-Le principes des modèles à micro-facette est de considérer la surface de l'objet comme un ensemble de petites faces orientés selon des normales propres a chacune (micro-normales). La distribution statistique des micro-normales autour de la normale géométrique du maillage (macro-normale) permet de déterminer les mécanismes de réflexion. Parmi les nombreux avantages d'un telle méthode il y a la possibilité de caractériser des surfaces anisotropes par le biais de directions privilégiés dans la distribution de facettes.
+Le principes des modèles à micro-facette est de considérer la surface de l'objet comme un ensemble de petites faces orientés selon des normales propres a chacune (micro-normales). La distribution statistique des micro-normales autour de la normale géométrique du maillage (macro-normale) permet de déterminer les mécanismes de réflexion\cite{Bruneton2010}\cite{Dupuy2012}\cite{Heitz2013}.
 
-L'auto-occultation entre facettes, variable selon le point de vue, permet par ailleurs de calculer une normal intermédiaire entre la normale géométrique et les micro-normales des facette (mézo-normal) qui correspond à l’intégration des micro-normales sur l'ensemble des facette visible\cite{Bruneton2010}\cite{Dupuy2012}\cite{Heitz2013}.
+Parmi les nombreux avantages d'un telle méthode il y a la possibilité de caractériser des surfaces anisotropes par le biais de directions privilégiés dans la distribution de facettes.
+
+L'auto-occultation entre facettes, variable selon le point de vue, permet par ailleurs de calculer une normal intermédiaire entre la normale géométrique et les micro-normales des facette (mézo-normal) qui correspond à l’intégration des micro-normales sur l'ensemble des facette visible (voir figure~\ref{fig:svg:mezonormales}, page~\pageref{fig:svg:mezonormales}).
 
 \begin{figure}\centering
 	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/vectorial/visible_NDF.pdf}
-	\caption{Mézo-normales et point de vue\\(source \cite{Dupuy2012})}
+	\captionsource{Mézo-normales et point de vue}{\cite{Dupuy2012}}
 	\label{fig:svg:mezonormales}
 \end{figure}
 
@@ -273,7 +275,7 @@ Il serait possible de les réduire fortement via un pré-calcule (convolution) m
 Dans notre cas, il serait nécessaire d'évaluer, sans pré-calcul, l’intégration anisotrope de l'envmap.
 Les outils de filtrages anisotropes ne sont ici pas exploitable en l’état car une filtre anisotrope est définit entre autre par le facteur d'anisotropie qui le caractérise. Le nombre d'unité de texture étant grandement limité, il n'est pas possible de charger plusieurs fois l'envmap avec des filtrages différents qui couvriraient toutes nos attentes.
 
-Les outils de lecture de texture par gradient\footnote{\href{https://www.opengl.org/sdk/docs/man/html/textureGrad.xhtml}{\texttt{textureGrad()}}} mis en place dans openGL ne conviennent pas non plus car même si les vecteurs fournis (\texttt{dX} et \texttt{dY}) sont caractéristique d'une forte anisotropie, le filtrage anisotropique est en l'état limité aux faces constituant l'envmap cubique. Il en résulte des défaults aux jonctions entre les faces.
+Les outils de lecture de texture par gradient\footurl[textureGrad:]{https://www.opengl.org/sdk/docs/man/html/textureGrad.xhtml} mis en place dans openGL ne conviennent pas non plus car même si les vecteurs fournis (\texttt{dX} et \texttt{dY}) sont caractéristique d'une forte anisotropie, le filtrage anisotropique est en l'état limité aux faces constituant l'envmap cubique. Il en résulte des défaults aux jonctions entre les faces.
 
 Il conviendrait donc, pour permettre en place les mécanismes d'évaluation anisotrope voulus, d'approximer l’intégration vis de multiples accès à la texture, le long de la direction privilégie d’anisotropie pour procéder à une intégration implicite.
 
@@ -307,11 +309,6 @@ Compte tenu des méthodes décrites précédemment, le pipeline de rendu se déc
 			\item[Rendu ombre :] affichage des ombres en surimpression afin d'intégrer l'objet ne manière plus réaliste.
 		\end{description}
 \end{enumerate}
-
-%=====================================================================
-
-\section{Résultats}
-
 
 
 

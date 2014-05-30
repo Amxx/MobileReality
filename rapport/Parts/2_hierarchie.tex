@@ -61,7 +61,7 @@ Afin de permettre la reconnaissance de la scène dans ca globalité, il est nece
 
 Il est donc necessaire de choisir un modèle de marqueur permetant a la fois une localisation précise d'au moins trois points (necessaires au reperage) et portant des informations propres.
 
-Parmit les nombreux modèles de marqueurs repondant au prérequis, le choix d'une implementation s'est rapidement porté sur un modèle utilisant des QR codes\footnote{\url{http://www.qrcode.com/}}. L'adaptation à un autre modèle est particulièrement aisé puisqu'elle ne demande que le developpement d'un module de scanner reconnaissant les marqueurs (voir section~\ref{section:module:scanner}, page~\pageref{section:module:scanner}).
+Parmit les nombreux modèles de marqueurs repondant au prérequis, le choix d'une implementation s'est rapidement porté sur un modèle utilisant des QR codes\footurl[QRCode:]{http://www.qrcode.com/}. L'adaptation à un autre modèle est particulièrement aisé puisqu'elle ne demande que le developpement d'un module de scanner reconnaissant les marqueurs (voir section~\ref{section:module:scanner}, page~\pageref{section:module:scanner}).
 
 Sont disponible en annexe les patrons des mires cubique (figure~\ref{extra:patron_cube}, page~\pageref{extra:patron_cube}) et hémisphérique octogonale (figure~\ref{extra:patron_octo}, page~\pageref{extra:patron_octo}) construites à base de QR codes.
 
@@ -94,11 +94,11 @@ ou $f$ est la longueur focale, $m$ est la résolution du capteur selon les axes 
 
 Le calcul de cette matrice est resolu par la minimisation d'un système linéaire sur de nombreuses prises de vue du marqueur. 
 
-Cette étape de calibration est implementé par la bibliothèque OpenCV\footnote{\url{http://opencv.org/}}.
+Cette étape de calibration est implementé par la bibliothèque OpenCV\footurl[OpenCV:]{http://opencv.org/}.
 
 Une fois determinés, les paramètres relatif à la camera sont sauvegardés dans un fichier \texttt{xml}.
 
-\subsection{Positionnement à partir de marqueurs}
+\subsection{Positionnement à partir de marqueurs}\label{section:positionnement}
 
 Une fois la camera calibré, c'est a dire une fois les paramètre intrinseques déterminées il est possible d'utiliser la connaissance de la matrice $projection$ et des dimensions du marqueur pour reconstruire, à partir des coordonnées du marqueur dans l'espace image, la matrice de transformation $extrinseque$ correponsant au passage de l'espace du QR code (face de la mire) à l'espace de la camera.
 

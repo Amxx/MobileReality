@@ -48,6 +48,9 @@
 \pagenumbering{Roman}\setcounter{page}{1} 
 \appendix
 \chapter{Annexes}
+% \onecolumn
+\input{\rootPath Extras/calibration.tex}
+\input{\rootPath Extras/config.tex}
 \input{\rootPath Extras/cube.tex}
 \input{\rootPath Extras/octo.tex}
 
@@ -58,13 +61,15 @@
 \bibliographystyle{apalike}
 \bibliography{\rootPath Annexes/biblio}
 
+\phantomsection \listoffigures
+
 \clearpage
 \begingroup
 	\let\clearpage\relax
 	\onecolumn
-	\phantomsection \listoffigures
 	\phantomsection \listoftables
 	\phantomsection \listofalgorithms
+	\phantomsection \listofcode
 \endgroup
 
 %\addcontentsline{toc}{section}{Table des matières}

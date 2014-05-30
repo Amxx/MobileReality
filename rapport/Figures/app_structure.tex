@@ -1,0 +1,48 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\input{../Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{../}
+
+\begin{document}
+\begin{tikzpicture}[node distance=2cm]
+
+
+	\node (Core)				[class, 		single, text width=20cm]			at (+0.00, +0.00)					{	\textbf{Core}						};
+	\node (Tools)				[class,			single, text width=3cm]				at (-8.50, -1.00)					{	\textbf{Tools}					}			edge[post] (-8.50, -0.50) ;
+	\node (ToolsDesc) 	[component,	below=0.1cm of Tools, text justified]
+	{
+		Timers\newline
+		Matrices\newline
+		\newline
+		\newline
+	};
+
+	\node (Envmap)			[class,			single, text width=4.5cm]			at (-4.25, -1.00)					{	\textbf{Envmap}					}			edge[post] (-4.25, -0.50) ;
+	\node (Camera)			[class,			single, text width=4.5cm]			at (-4.25, -1.75)					{	\textbf{Camera}					}			edge[post] (Envmap) ;
+	\node (Scanner)			[module,		triple, text width=4.5cm]			at (+0.75, -1.00)					{	\textbf{Scanner}				}			edge[post] (+0.75, -0.50) ;
+
+	\node (Calibration)	[class,			double, text width=2.0cm]			at (-5.50, -2.50)					{	\textbf{Calibration}		}			edge[post, bend left=15]	(Camera) ;
+	\node (Video)				[module,		single, text width=2.0cm]			at (-3.00, -2.50)					{	\textbf{VideoDev}				}			edge[post, bend right=15]	(Camera) ;
+	\node (Module)			[module,		single, text width=4.5cm]			at (-1.75, -3.25)					{	\textbf{Module}					}			edge[post, bend left=15]	(Video)
+																																																													edge[post, bend right=15]	(Scanner) ;
+	\node (Symbol)			[class,			single, text width=2.0cm]			at (+2.00, -3.25)					{	\textbf{Symbol}					}			edge[post, bend left=15]	(Scanner) ;
+
+	\node (Occlusion)		[class,			quadru, text width=2cm]				at (+4.50, -1.00)					{	\textbf{Occlusion}			}			edge[post] (+4.50, -0.50) ;
+
+	\node (Config)			[class,			single, text width=4cm]				at (+8.00, -1.00)					{	\textbf{Configuration}	}			edge[post] (+8.00, -0.50) ;
+	\node (ConfigDesc) 	[component,	below=0.1cm of Config, text justified, rectangle split, rectangle split parts=2, rectangle split horizontal, text width=1.85cm]
+	{
+		General\newline
+		Object\newline
+		Envmap\newline
+		Rendering\newline
+		Location
+		\nodepart{second}
+		Device\newline
+		Markers\newline
+		Module\newline
+		Type\newline
+	};
+
+\end{tikzpicture}
+\end{document}

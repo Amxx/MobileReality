@@ -1,0 +1,76 @@
+\documentclass[10pt,a4paper,twoside,twocolumn]{report}
+\input{../Annexes/PackagesReport.tex}
+\input{../Annexes/ParametersReport.tex}
+\input{../Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{../}
+\standalonetrue
+
+\begin{document}
+
+
+\begin{code*}[ht!]\centering
+
+	\lstset{language=XML,tabsize=2}
+	\begin{lstlisting}
+<?xml version="1.0"?>
+<opencv_storage>
+	
+	<!-- ############################### Object ############################### -->
+	<object>
+		<obj>data/objects/bigguy/bigguy.obj</obj>
+		<spheres>data/objects/bigguy/bigguy.obj.spheres</spheres>
+		<scale>1.0</scale>
+	</object>
+	<!-- ########################## Devices options ########################### -->
+	<devices>
+		<front>
+			<enable>on</enable>												<!-- on | off									-->
+			<id>0</id>																<!-- [int] | auto | manual		-->
+			<params>data/params/logitech.xml</params>
+		</front>
+		<back>
+			<enable>on</enable>												<!-- on | off									-->
+			<id>1</id>																<!-- [int] | auto | manual		-->
+			<params>data/params/c910-fisheye.xml</params>
+		</back>
+	</devices>
+	<!-- ######################## Markers description ######################### -->
+	<markers>
+		<size>6.0</size>
+		<scale>0.786667</scale>
+	</markers>
+	<!-- ############### General parameters of the application ################ -->
+	<generalParameters>
+		<verbose>2</verbose>												<!-- [int] | off | low | high -->
+		<defaultValues>
+			<brightness>128</brightness>							<!-- -1 for auto							-->
+			<gain>64</gain>														<!-- -1 for auto							-->
+			<persistency>10</persistency>
+		</defaultValues>
+		<envmap>
+			<path>data/envmap/%03d.jpg</path>					<!-- [path] | empty for clean	-->
+			<build>on</build>													<!-- on | off									-->
+			<size>512 512</size>
+			<dual>off</dual>													<!-- on | off									-->
+		</envmap>
+		<localisation>
+			<type>dynamic</type>											<!-- dynamic | debug					-->
+			<size>400.0</size>												<!-- [float] (0 for infinity) -->
+		</localisation>		
+		<rendering>
+			<background>on</background>								<!-- on | off									-->
+			<scene>on</scene>													<!-- on | off									-->
+			<view>off</view>													<!-- on | off									-->
+		</rendering>
+		<modules>
+			<scanner>install/share/libscanner_zbar.so</scanner>
+			<video>install/share/libvideodevice_uvc.so</video>
+		</modules>
+	</generalParameters>
+</opencv_storage>
+	\end{lstlisting}
+	\caption{Fichier de configuration}
+	\label{code:config}
+\end{code*}
+
+\end{document}

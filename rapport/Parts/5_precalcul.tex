@@ -86,7 +86,7 @@ A l'issue de ces différents post-traitement, il ne reste qu'a exporter la textu
 
 
 
-\section{Décomposition en sphères}
+\section{Décomposition en sphères}\label{section:precomputation_spheres}
 La section~\ref{section:ombres}, page~\pageref{section:ombres}, traite du rendu d'ombres portées issus de l'objet 3D ajouté à la scène. Cette étape nécessite une représentation de l'objet en question comme union de sphères.
 
 Le pré-calcul étudié ici consiste donc à construire, étant donné un maillage, un ensemble limité de sphère qui s'approche au mieux de la surface correspondant au maillage.
@@ -168,13 +168,13 @@ L'équation~\ref{eq:metrique} nous indique comment construire $A$, $X$ et $B$ :
 					\end{pmatrix}																												\\
 		X &=	\begin{pmatrix} S.x \\ S.y \\ S.z \\ \|S\|^2 - S.r^2 \end{pmatrix}	\\
 		B	&=	\begin{pmatrix}
-						-\|P_1\|^2	\\
-						-\|P_2\|^2	\\
+						\|P_1\|^2	\\
+						\|P_2\|^2	\\
 						\vdots			\\
-						-\|P_n\|^2
+						\|P_n\|^2
 					\end{pmatrix}																												\\
 \intertext{Ainsi on a :}
-	A.X-B &= \begin{pmatrix}
+	A.X+B &= \begin{pmatrix}
 						f(P_1, S)	\\
 						f(P_2, S)	\\
 						\vdots		\\
