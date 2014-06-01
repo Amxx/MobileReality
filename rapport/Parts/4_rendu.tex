@@ -61,7 +61,7 @@ L'angle solide sur une face partiellement visible (selon une demi sphère caract
 	\Omega_F(\vec n) = \iint_{F}\frac{\Hs(\vec\omega.\vec n)}{\|\vec\omega\|^3}\, \mathrm d\omega
 \end{equation}
 
-Avec $\Hs$ la fonction de $\operatorname{HeavySide}$ definie par :
+Avec $\Hs$ la fonction de $\operatorname{HeavySide}$ définie par :
 \begin{align}
 	\Hs(x) = \begin{cases} 0 &\text{si } x<0 \\ 1 & \text{si } x\geq 0\end{cases} \notag
 \end{align}
@@ -275,7 +275,7 @@ Il serait possible de les réduire fortement via un pré-calcule (convolution) m
 Dans notre cas, il serait nécessaire d'évaluer, sans pré-calcul, l’intégration anisotrope de l'envmap.
 Les outils de filtrages anisotropes ne sont ici pas exploitable en l’état car une filtre anisotrope est définit entre autre par le facteur d'anisotropie qui le caractérise. Le nombre d'unité de texture étant grandement limité, il n'est pas possible de charger plusieurs fois l'envmap avec des filtrages différents qui couvriraient toutes nos attentes.
 
-Les outils de lecture de texture par gradient\footurl[textureGrad:]{https://www.opengl.org/sdk/docs/man/html/textureGrad.xhtml} mis en place dans openGL ne conviennent pas non plus car même si les vecteurs fournis (\texttt{dX} et \texttt{dY}) sont caractéristique d'une forte anisotropie, le filtrage anisotropique est en l'état limité aux faces constituant l'envmap cubique. Il en résulte des défaults aux jonctions entre les faces.
+Les outils de lecture de texture par gradient\footurl[textureGrad:]{https://www.opengl.org/sdk/docs/man/html/textureGrad.xhtml} mis en place dans openGL ne conviennent pas non plus car même si les vecteurs fournis (\texttt{dX} et \texttt{dY}) sont caractéristique d'une forte anisotropie, le filtrage anisotropique est en l'état limité aux faces constituant l'envmap cubique. Il en résulte des défauts aux jonctions entre les faces.
 
 Il conviendrait donc, pour permettre en place les mécanismes d'évaluation anisotrope voulus, d'approximer l’intégration vis de multiples accès à la texture, le long de la direction privilégie d’anisotropie pour procéder à une intégration implicite.
 

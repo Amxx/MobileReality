@@ -55,13 +55,13 @@ Les différentes cameras présentes sur l'interface d'acquisition seront à leur
 
 \section{Utilisation de marqueurs}
 
-L'évaluation des transformations, qui est necessaire au positionnement dans la scène et donc à la reconstruction de l'environnement, necessite la reconnaissance de marqueurs. L'identification de ces marqeurs, fixes dans l'espace du monde, associé a la connaissance de la matrice $model$ correspondante permettent suffisent en effet à déduire l'orientation au regard de la scène.
+L'évaluation des transformations, qui est nécessaire au positionnement dans la scène et donc à la reconstruction de l'environnement, nécessite la reconnaissance de marqueurs. L'identification de ces marqueurs, fixes dans l'espace du monde, associé a la connaissance de la matrice $model$ correspondante permettent suffisent en effet à déduire l'orientation au regard de la scène.
 
-Afin de permettre la reconnaissance de la scène dans ca globalité, il est necessaire de construire une mire complete, disposant de plusieurs faces parmit lesquelles au moins une devra, pour toute orrientation, etre lisible. Les marqueurs constituants cette mire doivent par ailleur etre capable de porter les informations caractèristique de la matrice $model$ associé.
+Afin de permettre la reconnaissance de la scène dans sa globalité, il est nécessaire de construire une mire complète, disposant de plusieurs faces parmi lesquelles au moins une devra, pour toute orientation, être lisible. Les marqueurs constituants cette mire doivent par ailleurs être capable de porter les informations caractéristique de la matrice $model$ associé.
 
-Il est donc necessaire de choisir un modèle de marqueur permetant a la fois une localisation précise d'au moins trois points (necessaires au reperage) et portant des informations propres.
+Il est donc nécessaire de choisir un modèle de marqueur permettant a la fois une localisation précise d'au moins trois points (nécessaires au repérage) et portant des informations propres.
 
-Parmit les nombreux modèles de marqueurs repondant au prérequis, le choix d'une implementation s'est rapidement porté sur un modèle utilisant des QR codes\footurl[QRCode:]{http://www.qrcode.com/}. L'adaptation à un autre modèle est particulièrement aisé puisqu'elle ne demande que le developpement d'un module de scanner reconnaissant les marqueurs (voir section~\ref{section:module:scanner}, page~\pageref{section:module:scanner}).
+Parmi les nombreux modèles de marqueurs répondant au prérequis, le choix d'une implémentation s'est rapidement porté sur un modèle utilisant des QR codes\footurl[QRCode:]{http://www.qrcode.com/}. L'adaptation à un autre modèle est particulièrement aisé puisqu'elle ne demande que le développement d'un module de scanner reconnaissant les marqueurs (voir section~\ref{section:module:scanner}, page~\pageref{section:module:scanner}).
 
 Sont disponible en annexe les patrons des mires cubique (figure~\ref{extra:patron_cube}, page~\pageref{extra:patron_cube}) et hémisphérique octogonale (figure~\ref{extra:patron_octo}, page~\pageref{extra:patron_octo}) construites à base de QR codes.
 
@@ -74,7 +74,7 @@ Compte tenu de la hiérarchie de référentiel décrite dans la section précéd
 
 \subsection{Calibration de la camera}
 
-L'étape de calibration de camera permet de calculer les differents termes de la matrice $projection$ propre à l'interface d'acquisition. Cela revient à ajuster le modèle de sténopé considere dans la section~\ref{section:modele} avec les paramètres physiques.
+L'étape de calibration de camera permet de calculer les différents termes de la matrice $projection$ propre à l'interface d'acquisition. Cela revient à ajuster le modèle de sténopé considéré dans la section~\ref{section:modele} avec les paramètres physiques.
 
 La matrice $projection$ est de la forme suivante :
 
@@ -92,17 +92,17 @@ avec
 \end{align*}
 ou $f$ est la longueur focale, $m$ est la résolution du capteur selon les axes $\vec x$ et $\vec y$, $u_0$ et $v_0$ sont les coordonnées du centre optique sur le capteur et $\gamma$ est un coefficient qui décrit la non orthogonalité des axe principaux
 
-Le calcul de cette matrice est resolu par la minimisation d'un système linéaire sur de nombreuses prises de vue du marqueur. 
+Le calcul de cette matrice est résolu par la minimisation d'un système linéaire sur de nombreuses prises de vue du marqueur. 
 
-Cette étape de calibration est implementé par la bibliothèque OpenCV\footurl[OpenCV:]{http://opencv.org/}.
+Cette étape de calibration est implémentée par la bibliothèque OpenCV\footurl[OpenCV:]{http://opencv.org/}.
 
-Une fois determinés, les paramètres relatif à la camera sont sauvegardés dans un fichier \texttt{xml}.
+Une fois déterminés, les paramètres relatif à la camera sont sauvegardés dans un fichier \texttt{xml}.
 
 \subsection{Positionnement à partir de marqueurs}\label{section:positionnement}
 
-Une fois la camera calibré, c'est a dire une fois les paramètre intrinseques déterminées il est possible d'utiliser la connaissance de la matrice $projection$ et des dimensions du marqueur pour reconstruire, à partir des coordonnées du marqueur dans l'espace image, la matrice de transformation $extrinseque$ correponsant au passage de l'espace du QR code (face de la mire) à l'espace de la camera.
+Une fois la camera calibré, c'est a dire une fois les paramètre intrinsèques déterminées il est possible d'utiliser la connaissance de la matrice $projection$ et des dimensions du marqueur pour reconstruire, à partir des coordonnées du marqueur dans l'espace image, la matrice de transformation $extrinseque$ correspondant au passage de l'espace du QR code (face de la mire) à l'espace de la camera.
 
-Les matrices $model$ et $orientation$ etant connus, la première grace aux informations écrites sur le QR code et la seconde etant pré enregistrés (fixe, lié a la géométrie du téléphone), il est possible d'en déduire la matrice $view$ qui caractèrise le positionnement dans la scène :
+Les matrices $model$ et $orientation$ étant connus, la première grace aux informations écrites sur le QR code et la seconde étant pré enregistrés (fixe, lié a la géométrie du téléphone), il est possible d'en déduire la matrice $view$ qui caractérise le positionnement dans la scène :
 
 \begin{align}
 	view	&=			orientation^{-1}	\notag \\
@@ -113,7 +113,7 @@ Les matrices $model$ et $orientation$ etant connus, la première grace aux infor
 
 \subsection{Models OpenCV / OpenGL}
 
-Les differentes bibliothèques ont chacune leur approche qui resultent dans des differences de conventions.
+Les différentes bibliothèques ont chacune leur approche qui résultent dans des différences de conventions.
 
 OpenCV considère les images comme des matrices. À ce titre l'origine est placé en haut à gauche, avec le $\vec x$ pointant vers la gauche et le vecteur $\vec y$ pointant vers le bas. Ainsi regarder une image revient à regarder selon l'axe des $\vec z$ croissants.
 
@@ -124,7 +124,7 @@ OpenCV considère les images comme des matrices. À ce titre l'origine est plac�
 	\label{fig:tikz:space-opencv}
 \end{figure}
 
-À l'inverse OpenGL s'interesse à des espaces $3D$ complets et oriente donc naturellement le vecteur $\vec y$ vers le haut. L'utilisateur regarde donc selon l'axe des $\vec z$ décroissants.
+À l'inverse OpenGL s’intéresse à des espaces $3D$ complets et oriente donc naturellement le vecteur $\vec y$ vers le haut. L'utilisateur regarde donc selon l'axe des $\vec z$ décroissants.
 
 \begin{figure}[!ht]
 	\centering
@@ -133,7 +133,7 @@ OpenCV considère les images comme des matrices. À ce titre l'origine est plac�
 	\label{fig:tikz:space-opengl}
 \end{figure}
 
-Afin d'utiliser conjointement les deux bibliothèques, il convient de faire les transformations adequates.
+Afin d'utiliser conjointement les deux bibliothèques, il convient de faire les transformations adéquates.
 
 \begin{equation}
 	cvToGl = \begin{pmatrix}1 & 0 & 0 \\ 0 & -1 & 0 \\ 0 & 0 & -1\end{pmatrix}
