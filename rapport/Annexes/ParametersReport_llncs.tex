@@ -1,0 +1,108 @@
+% \frenchbsetup{StandardEnumerateEnv=true}
+
+% %% =======================================================================
+
+% \fancypagestyle{empty}{%
+%   \fancyhf{}
+%   \fancyhead[L]{}
+%   \fancyhead[C]{}
+%   \fancyhead[R]{}
+%   \fancyfoot[L]{}
+%   \fancyfoot[C]{}
+%   \fancyfoot[R]{}
+% }
+% \fancypagestyle{basicstyle}{
+% 	\fancyhf{}	
+% 	\fancyhead[L]{}
+% 	\fancyhead[C]{Rendu réaliste et temps réel pour la réalité augmentée}
+% 	\fancyhead[R]{}
+% 	\fancyfoot[L]{hadrien.croubois@ens-lyon.fr}
+% 	\fancyfoot[C]{--~\thepage~--}
+% 	\fancyfoot[R]{}
+% }
+% \pagestyle{basicstyle}
+
+\title{Rendu réaliste et temps réel pour la réalité augmentée}
+\author{Hadrien Croubois\inst{1}\inst{2}}
+\institute{ENS de Lyon \and Université Claude Bernard Lyon I}
+
+
+% %% =======================================================================
+
+% \titleformat{\section}[frame]
+% {\normalfont}
+% {\filright \footnotesize \enspace Partie \thesection\enspace}
+% {6pt}
+% {\bfseries\filcenter}
+	
+% \titleformat{\subsection}[frame]
+% {\normalfont}
+% {\filright \footnotesize \enspace \thesubsection\enspace}
+% {6pt}
+% {\filcenter}
+
+% \titleformat{\subsubsection}
+% {\titlerule \vspace{.8ex} \normalfont\itshape}
+% {\thesubsubsection}
+% {.5em}
+% {}
+
+% \titleformat{\chapter}[display]
+% {\normalfont\bfseries\filcenter}
+% {}
+% {1ex}
+% {\titlerule[2pt] \vspace{2ex} \LARGE}
+% [\vspace{1ex} {\titlerule[2pt]}]
+
+% \parindent=10pt
+% \DeclareUnicodeCharacter{00A0}{~}
+
+% %% =======================================================================
+
+
+
+% \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\newcommand{\Hs}{\operatorname{HS}}
+
+
+
+
+% \floatstyle{ruled}
+% \restylefloat{figure}
+% \restylefloat{table}
+\newfloat{code}{!h}{locode}{}
+\floatname{code}{\textsc{code}}
+
+
+
+% \addto\captionsfrench{%
+%   \renewcommand{\listfigurename}{Liste des figures}%
+%   \renewcommand{\listtablename}{Liste des tableaux}%
+%   \renewcommand{\listalgorithmcfname}{Liste des algorithmes}%
+% }
+\newcommand{\listofcode}{\listof{code}{Liste des codes}}
+
+% \numberwithin{code}{chapter}
+% \numberwithin{equation}{subsection}
+% \counterwithout{footnote}{chapter}
+
+
+
+
+
+
+\newcommand{\framedgraphics}[2]{%
+  \setlength{\fboxsep}{0pt}%
+  \setlength{\fboxrule}{1pt}%
+  \fbox{\includegraphics[{#1}]{{#2}}}%
+}
+
+\newcommand*{\captionsource}[2]{%
+  \caption[{#1}]{%
+    #1%
+    \\\hspace{\linewidth}%
+    \textbf{\textsc{Source}} #2%
+  }%
+}
+
+\newcommand{\footurl}[2][]{\footnote{\textbf{#1}\href{#2}{#2}}}

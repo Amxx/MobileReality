@@ -11,15 +11,15 @@
 
 \section{Hiérarchie de référentiels}
 
-Afin de mettre en place les différents mécanismes de repérage, il à été nécessaire de hiérarchiser les repères relatifs aux différents référentiels considères.
+Afin de mettre en place les différents mécanismes de repérage, il a été nécessaire de hiérarchiser les repères relatifs aux différents référentiels considérés.
 
-Le référentiel principal est le référentiel du monde. Il est par définition fixe au cours du temps et est définit par rapport à la mire utilisé pour l'acquisition. Ce repère est centré au centre géométrique de la mire et servira aussi bien à positionner l'objet à afficher qu'à définir servir de référentiel de base pour l'envmap.
+Le référentiel principal est le référentiel du monde. Il est par définition fixe au cours du temps et est définit par rapport à la mire utilisée pour l'acquisition. Ce repère est placé au centre géométrique de la mire et servira aussi bien à positionner l'objet à afficher qu'à définir le référentiel de base pour l'envmap.
 
-Les différentes faces de la mire sont elle même fixes dans le repère du monde car lié a l'objet physique (la mire) qui le définit. Les transformation entre le repère de chacune des faces de la mire et le repère du monde sont codées dans les marqueur présents sur les faces (matrice $model$).
+Les différentes faces de la mire sont elles-mêmes fixes dans le repère du monde car liées à l'objet physique (la mire) qui le définit. Les transformations entre le repère de chacune des faces de la mire et le repère du monde sont codées dans les marqueurs présents sur les faces (matrice $model$).
 
-Ainsi, ayant identifier une des faces à l'aide du marqueur présent sur cette dernière, il est possible, en appliquant la transformation codé par ce marqueur, de reconstruire le repère du monde.
+Ainsi, ayant identifié une des faces à l'aide du marqueur présent sur cette dernière, il est possible, en appliquant la transformation codée par ce marqueur, de reconstruire le repère du monde.
 
-L'interface d'acquisition est elle aussi repéré vis a vis du repère principal. La transformation entre ces deux repère est codé par la matrice $view$ et changera au cours du temps, l'utilisateur se déplaçant par rapport à la mire.
+L'interface d'acquisition est elle aussi positionnée vis-à-vis du repère principal. La transformation entre ces deux repères est codée par la matrice $view$ et changera au cours du temps, l'utilisateur se déplaçant par rapport à la mire.
 
 \begin{figure}[!ht]
 	\centering
@@ -28,7 +28,7 @@ L'interface d'acquisition est elle aussi repéré vis a vis du repère principal
 	\label{fig:tikz:spaceHierarchie}
 \end{figure}
 
-Les différentes cameras présentes sur l'interface d'acquisition seront à leur tour positionnées relativement à l'interface d'acquisition. Cette dernière transformation est disponible dans les fichiers de configurations de camera chargés au démarrage.
+Les différentes caméras présentes sur l'interface d'acquisition seront à leur tour positionnées relativement à l'interface d'acquisition. Cette dernière transformation est disponible dans les fichiers de configuration de caméra chargés au démarrage.
 
 \begin{table}[!ht]
 	\centering
@@ -41,11 +41,11 @@ Les différentes cameras présentes sur l'interface d'acquisition seront à leur
 		$view^{-1}				\lcurvearrowup$	& 											& $\lcurvearrowdown view$				\\[.2cm]
 																			& \textbf{Smartphone}		&																\\[.2cm]
 		$orientation^{-1}	\lcurvearrowup$	& 											& $\lcurvearrowdown orientation$\\[.2cm]
-																			& \textbf{Camera}				&																\\[.2cm]
+																			& \textbf{Caméra}				&																\\[.2cm]
 		$cvToGl^{-1}			\lcurvearrowup$	& 											& $\lcurvearrowdown cvToGl $		\\[.2cm]
 																			& \textbf{Vue OpenGL}		&																\\[.2cm]
 		$projection^{-1}	\lcurvearrowup$	&												& $\lcurvearrowdown projection$	\\[.2cm]
-																			& \textbf{Image rendu}	&
+																			& \textbf{Image rendue}	&
 	\end{tabular}
 	\caption{Hiérarchie des matrices de transformations}
 	\label{ref:table:hierarchie}
@@ -55,15 +55,15 @@ Les différentes cameras présentes sur l'interface d'acquisition seront à leur
 
 \section{Utilisation de marqueurs}
 
-L'évaluation des transformations, qui est nécessaire au positionnement dans la scène et donc à la reconstruction de l'environnement, nécessite la reconnaissance de marqueurs. L'identification de ces marqueurs, fixes dans l'espace du monde, associé a la connaissance de la matrice $model$ correspondante permettent suffisent en effet à déduire l'orientation au regard de la scène.
+L'évaluation des transformations, qui est nécessaire au positionnement dans la scène et donc à la reconstruction de l'environnement, nécessite la reconnaissance de marqueurs. L'identification de ces marqueurs, fixes dans l'espace du monde, associée à la connaissance de la matrice $model$ correspondante permettent de calculer l'orientation au regard de la scène.
 
-Afin de permettre la reconnaissance de la scène dans sa globalité, il est nécessaire de construire une mire complète, disposant de plusieurs faces parmi lesquelles au moins une devra, pour toute orientation, être lisible. Les marqueurs constituants cette mire doivent par ailleurs être capable de porter les informations caractéristique de la matrice $model$ associé.
+Afin de permettre la reconnaissance de la scène dans sa globalité, il est nécessaire de construire une mire complète, disposant de plusieurs faces parmi lesquelles au moins une devra, pour toute orientation, être lisible. Les marqueurs constituants cette mire doivent par ailleurs être capables de porter les informations caractéristiques de la matrice $model$ associée.
 
-Il est donc nécessaire de choisir un modèle de marqueur permettant a la fois une localisation précise d'au moins trois points (nécessaires au repérage) et portant des informations propres.
+Il est donc nécessaire de choisir un modèle de marqueurs permettant à la fois une localisation précise d'au moins trois points (nécessaires au repérage) et portant des informations propres.
 
-Parmi les nombreux modèles de marqueurs répondant au prérequis, le choix d'une implémentation s'est rapidement porté sur un modèle utilisant des QR codes\footurl[QRCode:]{http://www.qrcode.com/}. L'adaptation à un autre modèle est particulièrement aisé puisqu'elle ne demande que le développement d'un module de scanner reconnaissant les marqueurs (voir section~\ref{section:module:scanner}, page~\pageref{section:module:scanner}).
+Parmi les nombreux modèles de marqueurs répondant au pré-requis, le choix d'une implémentation s'est rapidement porté sur un modèle utilisant des QR codes\footurl[QRCode:~]{http://www.qrcode.com/}. L'adaptation à un autre modèle est particulièrement aisée puisqu'elle ne demande que le développement d'un module de scanner reconnaissant les marqueurs (voir section~\ref{section:module:scanner}, page~\pageref{section:module:scanner}).
 
-Sont disponible en annexe les patrons des mires cubique (figure~\ref{extra:patron_cube}, page~\pageref{extra:patron_cube}) et hémisphérique octogonale (figure~\ref{extra:patron_octo}, page~\pageref{extra:patron_octo}) construites à base de QR codes.
+Sont disponibles en annexe les patrons des mires cubiques (figure~\ref{extra:patron_cube}, page~\pageref{extra:patron_cube}) et hémisphériques octogonales (figure~\ref{extra:patron_octo}, page~\pageref{extra:patron_octo}) construites à base de QR codes.
 
 
 
@@ -72,9 +72,9 @@ Sont disponible en annexe les patrons des mires cubique (figure~\ref{extra:patro
 Compte tenu de la hiérarchie de référentiel décrite dans la section précédente, il est nécessaire, pour décrire complètement le système, de décrire chacune des matrices de transformation. 
 
 
-\subsection{Calibration de la camera}
+\subsection{Calibration de la caméra}
 
-L'étape de calibration de camera permet de calculer les différents termes de la matrice $projection$ propre à l'interface d'acquisition. Cela revient à ajuster le modèle de sténopé considéré dans la section~\ref{section:modele} avec les paramètres physiques.
+L'étape de calibration de caméra permet de calculer les différents termes de la matrice $projection$ propre à l'interface d'acquisition. Cela revient à ajuster le modèle de sténopé considéré dans la section~\ref{section:modele} avec les paramètres physiques.
 
 La matrice $projection$ est de la forme suivante :
 
@@ -90,32 +90,32 @@ avec
 	\alpha_x	&= f * m_x	\\
 	\alpha_y	&= f * m_y
 \end{align*}
-ou $f$ est la longueur focale, $m$ est la résolution du capteur selon les axes $\vec x$ et $\vec y$, $u_0$ et $v_0$ sont les coordonnées du centre optique sur le capteur et $\gamma$ est un coefficient qui décrit la non orthogonalité des axe principaux
+où $f$ est la longueur focale, $m$ est la résolution du capteur selon les axes $\vec x$ et $\vec y$, $u_0$ et $v_0$ sont les coordonnées du centre optique sur le capteur et $\gamma$ est un coefficient qui décrit la non orthogonalité des axe principaux.
 
 Le calcul de cette matrice est résolu par la minimisation d'un système linéaire sur de nombreuses prises de vue du marqueur. 
 
-Cette étape de calibration est implémentée par la bibliothèque OpenCV\footurl[OpenCV:]{http://opencv.org/}.
+Cette étape de calibration est implémentée par la bibliothèque OpenCV\footurl[OpenCV:~]{http://opencv.org/}.
 
-Une fois déterminés, les paramètres relatif à la camera sont sauvegardés dans un fichier \texttt{xml}.
+Une fois déterminés, les paramètres relatifs à la caméra sont sauvegardés dans un fichier \texttt{xml}.
 
 \subsection{Positionnement à partir de marqueurs}\label{section:positionnement}
 
-Une fois la camera calibré, c'est a dire une fois les paramètre intrinsèques déterminées il est possible d'utiliser la connaissance de la matrice $projection$ et des dimensions du marqueur pour reconstruire, à partir des coordonnées du marqueur dans l'espace image, la matrice de transformation $extrinseque$ correspondant au passage de l'espace du QR code (face de la mire) à l'espace de la camera.
+Une fois la caméra calibrée, c'est-à-dire une fois les paramètres intrinsèques déterminés il est possible d'utiliser la connaissance de la matrice $projection$ et des dimensions du marqueur pour reconstruire, à partir des coordonnées du marqueur dans l'espace image, la matrice de transformation $extrinsic$ correspondant au passage de l'espace du QR code (face de la mire) à l'espace de la caméra.
 
-Les matrices $model$ et $orientation$ étant connus, la première grace aux informations écrites sur le QR code et la seconde étant pré enregistrés (fixe, lié a la géométrie du téléphone), il est possible d'en déduire la matrice $view$ qui caractérise le positionnement dans la scène :
+Les matrices $model$ et $orientation$ étant connues, la première grâce aux informations écrites sur le QR code et la seconde étant pré-enregistrée (fixe, liée à la géométrie du téléphone), il est possible d'en déduire la matrice $view$ qui caractérise le positionnement dans la scène :
 
 \begin{align}
 	view	&=			orientation^{-1}	\notag \\
 %%			&\times cvToGl^{-1}				\notag \\
-				&\times extrinseque				\notag \\
+				&\times extrinsic					\notag \\
 				&\times model^{-1}
 \end{align}
 
 \subsection{Models OpenCV / OpenGL}
 
-Les différentes bibliothèques ont chacune leur approche qui résultent dans des différences de conventions.
+Les différentes bibliothèques ont chacune leurs approches qui inpliquent des différences de conventions.
 
-OpenCV considère les images comme des matrices. À ce titre l'origine est placé en haut à gauche, avec le $\vec x$ pointant vers la gauche et le vecteur $\vec y$ pointant vers le bas. Ainsi regarder une image revient à regarder selon l'axe des $\vec z$ croissants.
+OpenCV considère les images comme des matrices. À ce titre l'origine est placée en haut à gauche, avec le $\vec x$ pointant vers la gauche et le vecteur $\vec y$ pointant vers le bas. Ainsi regarder une image revient à regarder selon l'axe des $\vec z$ croissants.
 
 \begin{figure}[!ht]
 	\centering

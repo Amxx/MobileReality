@@ -1,0 +1,102 @@
+\documentclass[orivec]{llncs}
+\input{Annexes/PackagesReport_llncs.tex}
+\input{Annexes/ParametersReport_llncs.tex}
+\input{Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{}
+
+
+
+\let\chapter\section
+\let\section\subsection
+\let\subsection\subsubsection
+\let\subsubsection\paragraph
+
+
+
+\makeindex
+
+%======================================================================
+\begin{document}
+\nocite{*}
+%======================================================================
+
+\clearpage
+\onecolumn
+\pagenumbering{gobble}
+
+% \input{\rootPath Parts/0a_titlepage}
+\maketitle
+\begin{abstract}
+<Text of the summary of your article>
+\end{abstract}
+
+
+%----------------------------------------------------------------------
+
+\clearpage
+\onecolumn
+\pagenumbering{roman}\setcounter{page}{1} 
+\input{\rootPath Parts/0b_remerciements}
+
+%----------------------------------------------------------------------
+
+\tableofcontents
+
+%----------------------------------------------------------------------
+
+\clearpage
+\twocolumn
+\pagenumbering{arabic}\setcounter{page}{1}
+
+\input{\rootPath Parts/0c_introduction}
+% \input{\rootPath Parts/1_acquisition}
+\input{\rootPath Parts/2_hierarchie}
+\input{\rootPath Parts/3_envmap}
+\input{\rootPath Parts/4_rendu}
+\input{\rootPath Parts/5_precalcul}
+\input{\rootPath Parts/7_perspectives}
+
+%----------------------------------------------------------------------
+
+\clearpage
+\pagenumbering{Roman}\setcounter{page}{1} 
+\appendix
+\chapter{Annexes}
+
+
+\let\chapter\section
+\let\section\subsection
+\let\subsection\subsubsection
+\let\subsubsection\paragraph
+\input{\rootPath Parts/6_application}	%%Moved to annexe
+
+\chapter{Codes et figures}
+\input{\rootPath Extras/calibration.tex}
+\input{\rootPath Extras/config.tex}
+\input{\rootPath Extras/cube.tex}
+\input{\rootPath Extras/octo.tex}
+
+%----------------------------------------------------------------------
+
+\clearpage
+\phantomsection
+\bibliographystyle{apalike}
+\bibliography{\rootPath Annexes/biblio}
+
+\phantomsection \listoffigures
+
+\clearpage
+\begingroup
+	\let\clearpage\relax
+	\onecolumn
+	\phantomsection \listoftables
+	\phantomsection \listofalgorithms
+	\phantomsection \listofcode
+\endgroup
+
+%\addcontentsline{toc}{section}{Table des matières}
+%\printindex
+
+%======================================================================
+\end{document}
+%======================================================================

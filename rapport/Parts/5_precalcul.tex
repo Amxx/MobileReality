@@ -7,9 +7,9 @@
 
 \begin{document}
 
-\chapter{Precalcul}
+\chapter{Pré-calculs}
 
-Nous avons détaillés dans le chapitre précédent les différentes étapes de rendu pour l'intégration d'un objet 3D dans une scène dynamique acquise en temps réel. Certaines des données nécessaire à un tel rendu étant indépendantes de la scène nous nous sommes proposés de les pré-calculer. 
+Nous avons détaillé dans le chapitre précédent les différentes étapes de rendu pour l'intégration d'un objet 3D dans une scène dynamique acquise en temps réel. Certaines des données nécessaires à un tel rendu étant indépendantes de la scène, nous nous sommes proposés de les pré-calculer. 
 
 \section{Éclairage ambiant sous forme de texture}\label{section:precomputation_ambiant}
 
@@ -19,36 +19,35 @@ Nous avons vu dans la section~\ref{section:ambiant}, page~\pageref{section:ambia
 \end{align}
 
 \subsection{Intégration statistique}
-Si s’agit donc d'évaluer, en tout point de l'objet, l’intégrale du produit scalaire entre le vecteur d’intégration et la normale à l'objet, pour un vecteur d’intégration parcourant l’espace visible.
+Il s’agit donc d'évaluer, en tout point de l'objet, l’intégrale du produit scalaire entre le vecteur d’intégration et la normale à l'objet, pour un vecteur d’intégration parcourant l’espace visible.
 
-On peut alors reformuler le calcul comme suit.
-
+On peut alors reformuler le calcul comme suit :
 \begin{align}
 \mathcal P_{\mathcal V}(p)	&= \frac{1}{\pi}\int_{\mathcal V(p, \vec n(p))}\vec\omega.\vec n\, \mathrm d\vec\omega \notag\\
 														&= \frac{1}{\pi}\int_{\mathcal H^2(\vec n(p))}\vec\omega.\vec n\times visible(p, \vec \omega)\, \mathrm d\vec\omega \notag\\
 														&= \frac{1}{\pi}\int_{\mathcal S}\vec\omega.\vec n\times \Hs(\vec \omega.\vec n)\times visible(p, \vec n)\, \mathrm d\vec\omega
 \end{align}
 
-Pour évaluer une elle intégrale, on procède par une intégration statistique (Monte Carlo). Pour cela on simule le domaine d'intégration sur l'espace de définition en tirant $n$ points uniformément sur une sphère. Ces points représentent les vecteurs $\vec\omega$.
+Pour évaluer une telle intégrale, on procède par une intégration statistique (Monte Carlo). Pour cela on simule le domaine d'intégration sur l'espace de définition en tirant $n$ points uniformément sur une sphère. Ces points représentent les vecteurs $\vec\omega$.
 
-Pour chacun de ces points in s’agit d'évaluer :
+Pour chacun de ces points il s’agit d'évaluer :
 	$$\vec\omega.\vec n\times \Hs(\vec \omega.\vec n)\times visible(p, \vec n)$$
 Le terme $\Hs(\vec \omega.\vec n)$ est en fait inutile car tout point pour lequel $visible(p, \vec n)$ sera non nul sera assuré d’être dans l’hémisphère décrit par $\Hs(\vec \omega.\vec n)$. La fonction à intégrer peut donc se résumer à :
 	$$\vec\omega.\vec n\times visible(p, \vec n)$$
 
 \subsection{Évaluation de la visibilité}
-L'évaluation la visibilité est faite à l'aide d'une shadowmap. Étant donnée un point de vue (vecteur $\vec\omega$ aléatoire) il s’agit d’effectuer une première étape de rendu, avec une projection orthographique pour en conserver que les informations de profondeurs retenus dans le Z-buffer (voir figure~\ref{fig:precompute_ambiant:zbuffer}).
+L'évaluation la visibilité est faite à l'aide d'une shadowmap. Étant donné un point de vue (vecteur $\vec\omega$ aléatoire), il s’agit d’effectuer une première étape de rendu qui donnera, dans le Z-buffer, les informations de visibilité (voir figure~\ref{fig:precompute_ambiant:zbuffer}).
 
 \begin{figure}[!ht]\centering
 	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/zbuffer.png}
-	\caption{Z-buffer issue de la première étape de rendu (shadowmap)}
+	\caption{Z-buffer issu de la première étape de rendu (shadowmap)}
 	\label{fig:precompute_ambiant:zbuffer}
 \end{figure}
 
 
-Ces données de profondeurs permettent ensuite d'évaluer si un texel est visible ou non, simplement en comparant la profondeur du texel considéré et celui retenu dans la texture et qui caractérise le texel le plus proche selon le rayon associé.
+Ces données de profondeur permettent ensuite d'évaluer si un texel est visible ou non, simplement en comparant la profondeur du texel considéré et celui retenu dans la texture et qui caractérise le texel le plus proche selon le rayon associé.
 
-La seconde étape de rendu consiste alors à écrire, dans l’espace texture associé a l'objet, les informations de visibilités qui auront été calculé (voir figure~\ref{fig:precompute_ambiant:singlesource}). A cette étape, il est important de s'assurer que la texture est bien écrite, y comprit au niveau des jointures entre les différents éléments qui preuvent demander un ajustement.\cite{Aila2005}\cite{Manson2012}
+La seconde étape de rendu consiste alors à écrire, dans l’espace texture associé à l'objet, les informations de visibilités qui auront été calculées (voir figure~\ref{fig:precompute_ambiant:singlesource}). À cette étape, il est important de s'assurer que la texture est bien écrite, y compris au niveau des jointures entre les différents éléments qui peuvent demander un ajustement.\cite{Aila2005}\cite{Manson2012}
 
 \begin{figure}[!ht]\centering
 	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/singlesource_red.png}
@@ -56,19 +55,19 @@ La seconde étape de rendu consiste alors à écrire, dans l’espace texture as
 	\label{fig:precompute_ambiant:singlesource}
 \end{figure}
 
-\subsection{Post traitement}
-Une fois évalué pour une source, les résultats sont ajoutés à une texture qui somme les contributions des différentes sources. Cette texture contient ainsi le résultat de l'intégration considère.
+\subsection{Post-traitement}
+Une fois évalués pour une source, les résultats sont ajoutés à une texture qui somme les contributions des différentes sources. Cette texture contient ainsi le résultat de l'intégration considérée.
 
-Une fois toutes les sources évaluées, il reste quelques étapes de post traitement :
+Une fois toutes les sources évaluées, il reste quelques étapes de post-traitement :
 \begin{itemize}
-	\item L'intégration étant normalisé, les valeurs calculées sont théoriquement entre $0.0$ et $1.0$. Cependant du fait de la distribution aléatoire des sources utilisées pour l'intégration, il peut arriver qu'en certains points ne pressentant pas d'auto-occultation la valeur dépasse $1.0$. Les valeurs sont alors seuillés afin de ne pas poser de problème au moment du stockage au format \texttt{.png}.
+	\item L'intégration étant normalisée, les valeurs calculées sont théoriquement entre $0.0$ et $1.0$. Cependant du fait de la distribution aléatoire des sources utilisées pour l'intégration, il peut arriver qu'en certains points ne pressentant pas d'auto-occultation la valeur dépasse $1.0$. Les valeurs sont alors seuillées afin de ne pas poser de problèmes au moment du stockage au format \texttt{.png}.
 
-	Les données étant quantifiées entre $0$ et $255$, un dépassement de la valeur flottante à stoker peut provoquer une traduction en un entier supérieur à $255$. Ces nombres étant stockés sous forme de caractère ASCII, un dépassement à $256$ ou $257$ peut alors provoquer une évaluation modulo $256$ soit un stockage sous forme de $0$ ou de $1$.
+	Les données étant quantifiées entre $0$ et $255$, un dépassement de la valeur flottante à stocker peut provoquer une traduction en un entier supérieur à $255$. Ces nombres étant stockés sous forme de caractères ASCII, un dépassement à $256$ ou $257$ peut alors provoquer une évaluation modulo $256$ soit un stockage sous forme de $0$ ou de $1$.
 
-	\item Les parties de l'image ne correspondant pas a des coordonnées de textures valides étant jusque la vides. L'évaluation des niveaux de mipmap pour la texture considéré risque de prendre en compte des éléments qui ne sont par représentatives de la réalité géométrique de l'objet. Afin de limiter ce biais dans l'évaluation des niveaux de mipmap, on remplit les parties vides et non représentative avec la valeur moyenne calculée sur les parties représentatives. Ainsi on limite l’incohérence des données considère en bordure de patch pour les niveaux de mipmap les plus élevés.
+	\item Les parties de l'image ne correspondant pas à des coordonnées de textures valides étant jusque-là vides. L'évaluation des niveaux de mipmap pour la texture considérée risque de prendre en compte des éléments qui ne sont par représentatifs de la réalité géométrique de l'objet. Afin de limiter ce biais dans l'évaluation des niveaux de mipmap, on remplit les parties vides et non représentative avec la valeur moyenne calculée sur les parties représentatives. Ainsi on limite l’incohérence des données considérées en bordure de patch pour les niveaux de mipmap les plus élevés.
 \end{itemize}
 
-A l'issue de ces différents post-traitement, il ne reste qu'a exporter la textures sous forme d'image (voir figure~\ref{fig:precompute_ambiant:postprocess}) qui sera chargée le moment voulu.
+A l'issue de ces différents post-traitement, il ne reste qu'à exporter la texture sous forme d'image (voir figure~\ref{fig:precompute_ambiant:postprocess}) qui sera chargée le moment voulu.
 
 \begin{figure}[!ht]\centering
 	\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/postprocess.png}
@@ -87,11 +86,11 @@ A l'issue de ces différents post-traitement, il ne reste qu'a exporter la textu
 
 
 \section{Décomposition en sphères}\label{section:precomputation_spheres}
-La section~\ref{section:ombres}, page~\pageref{section:ombres}, traite du rendu d'ombres portées issus de l'objet 3D ajouté à la scène. Cette étape nécessite une représentation de l'objet en question comme union de sphères.
+La section~\ref{section:ombres}, page~\pageref{section:ombres}, traite du rendu d'ombres portées issues de l'objet 3D ajouté à la scène. Cette étape nécessite une représentation de l'objet en question comme union de sphères.
 
-Le pré-calcul étudié ici consiste donc à construire, étant donné un maillage, un ensemble limité de sphère qui s'approche au mieux de la surface correspondant au maillage.
+Le pré-calcul étudié ici consiste donc à construire, étant donné un maillage, un ensemble limites de sphères qui s'approche au mieux de la surface correspondant au maillage.
 
-Ce problème d'optimisation est longuement développée dans la littérature\cite{Marshall1997}\cite{Gross2003}, notamment pour la reconstruction de surface implicite à partir de points (orientées ou non). La plupart des méthodes consistent à ajuster des surfaces contraintes à l'aide d'outils statistiques. Ces méthodes présentent cependant le défaut d’être mathématiquement complexe et numériquement complexes.
+Ce problème d'optimisation est longuement développé dans la littérature\cite{Marshall1997}\cite{Gross2003}, notamment pour la reconstruction de surfaces implicites à partir de points (orientées ou non). La plupart des méthodes consistent à ajuster des surfaces contraintes à l'aide d'outils statistiques. Ces méthodes présentent cependant le défaut d’être mathématiquement complexes et numériquement complexes.
 
 Le choix s'est donc porté sur une méthode simple et inexacte mais suffisante au regard de l'utilisation des résultats par l'algorithme de calcul des ombrages.
 
@@ -132,15 +131,15 @@ Le choix s'est donc porté sur une méthode simple et inexacte mais suffisante a
 
 \subsection{Échantillonnage du maillage}
 
-Afin d'obtenir une distribution uniforme de points à la surface de l'objet, on procède a un échantillonnage par importance\footnote{Importance sampling}.
+Afin d'obtenir une distribution uniforme de points à la surface de l'objet, on procède à un échantillonnage par importance\footnote{Importance sampling}.
 
-Pour construire un point uniformément a la surface du maillage on sélectionne d'abord une face proportionnellement à sa surface avant de choisir un point uniformément sur la face considéré.
+Pour construire un point uniformément à la surface du maillage, on sélectionne d'abord une face proportionnellement à sa surface avant de choisir un point uniformément sur la face considéré.
 
 En répétant cette opération un grand nombre de fois on obtient un nuage de points qui représente correctement les grandes faces. Ce sont ces points qui seront utilisés par la suite pour la construction des sphères représentatives.
 
-\subsection{Appareillement de points et calcul de sphère optimale}
+\subsection{Appareillement de points et calcul de sphères optimales}
 
-La phase d'appareillement de l'algorithme consiste à organiser les points en clusters relatifs aux sphères déjà construites. Il s’agit donc d’établir une métrique qui caractérise la proximité d'un point à une sphère. De la même manière, la phase de calcul de sphère optimale consiste à calculer la sphère qui minimisera la métrique considère précédemment sur le cluster qui lui a été associé.
+La phase d'appareillement de l'algorithme consiste à organiser les points en clusters relatifs aux sphères déjà construites. Il s’agit donc d’établir une métrique qui caractérise la proximité d'un point à une sphère. De la même manière, la phase de calcul de sphères optimales consiste à calculer la sphère qui minimisera la métrique considère précédemment sur le cluster qui lui a été associé.
 
 La principale difficulté ici est de construire un métrique représentative des critères de qualités voulus, pour laquelle le calcul d'un élément optimal n'est pas trop complexe et qui converge vers un état stable.
 

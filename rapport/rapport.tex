@@ -39,7 +39,6 @@
 \input{\rootPath Parts/3_envmap}
 \input{\rootPath Parts/4_rendu}
 \input{\rootPath Parts/5_precalcul}
-\input{\rootPath Parts/6_application}
 \input{\rootPath Parts/7_perspectives}
 
 %----------------------------------------------------------------------
@@ -48,7 +47,14 @@
 \pagenumbering{Roman}\setcounter{page}{1} 
 \appendix
 \chapter{Annexes}
-% \onecolumn
+
+\let\chapter\section
+\let\section\subsection
+\let\subsection\subsubsection
+\let\subsubsection\paragraph
+\input{\rootPath Parts/6_application}	%%Moved to annexe
+
+\chapter{Codes et figures}
 \input{\rootPath Extras/calibration.tex}
 \input{\rootPath Extras/config.tex}
 \input{\rootPath Extras/cube.tex}

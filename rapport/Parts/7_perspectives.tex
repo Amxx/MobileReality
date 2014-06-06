@@ -17,7 +17,7 @@ Au delà des travaux développés au cours de ce stage, certains aspect sont enc
 
 La méthode de rendu développée utilise les informations le luminosité de la scène. Ces informations, issues de camera standard, ne traduisent pas la réalité physique de la luminosité de la scène mais plutôt la perception que l’on peut avoir de cette scène. Les données obtenus par le capteur photosensible sont en effet traités pour obtenir une image classique.
 
-L’imagerie HDR\footurl[HDR:]{http://en.wikipedia.org/wiki/High-dynamic-range\_imaging} (High dynamic range), par opposition aux images classique ou LDR (Low dynamic range), vise à considérer une dynamique de luminosité plus large qui permettent de représenter les contrastes présent dans la nature. 
+L’imagerie HDR\footurl[HDR:~]{http://en.wikipedia.org/wiki/High-dynamic-range\_imaging} (High dynamic range), par opposition aux images classique ou LDR (Low dynamic range), vise à considérer une dynamique de luminosité plus large qui permettent de représenter les contrastes présent dans la nature. 
 
 Les calculs d’éclairement développée dans ce rapport étant fait du point de vue de l’intensité lumineuse reçu par unité de surface, il faudrait théoriquement les appliquer à une envmap HDR qui reflètent les fortes différences de luminosité présentes dans la scène. Cela implique d’acquérir, en temps réel, une vue HDR de la scène. 
 
@@ -27,7 +27,7 @@ L’utilisation d’une envmap devrait améliorer les résultats de rendu, notam
 
 La principale difficultés viens de la reconstruction de l’image HDR en temps réel, notamment avec des cameras ne permettant pas de régler ou même de fixer les paramètres d’exposition. L’étape de calibration des cameras d’être une étape difficile. 
 
-La version $3.0$ d’OpenCV\footurl[OpenCV:]{http://opencv.org/} devrait voir l’apparition d’outils pour la reconstruction et la manipulation d’images HDR. Il semble intéressant, une fois cette mise a jour disponible, d’étudier les possibilités offertes pour éventuellement les intégrer au module d’acquisition \texttt{videodevice\_opencv}.
+La version $3.0$ d’OpenCV\footurl[OpenCV:~]{http://opencv.org/} devrait voir l’apparition d’outils pour la reconstruction et la manipulation d’images HDR. Il semble intéressant, une fois cette mise a jour disponible, d’étudier les possibilités offertes pour éventuellement les intégrer au module d’acquisition \texttt{videodevice\_opencv}.
 
 
 \section{BRDF anisotropes}

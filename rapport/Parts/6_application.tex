@@ -18,7 +18,7 @@
 \section{Généralitées}
 \subsection{Obtenir le code source}
 
-Le code source de l’application est disponible en ligne sur GitHub \footurl{https://github.com/Amxx/MobileReality/tree/master/code}. Ce code disponible est sous licence CeCILL-B\footurl[CeCILL]{http://www.cecill.info/}.
+Le code source de l’application est disponible en ligne sur GitHub \footurl{https://github.com/Amxx/MobileReality/tree/master/code}. Ce code disponible est sous licence CeCILL-B\footurl[CeCILL:~]{http://www.cecill.info/}.
 
 
 \subsection{Installation}
@@ -32,25 +32,25 @@ Pour plus d’informations sur la procédure d’installation, un fichier \textt
 Le code développée fait appel à différentes bibliothèques pour remplir des taches spécifiques. À ce titre, l’utilisation de l’application peut demander l’installation préalable des outils utilisés.
 
 \begin{description}
-	\item[OpenCV:] Regroupant de nombreuses opérations de traitement d’image, OpenCV\footurl[OpenCV:]{http://opencv.org/} est utilisé pour la manipulation des images ainsi que pour les différentes étapes de calibration et les calculs matriciels associés.
-	\item[Eigen:] Utilisée pour le pré calcule des sphères (voir section~\ref{section:precomputation_spheres}, page~\pageref{section:precomputation_spheres}), Eigen\footurl[Eigen:]{http://eigen.tuxfamily.org/} est une bibliothèques de calcul matriciel ne nécessitant pas d’installation préalable.
+	\item[OpenCV:] Regroupant de nombreuses opérations de traitement d’image, OpenCV\footurl[OpenCV:~]{http://opencv.org/} est utilisé pour la manipulation des images ainsi que pour les différentes étapes de calibration et les calculs matriciels associés.
+	\item[Eigen:] Utilisée pour le pré calcule des sphères (voir section~\ref{section:precomputation_spheres}, page~\pageref{section:precomputation_spheres}), Eigen\footurl[Eigen:~]{http://eigen.tuxfamily.org/} est une bibliothèques de calcul matriciel ne nécessitant pas d’installation préalable.
 \end{description}
 
-Le framework gKit, développé au LIRIS\footurl[LIRIS]{http://liris.cnrs.fr/}, utilisé dans cette application induit également un certain nombre de dépendances.
+Le framework gKit, développé au LIRIS\footurl[LIRIS:~]{http://liris.cnrs.fr/}, utilisé dans cette application induit également un certain nombre de dépendances.
 
 \begin{description}
-	\item[GLEW:] GLEW\footurl[GLEW:]{http://glew.sourceforge.net/} est un bibliothèques multiplateforme utilisée pour la gestion des extentions OpenGL.
-	\item[SDL2:] SDL\footurl[SDL2:]{http://www.libsdl.org/} est une bibliothèque multiplateforme permettant un accès bas niveau aux différentes interfaces utilisateurs ainsi qu’au matériel graphique via OpenGL et Direct3D.
-	\item[SDL2 Image:] SDL2\_image\footurl[SDL2 Image:]{http://www.libsdl.org/projects/SDL\_image/} est une extension de SDL permettant la gestion d’images dans différents formats.
-	\item[SDL2 TTF:] SDL2\_ttf\footurl[SDL2 TTF:]{http://www.libsdl.org/projects/SDL\_ttf/} est une extension de SDL permettant la gestion des polices de caractères.
-	\item[OpenEXR:] OpenEXR\footurl[OpenEXR:]{http://www.openexr.com/} est un dépendance optionnel utilisé pour la gestion des formats d’image HDR.
+	\item[GLEW:] GLEW\footurl[GLEW:~]{http://glew.sourceforge.net/} est un bibliothèques multiplateforme utilisée pour la gestion des extentions OpenGL.
+	\item[SDL2:] SDL\footurl[SDL2:~]{http://www.libsdl.org/} est une bibliothèque multiplateforme permettant un accès bas niveau aux différentes interfaces utilisateurs ainsi qu’au matériel graphique via OpenGL et Direct3D.
+	\item[SDL2 Image:] SDL2\_image\footurl[SDL2 Image:~]{http://www.libsdl.org/projects/SDL\_image/} est une extension de SDL permettant la gestion d’images dans différents formats.
+	\item[SDL2 TTF:] SDL2\_ttf\footurl[SDL2 TTF:~]{http://www.libsdl.org/projects/SDL\_ttf/} est une extension de SDL permettant la gestion des polices de caractères.
+	\item[OpenEXR:] OpenEXR\footurl[OpenEXR:~]{http://www.openexr.com/} est un dépendance optionnel utilisé pour la gestion des formats d’image HDR.
 \end{description}
 
 Enfin la construction des différents modèles induit aussi certaines dépendances supplémentaires.
 
 \begin{description}
-	\item[OpenCV:] En plus des outils de traitement d’image, OpenCV\footurl[OpenCV:]{http://opencv.org/} est utilisé par le module du même nom pour la gestion des interfaces d’acquisition vidéo (webcam).
-	\item[ZBar:] La bibliothèque ZBar\footurl[ZBar:]{http://zbar.sourceforge.net/} est utilisé par le module du même nom pour la détection et le décodage des QRCodes présents dans les images issues des cameras.
+	\item[OpenCV:] En plus des outils de traitement d’image, OpenCV\footurl[OpenCV:~]{http://opencv.org/} est utilisé par le module du même nom pour la gestion des interfaces d’acquisition vidéo (webcam).
+	\item[ZBar:] La bibliothèque ZBar\footurl[ZBar:~]{http://zbar.sourceforge.net/} est utilisé par le module du même nom pour la détection et le décodage des QRCodes présents dans les images issues des cameras.
 \end{description}
  
 
@@ -81,7 +81,7 @@ Les différentes composants logiciels sont encapsulé dans des objets spécifiqu
 	\item[Calibration:] La classe \texttt{Calibration} gèrent les différentes valeur caractérisant un objet de type \texttt{VideoDevice}. Elle intègre aussi les méthodes de calcul et d’enregistrement / chargement de ces données de calibration.
 	\item[Camera:] La classe \texttt{Camera} regroupe un objet de type \texttt{VideoDevice} ainsi qu’un objet de type \texttt{Calibration}. Héritant de la structure virtuelle \texttt{VideoDevice}, elle permet de gérer un périphérique vidéo calibré de manière transparente.
 
-	\item[Scanner:] La classe \texttt{Scanner} est une classe virtuelle décrivant l’interface relatives aux modules de détection de symboles dans les images. Cette classe virtuelle est implémentée dans le module \texttt{scanner\_zbar} qui utilise par bibliothèque ZBar\footurl[ZBar:]{http://zbar.sourceforge.net/} pour l’identification de QRCodes.
+	\item[Scanner:] La classe \texttt{Scanner} est une classe virtuelle décrivant l’interface relatives aux modules de détection de symboles dans les images. Cette classe virtuelle est implémentée dans le module \texttt{scanner\_zbar} qui utilise par bibliothèque ZBar\footurl[ZBar:~]{http://zbar.sourceforge.net/} pour l’identification de QRCodes.
 	\item[Symbol:] La classe \texttt{Symbol} décrit les symboles identifiées par les modules de type \texttt{Scanner}. Contenant les informations de positionnement ainsi que les données encodées, ils permettent de calculer les données de positionnement (voir section~\ref{section:positionnement}, page~\pageref{section:positionnement}).
 
 	\item[Envmap:] La classe \texttt{Envmap} encapsules les fonctions nécessaires à la reconstruction de la carte d’environnement, sur GPU, à partir des différentes images issues des cameras ainsi que des données de positionnement correspondantes.
