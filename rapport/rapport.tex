@@ -1,4 +1,4 @@
-\documentclass[10pt,a4paper,twoside, twocolumn]{report}
+\documentclass[10pt,a4paper,twoside,twocolumn]{report}
 \input{Annexes/PackagesReport.tex}
 \input{Annexes/ParametersReport.tex}
 \input{Annexes/ParametersTikz.tex}
@@ -33,13 +33,14 @@
 \twocolumn
 \pagenumbering{arabic}\setcounter{page}{1}
 
-\input{\rootPath Parts/0c_introduction}
-\input{\rootPath Parts/1_acquisition}
-\input{\rootPath Parts/2_hierarchie}
-\input{\rootPath Parts/3_envmap}
-\input{\rootPath Parts/4_rendu}
-\input{\rootPath Parts/5_precalcul}
-\input{\rootPath Parts/7_perspectives}
+\input{\rootPath Parts/0c_introduction.tex}
+% \input{\rootPath Parts/1_acquisition.tex}
+\input{\rootPath Parts/2_hierarchie.tex}
+\input{\rootPath Parts/3_envmap.tex}
+\input{\rootPath Parts/4_rendu.tex}
+\input{\rootPath Parts/5_precalcul.tex}
+\input{\rootPath Parts/6_results.tex}
+\input{\rootPath Parts/7_perspectives.tex}
 
 %----------------------------------------------------------------------
 
@@ -48,13 +49,15 @@
 \appendix
 \chapter{Annexes}
 
-\let\chapter\section
-\let\section\subsection
-\let\subsection\subsubsection
-\let\subsubsection\paragraph
-\input{\rootPath Parts/6_application}	%%Moved to annexe
+\begingroup
+	\let\chapter\section
+	\let\section\subsection
+	\let\subsection\subsubsection
+	\let\subsubsection\paragraph
+	\input{\rootPath Extras/application.tex}
+\endgroup
 
-\chapter{Codes et figures}
+\section{Codes et figures}
 \input{\rootPath Extras/calibration.tex}
 \input{\rootPath Extras/config.tex}
 \input{\rootPath Extras/cube.tex}

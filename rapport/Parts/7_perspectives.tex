@@ -7,10 +7,13 @@
 
 \begin{document}
 
+
+\iftwocolumn \twocolumn \else \onecolumn \fi
+
+
 \chapter{Perspectives d’évolution}
 
 Au delà des travaux développés au cours de ce stage, certains aspect sont encore en travaux. Les problématiques discutées dans ce chapitre sont sujet à modifications et pourrait faire l’objet de nouveaux travaux dans ma continuité des résultats déjà obtenus.
-
 
 
 \section{Acquisition HDR}
@@ -32,15 +35,26 @@ La version $3.0$ d’OpenCV\footurl[OpenCV:~]{http://opencv.org/} devrait voir l
 
 \section{BRDF anisotropes}
 
+Une des possibilités perspectives évoquées dans la section rendu est la possibilités de considérer un modèle de surface à micro-facettes.
+
+Un tel modèle, étoffé d’informations surfacique décrivant la distribution de micro-facettes permet un rendu réaliste de matières anisotropes comme le métal brossé.
+
+Pour cela de lourds calcules statistiques sont nécessaires dans l’évaluation de la direction de réflexion étant donné l’angle de vue et les caractéristiques de la distribution de micro-facettes au point considéré. Ces calculs statistique devront par ailleurs résolues de manière analytique, quitte à les approcher, au risque de trop ralentir l’étape de rendu.
+
+La principal difficulté dans l’application d’un tel modèle reste cependant la nécessité d’évaluer l’envmap de manière anisotrope. La ou le filtrage linéaire permet d’intégrer l’envmap de manière isotrope de manière satisfaisante, le filtrage anisotrope de l’envmap pose problème au niveau des bordures entre les différentes faces constituants l’envmap cubique.
 
 
+\section{Modèles animés}
 
+Afin améliorer l’expérience de l’utilisateur, il pourrai être intéressant d’intégrer des modèles animés. Cela permettrait par exemple d’insérer des éléments dynamique à un scène historique ou bien de d’afficher de manière vraisemblable des vêtements qui s’ajusteraient au client.
 
-\section{Modèles dynamiques}
+Afin de pouvoir insérer de tels objets, il est nécessaire de pouvoir adapter les données pré-calculées. 
 
+Les sphères utilisés dans le calcul des ombres portées sont facilement adaptables. Il suffit de les poser sur un modèle de fil de fer qui représente les articulation de l’objet.
 
+L’animation des textures d’auto-occultation à par ailleurs déjà été étudié dans \cite{Kontkanen2006}
 
-
+La plus grande difficulté reste à intégrer la gestion des objet animés et à mettre en place les éventuels mécanismes d’asservissement de l’animation par rapport à l’environnement.
 
 %=====================================================================
 %=====================================================================

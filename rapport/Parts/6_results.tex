@@ -1,0 +1,116 @@
+\documentclass[10pt,a4paper,twoside, twocolumn]{report}
+\input{../Annexes/PackagesReport.tex}
+\input{../Annexes/ParametersReport.tex}
+\input{../Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{../}
+\standalonetrue
+
+\begin{document}
+
+
+% \iftwocolumn \onecolumn \else \twocolumn \fi
+\onecolumn
+
+
+\chapter{Résultats et conclusion}
+
+
+\iftwocolumn \begin{multicols}{2} \fi
+En début de stage nous nous étions fixé l’objectif de développer un pipeline de rendu réaliste, exécutable en temps réel sur des périphériques mobiles ainsi que de mettre en place les mécanismes nécessaires à l’acquisition dynamique de l’environnement lumineux.
+
+Le travail réalisé nous permet aujourd’hui de proposé un méthode de rendu d’objets 3D dont la principale force est l’utilisation des niveau de détails des textures pour l’évaluation des intégration de l’environnement lumineux. Cette approche nous a permit de réaliser non seulement l’éclairage de l’objet mais aussi le rendu d’ombre douce issues de l’objet.
+\iftwocolumn \end{multicols} \fi
+
+
+\begin{figure*}[!ht]\centering
+
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/white-1.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/glossy-1.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/miror-1.png}
+	\end{subfigure}
+	
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/white-2.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/glossy-2.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/miror-2.png}
+	\end{subfigure}
+	
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/white-3.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/glossy-3.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/miror-3.png}
+	\end{subfigure}
+	
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/white-4.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/glossy-4.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/miror-4.png}
+	\end{subfigure}
+
+	\caption{Rendu du modèle “bigguy” pour differents niveau de spécularité}
+	\label{fig:result:specularity}
+\end{figure*}
+
+
+\iftwocolumn \begin{multicols}{2} \fi
+L’application développée, ainsi que son portage sur iOS, on permit de valider le modèle de rendu développée au cours de ce stage. À défaut de correspondre aux résultats d’un modèle statistique, les images rendues répondent aux exigences d’intégration vraisemblable. L’aspect temps réel est lui aussi atteint, les performances sur périphérique mobiles allant de $20$ à plus de $60$ images par seconde selon le modèle d’envmap utilisé. Ces performances sont rendu possible grace à l’architecture des terminaux mobiles, le fait que la mémoire CPU et GPU soit partagé reduit en effet le cout des transferts mémoire.
+
+Parallèlement, les mécanismes d’acquisition d’envmap développés permetent l’acquisition des données d’environnements nécessaires à la phase de rendu. Même si de nombreux artefacts sont visibles dans le cas de reflets spéculaires, ils reste invisible pour des matières diffuses. 
+\iftwocolumn \end{multicols} \fi
+
+
+\begin{figure*}[!ht]\centering
+
+	\begin{subfigure}[b]{0.45\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/sphere-single-1.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/sphere-mult-1.png}
+	\end{subfigure}
+	
+	\begin{subfigure}[b]{0.45\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/sphere-single-2.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Imgs/screen/sphere-mult-2.png}
+	\end{subfigure}
+	
+	\caption{Rendu des ombres portées sans (gauche) et avec (droite) les informations de sphères englobantes}
+	\label{fig:result:spheres}
+\end{figure*}
+
+
+\iftwocolumn \begin{multicols}{2} \fi
+Ce portage à permit de confirmer que la génération de terminaux mobiles actuellement sur le marché pressente de fait tous les prérequis, aussi bien matériel que logiciel, nécessaire au développement de la réalité augmentée réaliste et temps réel.
+
+Les méthodes développées sont utilisables de le développement de nombreuses applications mobiles, que ce soit à des fins culturelles (mise en valeur du patrimoine par l’ajout virtuelle d’élément historique) ou à des fins publicitaires (visualisation d’un objet, d’un meuble ou de vêtements avant achat).
+\iftwocolumn \end{multicols} \fi
+
+
+%=====================================================================
+%=====================================================================
+\ifstandalone
+	\addcontentsline{toc}{chapter}{Bibliographie}
+	\bibliographystyle{apalike}
+	\bibliography{\rootPath Annexes/biblio}
+\fi
+%=====================================================================
+%=====================================================================
+\end{document}

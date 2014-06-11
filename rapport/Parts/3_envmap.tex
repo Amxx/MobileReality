@@ -7,12 +7,40 @@
 
 \begin{document}
 
-\chapter{Les cartes d'environnement}
+
+\iftwocolumn \twocolumn \else \onecolumn \fi
+
+
+\chapter{Les cartes d’environnement}
+
+
+Afin de pourvoir réaliser le rendu d’une image réaliste, il est nécessaire de connaître l’environnement lumineux de la scène. En fait, une image est l’enregistrement de l’environnement lumineux incident. La problématique du rendu d’image est donc de savoir comment reconstruire un environnement lumineux à partir de la géométrie de la scène, des propriétés des matériaux en présence et des différentes sources de lumières.
+
+Nous nous intéressons ici à l’étape d’acquisition de l’environnement lumineux, étape nécessaire pour faire correspondre les objets rendus à la scène réelle.
+
+
 \section{Principe}
+
+Une carte d’environnement, ou \emph{envmap} dans la suite de rapport, est une structure de donné contenant décrivant la lumière incidente en un point. Cette dernière dépendant de la direction considérée, une envmap contient la projection sur une sphère -- ou un cube --, centré au point considéré, de l’environnement visible.
+
+La méthode la plus rependu pour reconstruire une envmap consiste à réaliser un panorama sphérique à l’aide d’un objectif grand angle et d’une tête panoramique. Les images sont ensuite assemblé à l’aide de point d’intérêts. Cette méthode à cependant l’inconvénient de nécessité beaucoup de matériel et de demander beaucoup de temps. Les envmaps produites sont cependant d’une grande qualité pour peu que la tête panoramique ai bien été réglé pour tourner autour du point nodal de l’objectif.
+
+L’environnement lumineux étant fonction de la position, une autre méthode d’acquisition utilise un maillage de sphères métalliques. Les réflexions de la scène dans les différentes sphère permettent de reconstruire l’environnement lumineux en différents points. En interpolant entre les différentes sphères du maillage on à ainsi une bien meilleur connaissance de l’environnement lumineux. Cette méthode demande cependant deux étapes puisqu’il faut d’abord acquérir l’environnement lumineux pour ensuite pouvoir effectuer la phase de rendu sur des images obtenues sans le maillage de sphère.
+
+Notre but est ici de proposer une méthode qui s’affranchisse au maximum de matériel dédié tout en permettant un au niveau de réactivité, nécessaire à la mise a jour dynamique de l’envmap.
+
+
 \section{Reconstruction dynamique}
-\section{Détails d'implémentation}
 
+Afin d’acquérir l’environnement en temps réel, l’idée proposer ici est d'utiliser les informations de positionnement issus de l’identification du marqueur.
 
+Connaissant la position du mobile et les caractéristiques des cameras, il est possible de re-projeté l'image issue de la camera frontale pour reconstruire la portion de l'envmap directement derrière l'utilisateur. En se déplaçant autour de l'objet on vas ainsi reconstruire l'envmap dans sa globalité.
+
+Cette méthode s'approche ainsi de la méthode canonique, la différence principale étant que dans notre cas l'acquisition ne se fait pas en pivotant autour du point nodal.
+
+Cette différence introduit des défauts de raccords entre les différentes prise de vue, lesquels sont liée à la géométrie de la scène. Ces erreurs de parallaxe sont nulles pour une scène ou les sources lumineuses sont à l'infini (bonne approximation d'une scène en extérieur) mais sont sensible dans le cas d'environnement proche comme par exemple une scène d'intérieur.
+
+Différents mécanisme de correction de la parallaxe ont pour cela été intégré à l'étape de re-projection. Ces mécanisme ne peuvent cependant pas se substituer à la connaissance de la géométrie de la scène qui est nécessaire à toute reconstruction exacte.
 
 
 %=====================================================================

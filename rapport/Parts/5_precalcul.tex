@@ -7,6 +7,10 @@
 
 \begin{document}
 
+
+\iftwocolumn \twocolumn \else \onecolumn \fi
+
+
 \chapter{Pré-calculs}
 
 Nous avons détaillé dans le chapitre précédent les différentes étapes de rendu pour l'intégration d'un objet 3D dans une scène dynamique acquise en temps réel. Certaines des données nécessaires à un tel rendu étant indépendantes de la scène, nous nous sommes proposés de les pré-calculer. 
@@ -186,14 +190,15 @@ Cette première considération géométrique n'est cependant pas satisfaisante. 
 
 Par ailleurs la métrique proposé précédemment ne garanti pas la convergence du système.
 
-\begin{figure}[!ht]\centering
-	\begin{subfigure}[b]{0.4\textwidth}\centering
+\begin{figure*}[!ht]\centering
+	\begin{subfigure}[b]{\textwidth}\centering
 		\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_spheres/MRX22_both.png}
 		\vspace{0.5cm}
 		\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_spheres/MRX22_spheres.png}
 		\caption{MRX22 (157781 sommets, 287776 triangles)}
 	\end{subfigure}
-	\begin{subfigure}[b]{0.4\textwidth}\centering
+
+	\begin{subfigure}[b]{\textwidth}\centering
 		\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_both.png}
 		\vspace{0.5cm}
 		\includegraphics[width=0.4\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_spheres.png}
@@ -202,7 +207,7 @@ Par ailleurs la métrique proposé précédemment ne garanti pas la convergence 
 	
 	\caption{Décomposition en sphères d'objets 3D ($100000$ échantillons, $100$ sphères)}
 	\label{fig:precompute_sphere:result}
-\end{figure}
+\end{figure*}
 
 \subsubsection{Méthode adoptée}
 

@@ -20,41 +20,42 @@
 \nocite{*}
 %======================================================================
 
-\clearpage
-\onecolumn
+% \clearpage
+% \onecolumn
 \pagenumbering{gobble}
 
 % \input{\rootPath Parts/0a_titlepage}
 \maketitle
-\begin{abstract}
-<Text of the summary of your article>
-\end{abstract}
+% \begin{abstract}
+% <Text of the summary of your article>
+% \end{abstract}
 
 
 %----------------------------------------------------------------------
 
 \clearpage
-\onecolumn
+% \onecolumn
 \pagenumbering{roman}\setcounter{page}{1} 
 \input{\rootPath Parts/0b_remerciements}
 
 %----------------------------------------------------------------------
 
-\tableofcontents
+% \tableofcontents
 
 %----------------------------------------------------------------------
 
 \clearpage
-\twocolumn
+% \twocolumn
 \pagenumbering{arabic}\setcounter{page}{1}
 
-\input{\rootPath Parts/0c_introduction}
-% \input{\rootPath Parts/1_acquisition}
-\input{\rootPath Parts/2_hierarchie}
-\input{\rootPath Parts/3_envmap}
-\input{\rootPath Parts/4_rendu}
-\input{\rootPath Parts/5_precalcul}
-\input{\rootPath Parts/7_perspectives}
+\input{\rootPath Parts/0c_introduction.tex}
+% \input{\rootPath Parts/1_acquisition.tex}
+\input{\rootPath Parts/2_hierarchie.tex}
+\input{\rootPath Parts/3_envmap.tex}
+\input{\rootPath Parts/4_rendu.tex}
+\input{\rootPath Parts/5_precalcul.tex}
+\input{\rootPath Parts/6_results.tex}
+\input{\rootPath Parts/7_perspectives.tex}
 
 %----------------------------------------------------------------------
 
@@ -63,14 +64,15 @@
 \appendix
 \chapter{Annexes}
 
+\begingroup
+	\let\chapter\section
+	\let\section\subsection
+	\let\subsection\subsubsection
+	\let\subsubsection\paragraph
+	\input{\rootPath Extras/application.tex}
+\endgroup
 
-\let\chapter\section
-\let\section\subsection
-\let\subsection\subsubsection
-\let\subsubsection\paragraph
-\input{\rootPath Parts/6_application}	%%Moved to annexe
-
-\chapter{Codes et figures}
+\section{Codes et figures}
 \input{\rootPath Extras/calibration.tex}
 \input{\rootPath Extras/config.tex}
 \input{\rootPath Extras/cube.tex}
@@ -83,16 +85,16 @@
 \bibliographystyle{apalike}
 \bibliography{\rootPath Annexes/biblio}
 
-\phantomsection \listoffigures
+% \phantomsection \listoffigures
 
-\clearpage
-\begingroup
-	\let\clearpage\relax
-	\onecolumn
-	\phantomsection \listoftables
-	\phantomsection \listofalgorithms
-	\phantomsection \listofcode
-\endgroup
+% \clearpage
+% \begingroup
+% 	\let\clearpage\relax
+% 	\onecolumn
+% 	\phantomsection \listoftables
+% 	\phantomsection \listofalgorithms
+% 	\phantomsection \listofcode
+% \endgroup
 
 %\addcontentsline{toc}{section}{Table des matières}
 %\printindex

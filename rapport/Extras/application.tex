@@ -1,0 +1,256 @@
+\documentclass[10pt,a4paper,twoside, twocolumn]{report}
+\input{../Annexes/PackagesReport.tex}
+\input{../Annexes/ParametersReport.tex}
+\input{../Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{../}
+\standalonetrue
+
+\begin{document}
+
+
+
+\chapter{L’application}
+
+
+%%=====================================================================
+
+
+\section{Généralitées}
+\subsection{Obtenir le code source}
+
+Le code source de l’application est disponible en ligne sur GitHub \footurl{https://github.com/Amxx/MobileReality/tree/master/code}. Ce code disponible est sous licence CeCILL-B\footurl[CeCILL:~]{http://www.cecill.info/}.
+
+
+\subsection{Installation}
+
+Développé en C++11, la compilation de l’application nécessite \texttt{gcc 4.7} ou supérieure. L’outil \texttt{cmake} est par ailleurs utilisé afin d’automatiser les différentes étapes de la compilation et de l’installation.
+
+Pour plus d’informations sur la procédure d’installation, un fichier \texttt{README.txt} est disponible avec le code.
+
+\subsection{Dépendances}
+
+Le code développée fait appel à différentes bibliothèques pour remplir des taches spécifiques. À ce titre, l’utilisation de l’application peut demander l’installation préalable des outils utilisés.
+
+\begin{description}
+	\item[OpenCV:] Regroupant de nombreuses opérations de traitement d’image, OpenCV\footurl[OpenCV:~]{http://opencv.org/} est utilisé pour la manipulation des images ainsi que pour les différentes étapes de calibration et les calculs matriciels associés.
+	\item[Eigen:] Utilisée pour le pré calcule des sphères (voir section~\ref{section:precomputation_spheres}, page~\pageref{section:precomputation_spheres}), Eigen\footurl[Eigen:~]{http://eigen.tuxfamily.org/} est une bibliothèques de calcul matriciel ne nécessitant pas d’installation préalable.
+\end{description}
+
+Le framework gKit, développé au LIRIS\footurl[LIRIS:~]{http://liris.cnrs.fr/}, utilisé dans cette application induit également un certain nombre de dépendances.
+
+\begin{description}
+	\item[GLEW:] GLEW\footurl[GLEW:~]{http://glew.sourceforge.net/} est un bibliothèques multiplateforme utilisée pour la gestion des extentions OpenGL.
+	\item[SDL2:] SDL\footurl[SDL2:~]{http://www.libsdl.org/} est une bibliothèque multiplateforme permettant un accès bas niveau aux différentes interfaces utilisateurs ainsi qu’au matériel graphique via OpenGL et Direct3D.
+	\item[SDL2 Image:] SDL2\_image\footurl[SDL2 Image:~]{http://www.libsdl.org/projects/SDL\_image/} est une extension de SDL permettant la gestion d’images dans différents formats.
+	\item[SDL2 TTF:] SDL2\_ttf\footurl[SDL2 TTF:~]{http://www.libsdl.org/projects/SDL\_ttf/} est une extension de SDL permettant la gestion des polices de caractères.
+	\item[OpenEXR:] OpenEXR\footurl[OpenEXR:~]{http://www.openexr.com/} est un dépendance optionnel utilisé pour la gestion des formats d’image HDR.
+\end{description}
+
+Enfin la construction des différents modèles induit aussi certaines dépendances supplémentaires.
+
+\begin{description}
+	\item[OpenCV:] En plus des outils de traitement d’image, OpenCV\footurl[OpenCV:~]{http://opencv.org/} est utilisé par le module du même nom pour la gestion des interfaces d’acquisition vidéo (webcam).
+	\item[ZBar:] La bibliothèque ZBar\footurl[ZBar:~]{http://zbar.sourceforge.net/} est utilisé par le module du même nom pour la détection et le décodage des QRCodes présents dans les images issues des cameras.
+\end{description}
+ 
+
+
+%%=====================================================================
+
+
+\section{Structure}
+
+Écrite en C++11, l’application développée profite de la programmation orientée objet pour organiser le code suivant les différentes fonctionnalités. Afin de rendre l’application modulable, certains composants sont par ailleurs encapsulé suivant des modèles de classes virtuelles et chargé dynamiquement.
+
+\subsection{Hiérarchie}
+
+Les différentes composants logiciels sont encapsulé dans des objets spécifiques selon le paradigme de programmation orienté objet. La figure~\ref{fig:tikz:app_structure} (page~\pageref{fig:tikz:app_structure}) présente cette hiérarchie.
+\begin{figure*}[ht!]
+	\centering
+	\includestandalone[width=0.8\textwidth]{\rootPath Figures/app_structure}
+	\caption{Structure de l’application}
+	\label{fig:tikz:app_structure}
+\end{figure*}
+
+\begin{description}
+	\item[Core:] La classe \texttt{Core} décrit un instance de l’application. Héritant du modèle \texttt{gk::App} présent dans \texttt{gKit}, elle est crée au lancement du programme et gère l’application graphique ainsi que toute la hiérarchie de classes gérant les différents composants et fonctionnalités.
+
+	\item[Module:] La classe \texttt{Module} est une classe mettant en places les différentes méthodes nécessaire au chargement dynamique d’objet pré-compilés correspondant à différents types de structures. Cette classe permet ainsi une grande flexibilité dans le chargement de composants externes.
+
+	\item[VideoDevice:] La classe \texttt{VideoDevice} est une classe virtuelle décrivant l’interface acquisition vidéo. Cette classe est implémentée par les modules \texttt{videodevice\_opencv} et \texttt{videodevice\_uvc} qui constituent l’interface entre l’application et les périphériques d’acquisition vidéo.
+	\item[Calibration:] La classe \texttt{Calibration} gèrent les différentes valeur caractérisant un objet de type \texttt{VideoDevice}. Elle intègre aussi les méthodes de calcul et d’enregistrement / chargement de ces données de calibration.
+	\item[Camera:] La classe \texttt{Camera} regroupe un objet de type \texttt{VideoDevice} ainsi qu’un objet de type \texttt{Calibration}. Héritant de la structure virtuelle \texttt{VideoDevice}, elle permet de gérer un périphérique vidéo calibré de manière transparente.
+
+	\item[Scanner:] La classe \texttt{Scanner} est une classe virtuelle décrivant l’interface relatives aux modules de détection de symboles dans les images. Cette classe virtuelle est implémentée dans le module \texttt{scanner\_zbar} qui utilise par bibliothèque ZBar\footurl[ZBar:~]{http://zbar.sourceforge.net/} pour l’identification de QRCodes.
+	\item[Symbol:] La classe \texttt{Symbol} décrit les symboles identifiées par les modules de type \texttt{Scanner}. Contenant les informations de positionnement ainsi que les données encodées, ils permettent de calculer les données de positionnement (voir section~\ref{section:positionnement}, page~\pageref{section:positionnement}).
+
+	\item[Envmap:] La classe \texttt{Envmap} encapsules les fonctions nécessaires à la reconstruction de la carte d’environnement, sur GPU, à partir des différentes images issues des cameras ainsi que des données de positionnement correspondantes.
+
+	\item[Occlusion:] La classe \texttt{Occlusion} gère les données relatives aux sphères d’occlusion pré-calculées ainsi que les méthodes de construction des ombres.
+
+	\item[Configuration:] La classe \texttt{Configuration} contient l’ensemble des paramètres lues dans le fichier de configuration.
+\end{description}
+
+
+
+\subsection{Modules “videodevice”}
+
+La classe virtuelle \texttt{VideoDevice} décrit les méthodes utilisées par l’application pour communiquer avec les périphériques d’acquisition. Avec de simplifier leur chargement, les implémentations de cette classes sont encapsulées dans un module qui facilite l’instanciation d’un objet à partir de sources pré-compilées.
+
+L’implémentation des différents prototypes relatives à cette API donne donc le schéma suivant :
+
+\begin{code}[ht!]\centering
+	\lstset{
+		tabsize=2,
+	  language=C++,
+	  showstringspaces=true,
+	  morekeywords={control,IplImage,Module,VideoDevice},
+	  basicstyle=\footnotesize\ttfamily,
+	  keywordstyle=\bfseries\color{blue},
+	  % commentstyle=\itshape\color{purple!40!black},
+	  % identifierstyle=\color{blue},
+	  % stringstyle=\color{orange},
+	}
+	\begin{lstlisting}
+namespace videodevices
+{
+	class myVideoObject : public Module<VideoDevice>
+	{		
+		public:
+			myVideoObject();
+			~myVideoObject();
+
+			bool			open(int idx = 0);
+			void			close();
+			bool			isopen();
+			void			grabFrame();
+			IplImage*	getFrame();
+			IplImage*	frame();
+			int 			getParameter(control);
+			void			setParameter(control, int);
+			void			resetParameter(control);
+			void			showParameters();
+		private:
+			[...]
+	};
+};
+	\end{lstlisting}
+	\caption{Prototype d’un module \texttt{VideoDevice}}
+\end{code}
+
+Les méthodes \texttt{open}, \texttt{close} et \texttt{isopen} ont pour rôle de réserver, libérer et indiquer le statut des ressources matérielles. L’entier fournit à la fonction \texttt{open} indique quelle camera utiliser. Ces indices commence à $1$, l’indice $0$ représentant la camera par défaut.
+
+L’acquisition des images, au format \texttt{IplImage}, est fait via les fonctions \texttt{grabFrame()}, \texttt{getFrame()} et \texttt{frame()} :
+\begin{itemize}
+	\item La méthode \texttt{grabFrame()} récupère l’image courante;
+	\item La méthode \texttt{getFrame()} récupère l’image courante et la renvoi;
+	\item La méthode \texttt{frame()} renvoi la dernière image récupérée.
+\end{itemize}
+
+Enfin, les méthodes \texttt{getParameter()}, \texttt{setParameter()}, \texttt{resetParameter()} et \texttt{showParameters()} sont utilisées pour le contrôle des paramètres d'exposition et de contraste de la camera.
+
+
+
+\subsection{Modules “scanner”}\label{section:module:scanner}
+
+Les objets correspondant à la classe virtuelle \texttt{Scanner} implémentent l’identification des marqueurs présents dans les images fournit par les cameras.
+
+L’implémentation des différents prototypes relatives à cette API donne donc le schéma suivant :
+
+
+\begin{code}[ht!]\centering
+	\lstset{
+		tabsize=2,
+	  language=C++,
+	  showstringspaces=true,
+	  morekeywords={std,vector,IplImage,Symbol,Module,Scanner},
+	  basicstyle=\footnotesize\ttfamily,
+	  keywordstyle=\bfseries\color{blue},
+	  % commentstyle=\itshape\color{purple!40!black},
+	  % identifierstyle=\color{blue},
+	  % stringstyle=\color{orange},
+	}
+	\begin{lstlisting}
+namespace scanners
+{
+	class myScannerObject : public Module<Scanner>
+	{
+		public:
+			myScannerObject();
+			~myScannerObject();
+			std::vector<Symbol>	scan(IplImage*);
+		private :
+			[...]
+	};
+};
+	\end{lstlisting}
+	\caption{Prototype d’un module \texttt{Scanner}}
+\end{code}
+
+La méthode \texttt{scan()} prend une image en paramètre et renvoi la liste des marqueurs identifiés.
+
+%%=====================================================================
+
+
+\section{Configuration}
+
+Le comportement de l'application est configurable par le biais d'un fichier de configuration au format XML (voir code~\ref{code:config}, en annexe). Les options sont les suivantes:
+\begin{description}
+	\item[\textsc{object}:]		Paramètres décrivant l'objet à intégrer à la scène;
+		\begin{description}
+			\item[\texttt{obj}:]						Chemin vers le fichier contenant le maillage (au format \texttt{.obj});
+			\item[\texttt{spheres}:]				Chemin vers le fichier contenant les sphères englobantes (si cette entrée est vide, une seul sphère, construite à partir de la sphère englobante, sera utilisée);
+			\item[\texttt{scale}:]					Facteur de mise à l’échelle de l'objet;
+		\end{description}
+
+	\item[\textsc{device}:]		Paramètres décrivant les périphériques à utiliser. \texttt{front} représente la camera principale et \texttt{back} représente la camera arrière. Pour chacun de ces camera on a les options suivantes;
+		\begin{description}
+			\item[\texttt{enable}:]					Activer / désactiver la camera (désactiver la camera désactive également certains composants pour lesquels elle est indispensable);
+			\item[\texttt{id}:]							Identifiant de la camera à ouvrir automatiquement;
+			\item[\texttt{param}:]					Chemin vers le fichier de configuration contenant les paramètres de la camera. Si le fichier n'existe pas il sera crée et remplit avec les informations de calibration calculés automatiquement;
+		\end{description}
+
+	\item[\textsc{markers}:]	Paramètres des marqueurs;
+		\begin{description}
+			\item[\texttt{size}:]						Taille des marqueur (définit l’unité de distance);
+			\item[\texttt{scale}:]					Facteur d’échelle entre le marqueur et la mire qui le contient\footnote{$1.0$ pour un marqueur qui occuperai tout la surface, $0.5$ pour un marqueur centré représentant $1/4$ de la surface};
+		\end{description}
+	
+	\item[\textsc{generalParameter}:]		Paramètres généraux de l'application
+		\begin{description}
+			\item[\texttt{verbose}:]				Niveau de verbosité de l'application;
+			\item[\texttt{defaultValues}:]	Paramètre de luminosité et de contraste. L’option \texttt{persistency} indique le nombre d'images pendant lesquels sont conservé les informations de positionnement en cas de perte des marqueurs;
+			\item[\texttt{envamp}:]					Paramètres de l'envmap telle que la définition, l'activation de la construction au démarrage ou le chargement d'une envmap déjà reconstruite;
+			\item[\texttt{localisation}:]		Activer / désactiver les mécanisme de positionnement à partir de marqueurs. Taille de la scène (pour la correction de parallaxe);
+			\item[\texttt{rendering}:]			Options de rendu (\texttt{backgound} affiche l’arrière plan, \texttt{scene} rend l'objet et son ombre porté, \texttt{view} est un mode de debug);
+			\item[\texttt{modules}:]				Chemins vers les sources binaires des modules à utiliser.
+		\end{description}
+		
+\end{description}
+
+
+%%=====================================================================
+
+
+\section{Portage}
+
+L'application développée initialement sous Linux, à par la suite été portée sous iOS\footurl[iOS:~]{https://www.apple.com/fr/ios/} et est aujourd'hui exécutable sur les périphériques Apple récents\todo{lesquels, version minimum ?}. Ce portage à été rendu possible par l'utilisation du C++11, qui est une partie intégrante de l'objective C utilisée pour le développement d'applications iOS.
+
+De fait, presque aucune modifications de l'application principale n'ont été nécessaires (liées a la non gestion de certaines commandes de l'API OpenGL).
+
+Pour ce qui est des modules, le module de reconnaissance utilisant la bibliothèque multiplate-forme ZBar\footurl[ZBar:~]{http://zbar.sourceforge.net/} à pu être re-utilisé en l'état. Seul le module de gestion des cameras à du être récrit pour permettre l’acquisition d'images à partir de l'API propre à iOS.
+
+Les différents shaders ont également du être adapté afin de suivre les spécification OpenGL ES $2.0$\footurl[OpenGL ES:~]{http://www.khronos.org/opengles/}. OpenGL ES $2.0$ étant de fait très proche de OpenGL $3$, seul quelques modification, notamment de typage des variables, ont été nécessaires.
+
+À l'avenir, un portage vers Android\footurl[Android:~]{http://www.android.com/} sera également effectué
+
+%=====================================================================
+%=====================================================================
+\ifstandalone
+	\addcontentsline{toc}{chapter}{Bibliographie}
+	\bibliographystyle{apalike}
+	\bibliography{\rootPath Annexes/biblio}
+\fi
+%=====================================================================
+%=====================================================================
+\end{document}
