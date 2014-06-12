@@ -11,17 +11,20 @@
 \nocite{*}
 %======================================================================
 
-\clearpage
 \onecolumn
+
+\clearpage
 \pagenumbering{gobble}
 \input{\rootPath Parts/0a_titlepage.tex}
-\input{\rootPath Parts/0d_abstract.tex}
+% \maketitle
 
 %----------------------------------------------------------------------
 
 \clearpage
-\onecolumn
 \pagenumbering{roman}\setcounter{page}{1} 
+\input{\rootPath Parts/0d_abstract.tex}
+
+\clearpage
 \input{\rootPath Parts/0b_remerciements.tex}
 
 %----------------------------------------------------------------------

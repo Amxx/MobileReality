@@ -4,14 +4,10 @@
 \input{Annexes/ParametersTikz.tex}
 \newcommand*{\rootPath}{}
 
-
-
 \let\chapter\section
 \let\section\subsection
 \let\subsection\subsubsection
 \let\subsubsection\paragraph
-
-
 
 \makeindex
 
@@ -20,21 +16,20 @@
 \nocite{*}
 %======================================================================
 
-% \clearpage
-% \onecolumn
-\pagenumbering{gobble}
+\onecolumn
 
+\clearpage
+\pagenumbering{gobble}
 % \input{\rootPath Parts/0a_titlepage.tex}
 \maketitle
-\input{\rootPath Parts/0d_abstract.tex}
-
-
 
 %----------------------------------------------------------------------
 
+% \clearpage
+% \pagenumbering{roman}\setcounter{page}{1} 
+\input{\rootPath Parts/0d_abstract.tex}
+
 \clearpage
-% \onecolumn
-\pagenumbering{roman}\setcounter{page}{1} 
 \input{\rootPath Parts/0b_remerciements.tex}
 
 %----------------------------------------------------------------------

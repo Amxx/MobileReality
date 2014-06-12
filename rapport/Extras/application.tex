@@ -233,13 +233,13 @@ Le comportement de l'application est configurable par le biais d'un fichier de c
 
 \section{Portage}
 
-L'application développée initialement sous Linux, à par la suite été portée sous iOS\footurl[iOS:~]{https://www.apple.com/fr/ios/} et est aujourd'hui exécutable sur les périphériques Apple récents\todo{lesquels, version minimum ?}. Ce portage a été rendu possible par l'utilisation du C++11, qui est une partie intégrante de l'objective-C utilisée pour le développement d'applications iOS.
+L'application développée initialement sous Linux, à par la suite été portée sous iOS\footurl[iOS:~]{https://www.apple.com/fr/ios/} et est aujourd'hui exécutable sur les périphériques Apple récents (iPhone 5S et iPad Air). Ce portage a été rendu possible par l'utilisation du C++11, qui est une partie intégrante de l'objective-C utilisée pour le développement d'applications iOS.
 
 De fait, presque aucune modifications de l'application principale n'ont été nécessaires (liées à la non gestion de certaines commandes de l'API OpenGL).
 
 Pour ce qui est des modules, le module de reconnaissance utilisant la bibliothèque multiplate-forme ZBar\footurl[ZBar:~]{http://zbar.sourceforge.net/} a pu être re-utilisée en l'état. Seul le module de gestion des cameras a du être récrit pour permettre l’acquisition d'images à partir de l'API propre à iOS.
 
-Les différents shaders ont également du être adaptés afin de suivre les spécification OpenGL ES $2.0$\footurl[OpenGL ES:~]{http://www.khronos.org/opengles/}. OpenGL ES $2.0$ étant de fait très proche de OpenGL $3$, seules quelques modifications, notamment de typage des variables, ont été nécessaires.
+Les différents shaders ont également du être adaptés afin de suivre les spécification OpenGL ES $3.0$\footurl[OpenGL ES:~]{http://www.khronos.org/opengles/}. OpenGL ES $3.0$ étant de fait très proche de OpenGL $3$, seules quelques modifications, notamment de typage des variables, ont été nécessaires.
 
 À l'avenir, un portage vers Android\footurl[Android:~]{http://www.android.com/} sera également effectué.
 
