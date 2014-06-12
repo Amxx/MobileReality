@@ -24,11 +24,10 @@
 % \onecolumn
 \pagenumbering{gobble}
 
-% \input{\rootPath Parts/0a_titlepage}
+% \input{\rootPath Parts/0a_titlepage.tex}
 \maketitle
-% \begin{abstract}
-% <Text of the summary of your article>
-% \end{abstract}
+\input{\rootPath Parts/0d_abstract.tex}
+
 
 
 %----------------------------------------------------------------------
@@ -36,7 +35,7 @@
 \clearpage
 % \onecolumn
 \pagenumbering{roman}\setcounter{page}{1} 
-\input{\rootPath Parts/0b_remerciements}
+\input{\rootPath Parts/0b_remerciements.tex}
 
 %----------------------------------------------------------------------
 
@@ -48,8 +47,7 @@
 % \twocolumn
 \pagenumbering{arabic}\setcounter{page}{1}
 
-\input{\rootPath Parts/0c_introduction.tex}
-% \input{\rootPath Parts/1_acquisition.tex}
+\input{\rootPath Parts/1_introduction.tex}
 \input{\rootPath Parts/2_hierarchie.tex}
 \input{\rootPath Parts/3_envmap.tex}
 \input{\rootPath Parts/4_rendu.tex}

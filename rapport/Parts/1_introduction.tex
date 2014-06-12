@@ -1,0 +1,39 @@
+\documentclass[10pt,a4paper,twoside, twocolumn]{report}
+\input{../Annexes/PackagesReport.tex}
+\input{../Annexes/ParametersReport.tex}
+\input{../Annexes/ParametersTikz.tex}
+\newcommand*{\rootPath}{../}
+\standalonetrue
+
+\begin{document}
+
+\phantomsection
+\chapter{Introduction}
+
+Le travail détaillé dans ce document à été réalisé de février à juillet 2014 au sein de l'équipe R3AM\footurl[R3AM:~]{http://liris.cnrs.fr/r3am/} en vue de l’obtention du Master IGI de l'UCBL\footurl[UCBL:~]{http://www.univ-lyon1.fr/}. Il a été encadré par Jean-Philippe Farrugia et Jean-Claude Iehl.
+
+Ce travail a été financé par l'ENS de Lyon\footurl[ENS de Lyon:~]{http://www.ens-lyon.eu/}, au même titre que le reste du M2 IGI, dans le cadre de la troisième année correspondant au statut de normalien.
+
+Ce stage est issu du constat selon lequel les applications orientées temps réel actuellement disponible sur mobile ne correspondent pas à ce que propose l'état de l'art en terme de rendu réaliste. Une autre constatation est que les dispositifs mobiles actuels sont de plus en plus à même d’acquérir leur environnement (notamment au moyen de caméras frontales). 
+
+La réalité augmentée consiste à intégrer, d'une manière ou d'une autre, des données numériques dans une scène réelle. Les problématiques soulevées sont très nombreuses afin de permettre une intégration vraisemblable de l'objet virtuelle.
+
+Là où l'industrie cinématographique réalise aujourd'hui des effets visuels tout à fait vraisemblables au prix de nombreuses heures de travail de la part d'infographistes et de machines spécialement dédiées au rendu, nous nous intéresserons à l'aspect “temps réel” de cette discipline. Le temps réel pose des problèmes aussi bien pour l'acquisition que pour le rendu. Il vas, en effet, falloir à la fois reconnaître la scène, notamment en terme d'environnement lumineux et de géométrie, pour pouvoir dans un second temps intégrer un objet virtuel à cette dernière. Un tel ajout implique de modéliser les interactions lumineuses correspondant à la fois à l'éclairage de l'objet par son environnement mais aussi à l'impact du dit objet, notamment en terme d'ombre portées, sur la scène.
+
+Les deux problématiques sont aujourd'hui bien maîtrisées mais exploitent des méthodes qui demande des temps de traitement excluant le temps réel, à fortiori sur des terminaux mobiles disposant d'une puissance de calcul limité.
+
+L'optique de se stage est donc d'évaluer les possibilités d'acquisition et de rendu en temps réel sur une plate-forme mobile et de proposer une solution complète de rendu, en temps réel, à partir de données de carte d'environnement reconstruites dynamiquement. L'optique étant une intégration visuellement pertinente on s’intéressera plus à la vraisemblance des données qu'a leur exactitude physique, ce qui nous permettra de nous affranchir des méthodes de rendu stochastiques très lourdes à exécuter.
+
+Le code développée devra par ailleurs être conçu dans l'optique d'être facilement portable sur différentes plate-formes mobiles.
+
+
+%=====================================================================
+%=====================================================================
+\ifstandalone
+	\addcontentsline{toc}{chapter}{Bibliographie}
+	\bibliographystyle{apalike}
+	\bibliography{\rootPath Annexes/biblio}
+\fi
+%=====================================================================
+%=====================================================================
+\end{document}
