@@ -104,7 +104,7 @@ Le choix s'est donc porté sur une méthode simple et inexacte mais suffisante a
 	\SetKwData{Sphere}{Sphere}
 	\SetKwData{int}{int}
 	\SetKwFunction{UniformSample}{EchantionnageUniforme}
-	\SetKwFunction{Clustering}{Appareillement}
+	\SetKwFunction{Clustering}{Appariement}
 	\SetKwFunction{BestMatchingSphere}{SphereOptimale}
 
 	\Entree{\Mesh $m$, \int $n$, \int $s$}
@@ -141,15 +141,15 @@ Pour construire un point uniformément à la surface du maillage, on sélectionn
 
 En répétant cette opération un grand nombre de fois on obtient un nuage de points qui représente correctement les grandes faces. Ce sont ces points qui seront utilisés par la suite pour la construction des sphères représentatives.
 
-\subsection{Appareillement de points et calcul de sphères optimales}
+\subsection{Appariement de points et calcul de sphères optimales}
 
-La phase d'appareillement de l'algorithme consiste à organiser les points en clusters relatifs aux sphères déjà construites. Il s’agit donc d’établir une métrique qui caractérise la proximité d'un point à une sphère. De la même manière, la phase de calcul de sphères optimales consiste à calculer la sphère qui minimisera la métrique considère précédemment sur le cluster qui lui a été associé.
+La phase d'appariement de l'algorithme consiste à organiser les points en clusters relatifs aux sphères déjà construites. Il s’agit donc d’établir une métrique qui caractérise la proximité d'un point à une sphère. De la même manière, la phase de calcul des sphères optimales consiste à calculer la sphère qui minimisera la métrique considérée précédemment sur le cluster qui lui a été associé.
 
-La principale difficulté ici est de construire un métrique représentative des critères de qualités voulus, pour laquelle le calcul d'un élément optimal n'est pas trop complexe et qui converge vers un état stable.
+La principale difficulté ici est de construire une métrique représentative des critères de qualités voulus, pour laquelle le calcul d'un élément optimal n'est pas trop complexe et qui converge vers un état stable.
 
 \subsubsection{Première approche}
 
-Une métrique envisagéz est d'évaluer la distance d'un point à la surface de la sphère associé :
+Une métrique envisagée est d'évaluer la distance d'un point à la surface de la sphère associée :
 \begin{align}
 	f(P, S) &= \left\|P-S\right\|^2 - S.r^2															\label{eq:metrique}	\\
 					&= (P.x-S.x)^2 + (P.y-S.y)^2 + (P.z-S.z)^2 - S.r^2					\notag \\
@@ -158,7 +158,7 @@ Une métrique envisagéz est d'évaluer la distance d'un point à la surface de 
 					&= \|P\|^2 + \|S\|^2 - 2(P.xS.x + P.yS.y + P.zS.z) - S.r^2	\notag
 \end{align}
 
-Ce calcul de la sphère optimal associé a un cluster peut ensuite se faire par l'optimisation d'un système matriciel $AX-B$, la matrice $A$ représentant les données en entrée (points échantillonnées), le vecteur $X$ représentant la solution à optimiser et le vecteur $B$ étant l'objectif à atteindre.
+Ce calcul de la sphère optimale associé à un cluster peut ensuite se faire par l'optimisation d'un système matriciel $AX-B$, la matrice $A$ représentant les données en entrée (points échantillonnés), le vecteur $X$ représentant la solution à optimiser et le vecteur $B$ étant l'objectif à atteindre.
 
 L'équation~\ref{eq:metrique} nous indique comment construire $A$, $X$ et $B$ :
 \begin{subequations}
@@ -186,9 +186,9 @@ L'équation~\ref{eq:metrique} nous indique comment construire $A$, $X$ et $B$ :
 \end{align}
 \end{subequations}
 
-Cette première considération géométrique n'est cependant pas satisfaisante. La simple proximité entre un point et la surface d'une sphère ne prend pas en compte les différences d'orientation de normale entre une face du maillage et la sphère qui le modélise, lesquels sont des éléments de qualité essentiels dans notre cas. Au delà de ce problème d'orientation, cette métrique fait aussi face au problème des outliers présents sur les modèles non convexes. Si quatre points extrémaux se retrouvent loin de tout, il est possible qu'une sphère viennent les adopter comme point d'attache, englobant alors tout le modèle et cachant la géométrie que l'on voulais représenter.
+Cette première considération géométrique n'est cependant pas satisfaisante. La simple proximité entre un point et la surface d'une sphère ne prend pas en compte les différences d'orientation de normale entre une face du maillage et la sphère qui le modélise, lesquels sont des éléments de qualité essentiels dans notre cas. Au delà de ce problème d'orientation, cette métrique fait aussi face au problème des outliers présents sur les modèles non convexes. Si quatre points extrémaux se retrouvent loin de tout, il est possible qu'une sphère vienne les adopter comme point d'attache, englobant alors tout le modèle et cachant la géométrie que l'on voulais représenter.
 
-Par ailleurs la métrique proposé précédemment ne garanti pas la convergence du système.
+Par ailleurs la métrique proposée précédemment ne garanti pas la convergence du système.
 
 \begin{figure*}[!ht]\centering
 	\begin{subfigure}[b]{\textwidth}\centering
@@ -211,12 +211,12 @@ Par ailleurs la métrique proposé précédemment ne garanti pas la convergence 
 
 \subsubsection{Méthode adoptée}
 
-Finalement la solution adoptée, bien que géométriquement pauvre, nous donne des résultats visuellement acceptables tout en garantissant une convergence rapide. L'idée est de paver la surface du maillage à l'aide de sphères de rayon uniforme, ce qui correspond à la minimisation de la distance entre les points et le centre des sphère qui leur sont associés (voir figure~\ref{fig:precompute_sphere:result}).
+Finalement la solution adoptée, bien que géométriquement pauvre, nous donne des résultats visuellement acceptables tout en garantissant une convergence rapide. L'idée est de paver la surface du maillage à l'aide de sphères de rayon uniforme, ce qui correspond à la minimisation de la distance entre les points et le centre des sphères qui leur sont associés (voir figure~\ref{fig:precompute_sphere:result}).
 
-La distance considérée
+La distance considérée :
 \begin{align}
 	f(P, S)			&= \left\|P-S\right\|	\\
-\intertext{s'optimisant trivialement sur un cluster $C$ par}
+\intertext{s'optimisant trivialement sur un cluster $C$ par :}
 	\overline S	&= \left\{ \left(\overline p, \overline{\|p-s\|}\right)\;|\;p \in C \right\}
 \end{align}
 

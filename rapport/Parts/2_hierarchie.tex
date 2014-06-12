@@ -15,11 +15,13 @@
 
 \section{Hiérarchie de référentiels}
 
+\todo{motivations}
+
 Afin de mettre en place les différents mécanismes de repérage, il a été nécessaire de hiérarchiser les repères relatifs aux différents référentiels considérés.
 
-Le référentiel principal est le référentiel du monde. Il est par définition fixe au cours du temps et est définit par rapport à la mire utilisée pour l’acquisition. Ce repère est placé au centre géométrique de la mire et servira aussi bien à positionner l’objet à afficher qu’à définir le référentiel de base pour l’envmap.
+Le référentiel principal est le référentiel du monde. Il est par définition fixe au cours du temps et est défini par rapport à la mire utilisée pour l’acquisition. Ce repère est placé au centre géométrique de la mire et servira aussi bien à positionner l’objet à afficher qu’à définir le référentiel de base pour l’envmap.
 
-Les différentes faces de la mire sont elles-mêmes fixes dans le repère du monde car liées à l’objet physique (la mire) qui le définit. Les transformations entre le repère de chacune des faces de la mire et le repère du monde sont codées dans les marqueurs présents sur les faces (matrice $model$).
+Les différentes faces de la mire sont elles-mêmes fixes dans le repère du monde car liées à l’objet physique (la mire) qui le défini. Les transformations entre le repère de chacune des faces de la mire et le repère du monde sont codées dans les marqueurs présents sur les faces (matrice $model$).
 
 Ainsi, ayant identifié une des faces à l’aide du marqueur présent sur cette dernière, il est possible, en appliquant la transformation codée par ce marqueur, de reconstruire le repère du monde.
 
@@ -61,7 +63,7 @@ Les différentes caméras présentes sur l’interface d’acquisition seront à
 
 L’évaluation des transformations, qui est nécessaire au positionnement dans la scène et donc à la reconstruction de l’environnement, nécessite la reconnaissance de marqueurs. L’identification de ces marqueurs, fixes dans l’espace du monde, associée à la connaissance de la matrice $model$ correspondante permettent de calculer l’orientation au regard de la scène.
 
-Afin de permettre la reconnaissance de la scène dans sa globalité, il est nécessaire de construire une mire complète, disposant de plusieurs faces parmi lesquelles au moins une devra, pour toute orientation, être lisible. Les marqueurs constituants cette mire doivent par ailleurs être capables de porter les informations caractéristiques de la matrice $model$ associée.
+Afin de maximiser la reconnaissance de la scène dans sa globalité, il est nécessaire de construire une mire complète, disposant de plusieurs faces parmi lesquelles au moins une devra, pour toute orientation, être lisible. Les marqueurs constituants cette mire doivent par ailleurs être capables de porter les informations caractéristiques de la matrice $model$ associée.
 
 Il est donc nécessaire de choisir un modèle de marqueurs permettant à la fois une localisation précise d’au moins trois points (nécessaires au repérage) et portant des informations propres.
 
@@ -76,9 +78,9 @@ Sont disponibles en annexe les patrons des mires cubiques (figure~\ref{extra:pat
 Compte tenu de la hiérarchie de référentiel décrite dans la section précédente, il est nécessaire, pour décrire complètement le système, de décrire chacune des matrices de transformation. 
 
 
-\subsection{Calibration de la caméra}
+\subsection{Calibrage de la caméra}
 
-L’étape de calibration de caméra permet de calculer les différents termes de la matrice $projection$ propre à l’interface d’acquisition. Ici l’interface est simplement modélisée suivant le modèle communément admit de sténopé (ce qui revient à assimiler l’objectif à un simple point), dont la calibration détermine les caractéristique physiques (longueur focale, définition du capteur).
+L’étape de calibrage de caméra permet de calculer les différents termes de la matrice $projection$ propre à l’interface d’acquisition. Ici l’interface est simplement modélisée suivant le modèle communément admis de sténopé (ce qui revient à assimiler l’objectif à un simple point), dont la calibration détermine les caractéristique physiques (longueur focale, définition du capteur).
 %Cela revient à ajuster le modèle de sténopé considéré dans la section~\ref{section:modele} avec les paramètres physiques.
 
 La matrice $projection$ est de la forme suivante :

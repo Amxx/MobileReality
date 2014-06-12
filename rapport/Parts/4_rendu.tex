@@ -164,9 +164,9 @@ La méthode développée ici repose sur l’approximation de la formule~(\ref{re
 
 Plusieurs formules ont été étudiée pour des domaines d’intégration hémisphériques ou partiellement hémisphériques ainsi que pour des polygones entièrement visibles \cite{Snyder1996} (ce qui fait disparaître le terme de $\Hs$).
 
-Il aurait été possible d’adapter un modèle polygonale évoqué dans \cite{Snyder1996} mais les polygones sur lesquels il aurait fallu intégrer variant selon les conditions de visibilités, il aurait été nécessaire d’effectuer de coûteux calculs de géométrie.
+Il aurait été possible d’adapter un modèle polygonal évoqué dans \cite{Snyder1996} mais les polygones sur lesquels il aurait fallu intégrer variant selon les conditions de visibilité, il aurait été nécessaire d’effectuer de coûteux calculs de géométrie.
 
-L’objectif principal étant ici une grande vitesse d’exécution -- l’inexactitude des résultats étant de toute façon largement oubliée au regard des approximations faites précédemment -- on préféra utiliser une fonction grossièrement approché mais simple à calculer.
+L’objectif principal étant ici une grande vitesse d’exécution -- l’inexactitude des résultats étant de toute façon largement oubliée au regard des approximations faites précédemment -- on préféra utiliser une fonction grossièrement approchée mais simple à calculer.
 
 
 %%=====================================================================
@@ -176,9 +176,11 @@ L’objectif principal étant ici une grande vitesse d’exécution -- l’inexa
 
 \subsection{Modèle}
 
-Un indice visuel primordial à la vraisemblance visuelle des images produites est la présence d’ombres portées provoquées par l’ajout de l’objet \todo{reference}.
+Un indice visuel primordial à la vraisemblance visuelle des images produites est la présence d’ombres portées provoquées par l’ajout de l’objet.
 
-Modéliser l’impact d’un tel ajout necessite théoriquement de connaitre la géométrie de la scène et la nature des matériaux qui la compose.
+L’intégration d'ombres réalistes est généralement très coûteuse. Les sources lumineuses étendues que l'on rencontre doivent être considérées comme des distributions de points, ce qui implique une intégration numérique des contributions des différents éléments de la distribution. L'intégration stochastique étant très coûteuse, puisqu'elle doit intégrer les notions de visibilité issue de la géométrie, il s’agit de trouver une autre méthode qui soit adaptée à du rendu en temps réel.
+
+Modéliser l’impact d’un tel ajout nécessite théoriquement de connaître la géométrie de la scène et la nature des matériaux qui la composent.
 
 On fera ici plusieurs hypothèses dans le but d’obtenir un modèle qui soit calculable en temps réel tout en donnant des résultats vraisemblables.
 
@@ -301,7 +303,7 @@ Compte tenu des méthodes décrites précédemment, le pipeline de rendu se déc
 			\item[Sphères :] décomposition de l’objet comme union de sphères, stockée sous forme de \texttt{vec4[]}.
 		\end{description}
 
-	\item L’étape de calcul temps réel, qui évalue des résultats temporaires nécessaires à la réalisation du rendu final. Ces résultats doivent êtres réévaluer dynamiquement car ils dépendent de paramètres dynamiques tels que les données d’environnement.
+	\item L’étape de calcul temps réel, qui évalue des résultats temporaires nécessaires à la réalisation du rendu final. Ces résultats doivent êtres ré-évalués dynamiquement car ils dépendent de paramètres dynamiques tels que les données d’environnement.
 		\begin{description}
 			\item[Ombre :] ombre douce projetée par l’objet, elle dépend de l’environnement lumineux décrit par l’envmap.
 		\end{description}
