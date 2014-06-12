@@ -124,21 +124,36 @@ Les différentes bibliothèques ont chacune leurs approches qui inpliquent des d
 
 OpenCV considère les images comme des matrices. À ce titre l’origine est placée en haut à gauche, avec le $\vec x$ pointant vers la gauche et le vecteur $\vec y$ pointant vers le bas. Ainsi regarder une image revient à regarder selon l’axe des $\vec z$ croissants.
 
-\begin{figure}[!ht]
-	\centering
-	\includestandalone[width=0.33\textwidth]{\rootPath Figures/space-opencv}
-	\caption{Convention d’orientation OpenCV}
-	\label{fig:tikz:space-opencv}
-\end{figure}
+% \begin{figure}[!ht]
+% 	\centering
+% 	\includestandalone[width=0.33\textwidth]{\rootPath Figures/space-opencv}
+% 	\caption{Convention d’orientation OpenCV}
+% 	\label{fig:tikz:space-opencv}
+% \end{figure}
 
 À l’inverse OpenGL s’intéresse à des espaces $3D$ complets et oriente donc naturellement le vecteur $\vec y$ vers le haut. L’utilisateur regarde donc selon l’axe des $\vec z$ décroissants.
 
-\begin{figure}[!ht]
-	\centering
-	\includestandalone[width=0.33\textwidth]{\rootPath Figures/space-opengl}
-	\caption{Convention d’orientation OpenGL}
-	\label{fig:tikz:space-opengl}
+% \begin{figure}[!ht]
+% 	\centering
+% 	\includestandalone[width=0.33\textwidth]{\rootPath Figures/space-opengl}
+% 	\caption{Convention d’orientation OpenGL}
+% 	\label{fig:tikz:space-opengl}
+% \end{figure}
+
+\begin{figure}[!ht]\centering
+	\begin{subfigure}[b]{0.22\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Figures/space-opencv}
+		\caption{OpenCV}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.2\textwidth}\centering
+		\includegraphics[width=\textwidth]{\rootPath Figures/space-opengl}
+		\caption{OpenGL}
+	\end{subfigure}
+
+	\caption{Conventions d’orientations}
+	\label{fig:tikz:conventions}
 \end{figure}
+
 
 Afin d’utiliser conjointement les deux bibliothèques, il convient de faire les transformations adéquates.
 
