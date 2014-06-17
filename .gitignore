@@ -25,7 +25,9 @@
 *.lof
 *.log
 *.lot
+*.nav
 *.out
+*.snm
 *.synctex.gz
 *.thm
 *.toc

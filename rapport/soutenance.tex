@@ -12,6 +12,25 @@
 
 
 \section{Introduction}
+
+\begin{frame}{La réalité augmentée}
+	La réalité augmentée consiste à integrer des données numériques à des images réels. Cela implique de nombreuses problèmatiques :
+	\begin{itemize}
+		\item Positionnement des informations ajoutées;
+		\item Intéractions lumineuses avec la scène.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Exemple d'application}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{\rootPath Imgs/IKEA-augmented-reality-app}
+		\caption{Exemple d'application de réalitée augmentée développée par IKEA}
+	\end{figure}
+\end{frame}
+
+
 \begin{frame}{Objectif}
 	L'objectif du stage est de mettre en place les outils nécessaires à l'intégration réaliste d'un objet dans une scène, en temps réel, sur une plateforme mobile.\\[.5cm]
 	Plusieurs sous-objectifs:
@@ -22,7 +41,9 @@
 	\end{itemize}
 \end{frame}
 
-\section{Repérage dans l'espace}
+
+\section{Repérage et acquisition}
+
 \begin{frame}
   \setbeamercovered{transparent}
 	\visible<+->{Repérage dans l'espace par rapport à une mire : problème d'algèbre linaire simple.}
@@ -31,14 +52,16 @@
 		\item Résolution du système linéaire : OpenCV
 	\end{itemize}
 \end{frame}
+
 \begin{frame}{Hiérarchie de référentiels 1/2}
 	\begin{figure}[!ht]
 		\centering
-		\includestandalone[width=0.4\textwidth]{\rootPath ../Figures/spaceHierarchie}
+		\includestandalone[width=0.7\textwidth]{\rootPath Figures/spaceHierarchie}
 		\caption{Les différents référentiels}
 		\label{fig:tikz:spaceHierarchie}
 	\end{figure}	
 \end{frame}	
+
 \begin{frame}{Hiérarchie de référentiels 2/2}
 	\begin{table}[!ht]
 		\centering
@@ -63,21 +86,21 @@
 \end{frame}
 
 
-\section{Acquisition de l'environnement}
-\begin{frame}{Cadre de travail 1/2}
-	La connaissance de l'environnement lumineux de l'objet suppose la connaissance de :
-	\begin{itemize}
-		\item La géométrie 3D de la scène (visible depuis l'objet);
-		\item La luminance de chaque objet composant la scène.
-	\end{itemize}
-	Même avec des informations des profondeur la reconstruction d'un telle environnement est trop complexe.		
-\end{frame}
-\begin{frame}{Cadre de travail 2/2}
-	\centering
-	On négligera par la suite que la géometrie de la scène\\[.5cm]
-	i.e.\\[.5cm]
-	On suppose que la scène est assimilable à un ensemble de sources lumineuses à l'infini
-\end{frame}
+% \section{Acquisition de l'environnement}
+% \begin{frame}{Cadre de travail 1/2}
+% 	La connaissance de l'environnement lumineux de l'objet suppose la connaissance de :
+% 	\begin{itemize}
+% 		\item La géométrie 3D de la scène (visible depuis l'objet);
+% 		\item La luminance de chaque objet composant la scène.
+% 	\end{itemize}
+% 	Même avec des informations des profondeur la reconstruction d'un telle environnement est trop complexe.		
+% \end{frame}
+% \begin{frame}{Cadre de travail 2/2}
+% 	\centering
+% 	On négligera par la suite que la géometrie de la scène\\[.5cm]
+% 	i.e.\\[.5cm]
+% 	On suppose que la scène est assimilable à un ensemble de sources lumineuses à l'infini
+% \end{frame}
 
 \begin{frame}{Reconstruction de l'environnement}
   \setbeamercovered{transparent}
@@ -90,48 +113,101 @@
 	\end{itemize}
 \end{frame}
 
+
+
 \section{Rendu}
+
 \begin{frame}{Méthode de rendu}
 	Inspiré de Plausible
 	\begin{center}\emph{Plausible Blinn-Phong Reflection of Standart Cube Mip-Maps\\(Mcguire, Evangelakos, Wilcox, Donow, Mara)}\end{center}
 	Modification de la composante diffuse par la prise en compte pondère de la contribution des différentes faces.
 \end{frame}
 
+\begin{frame}{Intégration de l'envmap}
+	L'évaluation la lumière incidente est faite en intégrant l'envmap visible.
+	\begin{figure}[!ht]
+		\centering
+		\includestandalone[width=0.4\textwidth]{\rootPath Figures/cubemapFacet}
+		\caption{Intégration de l'envmap visible}
+	\end{figure}	
+\end{frame}	
+
+\begin{frame}{Premier précalcul, l'auto-occlusion}
+	Un facteur d'auto-occlusion est pré-calculé est stocké dans une texture.
+	\begin{figure}[!ht]
+		\centering
+			\includegraphics[height=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/view3.png}
+			\hspace{0.5cm}
+			\includegraphics[height=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/view2.png}
+		\caption{Facteur d'auto-occlusion}
+	\end{figure}	
+\end{frame}	
+
+\begin{frame}{Ombres}
+	Afin de permettre une évaluation dynamique des ombres, on s’intéresse à l'ombre portée d'une sphère.
+	\begin{figure}[!ht]
+		\centering
+		\includestandalone[width=0.4\textwidth]{\rootPath Figures/shadows}
+		\caption{Occultation de la lumière incidente par une sphère}
+	\end{figure}	
+\end{frame}	
+
+\begin{frame}{Second précalcul, décomposition en sphères}
+	Afin d'appliquer la méthode de rendu d'ombres, il est nécessaire de décomposer l'objet en une union de sphère.
+	\begin{figure}[!ht]
+		\centering
+			\includegraphics[width=0.3\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_both.png}
+			\hspace{0.5cm}
+			\includegraphics[width=0.3\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_spheres.png}
+		\caption{Décomposition en sphère}
+	\end{figure}	
+\end{frame}	
+
+\begin{frame}{Résumé}
+	\begin{figure}[!ht]
+		\centering
+			\includestandalone[width=0.6\textwidth]{\rootPath Figures/pipeline}
+		\caption{Décomposition en sphère}
+	\end{figure}	
+\end{frame}	
+
+
+\section{Résultats}
+
 \begin{frame}{Résultats du rendu 1/2}
 	\begin{figure}
 		\centering
-		\includegraphics[height=3cm]{\rootPath Imgs/screen/screenshot_1395917524.png}
-		~
-		\includegraphics[height=3cm]{\rootPath Imgs/screen/screenshot_1395917522.png}
-		\hspace{2cm}
-		\includegraphics[height=3cm]{\rootPath Imgs/screen/screenshot_1395917554.png}
-		~
-		\includegraphics[height=3cm]{\rootPath Imgs/screen/screenshot_1395917553.png}
-		\caption{Résultats de rendu pour une matière purement diffuse dans différents environnement : Plausible Blinn-Phong (à gauche), méthode modifiée (à droite)  }
+			\includegraphics[width=0.5\textwidth]{\rootPath Imgs/screen/sphere-single-2.png}
+			\includegraphics[width=0.5\textwidth]{\rootPath Imgs/screen/sphere-mult-2.png}
+		\caption{Rendu des ombres portées sans (à gauche) et avec (à droite) la décomposition en sphères}
 	\end{figure}
 \end{frame}
 
 \begin{frame}{Résultats du rendu 2/2}
 	\begin{figure}
 		\centering
-		\includegraphics[height=2cm]{\rootPath Imgs/screen/screenshot_1395917731.png}
-		~
-		\includegraphics[height=2cm]{\rootPath Imgs/screen/screenshot_1395917730.png}
-		\hspace{2cm}
-		\includegraphics[height=2cm]{\rootPath Imgs/screen/screenshot_1395917752.png}
-		~
-		\includegraphics[height=2cm]{\rootPath Imgs/screen/screenshot_1395917751.png}
-		\vspace{.2cm}
-		\includegraphics[height=2cm]{\rootPath Imgs/screen/screenshot_1395917773.png}
-		~
-		\includegraphics[height=2cm]{\rootPath Imgs/screen/screenshot_1395917771.png}
-		\hspace{1.5cm}
-		\includegraphics[height=2cm]{\rootPath Imgs/screen/screenshot_1395917843.png}
-		~
-		\includegraphics[height=2cm]{\rootPath Imgs/screen/screenshot_1395917841.png}
-		
-		\caption{Résultats de rendu pour une matière purement diffuse dans différents environnement : Plausible Blinn-Phong (à gauche), méthode modifiée (à droite)  }
+				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/white-1.png}
+				~
+				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/glossy-1.png}
+				~
+				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/miror-1.png}
+				\vspace{0.2cm}
+				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/white-3.png}
+				~
+				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/glossy-3.png}
+				~
+				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/miror-3.png}
+			
+		\caption{Rendu du modèle “bigguy” pour différents niveau de spécularité}
 	\end{figure}
+\end{frame}
+
+\begin{frame}{Perspectives d'évolution}
+	\begin{itemize}
+		\item Envmap HDR;
+		\item BRDF Microfacettes;
+		\item Modèles animés.
+	\end{itemize}
 \end{frame}
 
 
