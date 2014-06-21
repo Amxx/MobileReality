@@ -15,6 +15,7 @@
 		<spheres>data/objects/sphere.obj.spheres</spheres>
 		<spheres>data/objects/bigguy/bigguy.obj.spheres</spheres>
 		-->
+		<spheres>data/objects/sphere.obj.spheres</spheres>
 		<scale>1.0</scale>
 	</object>
 	
@@ -50,7 +51,7 @@
 		</defaultValues>
 		
 		<envmap>
-			<path>data/envmap/6/%03d.jpg</path>				<!-- [path] | empty for clean	-->
+			<path>data/envmap/0/%03d.jpg</path>				<!-- [path] | empty for clean	-->
 			<build>off</build>												<!-- on | off									-->
 			<size>512 512</size>
 			<dual>off</dual>													<!-- on | off									-->

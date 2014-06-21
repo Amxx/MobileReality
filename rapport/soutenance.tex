@@ -14,22 +14,24 @@
 \section{Introduction}
 
 \begin{frame}{La réalité augmentée}
-	La réalité augmentée consiste à integrer des données numériques à des images réels. Cela implique de nombreuses problèmatiques :
-	\begin{itemize}
-		\item Positionnement des informations ajoutées;
-		\item Intéractions lumineuses avec la scène.
-	\end{itemize}
-\end{frame}
-
-
-\begin{frame}{Exemple d'application}
+	La réalité augmentée consiste à intégrer des données numériques à des images réelles. 
 	\begin{figure}
 		\centering
-		\includegraphics[width=0.7\textwidth]{\rootPath Imgs/IKEA-augmented-reality-app}
-		\caption{Exemple d'application de réalitée augmentée développée par IKEA}
-	\end{figure}
+		\includegraphics[width=.6\textwidth]{\rootPath Imgs/Wikitude_GPS.jpg}
+
+		\includegraphics[width=.6\textwidth]{\rootPath Imgs/IKEA-augmented-reality-app.jpg}
+		\caption{Exemples d'application de réalité augmentée sur mobile}
+	\end{figure}	
 \end{frame}
 
+\begin{frame}{Description de l'environnement lumineux}
+	Les cartes d'environnement (ou envmap) permettent de décrire l'environnement lumineux d'une scène.
+	\begin{figure}
+		\centering
+		\includegraphics[width=.6\textwidth]{\rootPath Imgs/cubemap.png}
+		\caption{Exemples de carte d'environnement}
+	\end{figure}	
+\end{frame}
 
 \begin{frame}{Objectif}
 	L'objectif du stage est de mettre en place les outils nécessaires à l'intégration réaliste d'un objet dans une scène, en temps réel, sur une plateforme mobile.\\[.5cm]
@@ -44,46 +46,53 @@
 
 \section{Repérage et acquisition}
 
-\begin{frame}
-  \setbeamercovered{transparent}
-	\visible<+->{Repérage dans l'espace par rapport à une mire : problème d'algèbre linaire simple.}
-	\begin{itemize}[<+->]
-		\item Choix de la mire : QRCode
-		\item Résolution du système linéaire : OpenCV
-	\end{itemize}
-\end{frame}
+% \begin{frame}
+%   \setbeamercovered{transparent}
+% 	\visible<+->{Repérage dans l'espace par rapport à une mire : problème d'algèbre linaire simple.}
+% 	\begin{itemize}[<+->]
+% 		\item Choix de la mire : QRCode
+% 		\item Résolution du système linéaire : OpenCV
+% 	\end{itemize}
+% \end{frame}
 
-\begin{frame}{Hiérarchie de référentiels 1/2}
-	\begin{figure}[!ht]
-		\centering
-		\includestandalone[width=0.7\textwidth]{\rootPath Figures/spaceHierarchie}
-		\caption{Les différents référentiels}
-		\label{fig:tikz:spaceHierarchie}
-	\end{figure}	
+\begin{frame}{Hiérarchie de référentiels}
+	Repérage dans l'espace par rapport à une mire,\\\hfill un problème d'algèbre linaire simple.
+
+	\vfill
+
+	\begin{minipage}{.45\textwidth}\centering
+		\begin{figure}[!ht]\centering
+			\includestandalone[width=\textwidth]{\rootPath Figures/spaceHierarchie}
+			\caption{Les différents référentiels}
+			\label{fig:tikz:spaceHierarchie}
+		\end{figure}	
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.5\textwidth}\centering
+		\begin{table}[!ht]
+			\centering\tiny
+			\begin{tabular}{rcl}
+																					& \textbf{QRcode}				&																\\
+				$ $																& $\updownharpoons$			& $ $														\\
+																					& \textbf{Face}					&																\\
+				$model^{-1}				\lcurvearrowup$	&												& $\lcurvearrowdown model$			\\	
+																					& \textbf{Monde}				&																\\
+				$view^{-1}				\lcurvearrowup$	& 											& $\lcurvearrowdown view$				\\
+																					& \textbf{Smartphone}		&																\\
+				$orientation^{-1}	\lcurvearrowup$	& 											& $\lcurvearrowdown orientation$\\
+																					& \textbf{Camera}				&																\\	
+				$cvToGl^{-1}			\lcurvearrowup$	& 											& $\lcurvearrowdown cvToGl $		\\
+																					& \textbf{Vue OpenGL}		&																\\
+				$projection^{-1}	\lcurvearrowup$	&												& $\lcurvearrowdown projection$	\\
+																					& \textbf{Image rendu}	&
+			\end{tabular}
+			\caption{Hiérarchie des matrices de transformations}
+			\label{ref:table:hierarchie}
+		\end{table}
+	\end{minipage}
+
 \end{frame}	
 
-\begin{frame}{Hiérarchie de référentiels 2/2}
-	\begin{table}[!ht]
-		\centering
-		\begin{tabular}{rcl}
-																				& \textbf{QRcode}				&																\\
-			$ $																& $\updownharpoons$			& $ $														\\
-																				& \textbf{Face}					&																\\
-			$model^{-1}				\lcurvearrowup$	&												& $\lcurvearrowdown model$			\\
-																				& \textbf{Monde}				&																\\
-			$view^{-1}				\lcurvearrowup$	& 											& $\lcurvearrowdown view$				\\
-																				& \textbf{Smartphone}		&																\\
-			$orientation^{-1}	\lcurvearrowup$	& 											& $\lcurvearrowdown orientation$\\
-																				& \textbf{Camera}				&																\\
-			$cvToGl^{-1}			\lcurvearrowup$	& 											& $\lcurvearrowdown cvToGl $		\\
-																				& \textbf{Vue OpenGL}		&																\\
-			$projection^{-1}	\lcurvearrowup$	&												& $\lcurvearrowdown projection$	\\
-																				& \textbf{Image rendu}	&
-		\end{tabular}
-		\caption{Hiérarchie des matrices de transformations}
-		\label{ref:table:hierarchie}
-	\end{table}
-\end{frame}
 
 
 % \section{Acquisition de l'environnement}
@@ -103,23 +112,31 @@
 % \end{frame}
 
 \begin{frame}{Reconstruction de l'environnement}
-  \setbeamercovered{transparent}
-	\visible<1->{L'environnement est décrit à l'aide d'une carte d'environnement cubique (cubemap)}\\[.5cm]
-	\visible<1->{Pour chaque frame :}
-	\begin{itemize}[<+->]
-		\item Localisation du terminal mobile dans la scène;
-		\item Reprojection des images issue des webcams dans le repère du monde;
-		\item Remplissage de la partie visible de la cubemap.
-	\end{itemize}
+
+	L'environnement est décrit à l'aide d'une carte d'environnement cubique (cubemap)
+	
+	\begin{minipage}{.45\textwidth}
+		\begin{itemize}
+			\item Localisation du terminal mobile dans la scène;
+			\item Reprojection des images issue des webcams dans le repère du monde;
+			\item Remplissage de la partie visible de la cubemap.
+		\end{itemize}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.45\textwidth}
+		\begin{figure}[!ht]\centering
+			\includestandalone[width=\textwidth]{\rootPath Figures/envmap_build}
+			\caption{Intégration de l'envmap visible}
+		\end{figure}	
+	\end{minipage}
+	
 \end{frame}
-
-
 
 \section{Rendu}
 
 \begin{frame}{Méthode de rendu}
-	Inspiré de Plausible
-	\begin{center}\emph{Plausible Blinn-Phong Reflection of Standart Cube Mip-Maps\\(Mcguire, Evangelakos, Wilcox, Donow, Mara)}\end{center}
+	Inspiré de :
+	\begin{center}\emph{Plausible Blinn-Phong Reflection of Standard Cube MIP-Maps\\(Mcguire, Evangelakos, Wilcox, Donow, Mara)}\end{center}
 	Modification de la composante diffuse par la prise en compte pondère de la contribution des différentes faces.
 \end{frame}
 
@@ -129,17 +146,28 @@
 		\centering
 		\includestandalone[width=0.4\textwidth]{\rootPath Figures/cubemapFacet}
 		\caption{Intégration de l'envmap visible}
-	\end{figure}	
+	\end{figure}
 \end{frame}	
 
-\begin{frame}{Premier précalcul, l'auto-occlusion}
-	Un facteur d'auto-occlusion est pré-calculé est stocké dans une texture.
+\begin{frame}{Premier pré-calcul, l'auto-occultation}
+	Un facteur d'auto-occultation est pré-calculé et stocké dans une texture.
 	\begin{figure}[!ht]
 		\centering
 			\includegraphics[height=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/view3.png}
 			\hspace{0.5cm}
 			\includegraphics[height=0.4\textwidth]{\rootPath Imgs/precompute_ambiant/view2.png}
-		\caption{Facteur d'auto-occlusion}
+		\caption{Facteur d'auto-occultation}
+	\end{figure}	
+\end{frame}
+
+\begin{frame}{Impact de l'auto-occultation}
+	Un facteur d'auto-occultation est pré-calculé et stocké dans une texture.
+	\begin{figure}[!ht]
+		\centering
+			\includegraphics[height=0.4\textwidth]{\rootPath Imgs/screen/ambient_off.png}
+			\hspace{0.5cm}
+			\includegraphics[height=0.4\textwidth]{\rootPath Imgs/screen/ambient_on.png}
+		\caption{Rendu sans (à gauche) et avec (à droite) utilisation du facteur d'auto-occlusion}
 	\end{figure}	
 \end{frame}	
 
@@ -152,8 +180,8 @@
 	\end{figure}	
 \end{frame}	
 
-\begin{frame}{Second précalcul, décomposition en sphères}
-	Afin d'appliquer la méthode de rendu d'ombres, il est nécessaire de décomposer l'objet en une union de sphère.
+\begin{frame}{Second pré-calcul, décomposition en sphères}
+	Afin d'appliquer la méthode de rendu d'ombres, il est nécessaire de décomposer l'objet en une union de sphères.
 	\begin{figure}[!ht]
 		\centering
 			\includegraphics[width=0.3\textwidth]{\rootPath Imgs/precompute_spheres/bigguy_both.png}
@@ -162,6 +190,15 @@
 		\caption{Décomposition en sphère}
 	\end{figure}	
 \end{frame}	
+
+\begin{frame}{Impact de la décomposition en sphères}
+	\begin{figure}
+		\centering
+			\includegraphics[width=0.5\textwidth]{\rootPath Imgs/screen/sphere-single-2.png}
+			\includegraphics[width=0.5\textwidth]{\rootPath Imgs/screen/sphere-mult-2.png}
+		\caption{Rendu des ombres portées sans (à gauche) et avec (à droite) la décomposition en sphères}
+	\end{figure}
+\end{frame}
 
 \begin{frame}{Résumé}
 	\begin{figure}[!ht]
@@ -174,30 +211,30 @@
 
 \section{Résultats}
 
-\begin{frame}{Résultats du rendu 1/2}
+\begin{frame}{Résultats du rendu}
 	\begin{figure}
 		\centering
-			\includegraphics[width=0.5\textwidth]{\rootPath Imgs/screen/sphere-single-2.png}
-			\includegraphics[width=0.5\textwidth]{\rootPath Imgs/screen/sphere-mult-2.png}
-		\caption{Rendu des ombres portées sans (à gauche) et avec (à droite) la décomposition en sphères}
+			\includegraphics[width=0.45\textwidth]{\rootPath Imgs/screen/white-1.png}
+			~
+			\includegraphics[width=0.45\textwidth]{\rootPath Imgs/screen/white-3.png}
+		\caption{Rendu du modèle “bigguy” pour différents niveau de spécularité}
 	\end{figure}
 \end{frame}
-
-\begin{frame}{Résultats du rendu 2/2}
+\begin{frame}{Résultats du rendu}
 	\begin{figure}
 		\centering
-				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/white-1.png}
-				~
-				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/glossy-1.png}
-				~
-				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/miror-1.png}
-				\vspace{0.2cm}
-				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/white-3.png}
-				~
-				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/glossy-3.png}
-				~
-				\includegraphics[width=0.3\textwidth]{\rootPath Imgs/screen/miror-3.png}
-			
+			\includegraphics[width=0.45\textwidth]{\rootPath Imgs/screen/glossy-1.png}
+			~
+			\includegraphics[width=0.45\textwidth]{\rootPath Imgs/screen/glossy-3.png}
+		\caption{Rendu du modèle “bigguy” pour différents niveau de spécularité}
+	\end{figure}
+\end{frame}
+\begin{frame}{Résultats du rendu}
+	\begin{figure}
+		\centering
+			\includegraphics[width=0.45\textwidth]{\rootPath Imgs/screen/miror-1.png}
+			~
+			\includegraphics[width=0.45\textwidth]{\rootPath Imgs/screen/miror-3.png}			
 		\caption{Rendu du modèle “bigguy” pour différents niveau de spécularité}
 	\end{figure}
 \end{frame}
