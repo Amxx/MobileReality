@@ -10,26 +10,27 @@
 		<obj>data/objects/Ford_Mustang_1966/Ford_Mustang_1966.obj</obj>
 		<obj>data/objects/MRX22_Recon_Flyer/MRX22_Recon_Flyer.obj</obj>
 		-->
-		<obj>data/objects/bigguy/bigguy.obj</obj>
+		<obj>data/objects/MRX22_Recon_Flyer/MRX22_Recon_Flyer.obj</obj>
 		<!--
 		<spheres>data/objects/sphere.obj.spheres</spheres>
 		<spheres>data/objects/bigguy/bigguy.obj.spheres</spheres>
+		<spheres>data/objects/MRX22_Recon_Flyer/MRX22_Recon_Flyer.obj.spheres</spheres>
 		-->
-		<spheres>data/objects/sphere.obj.spheres</spheres>
-		<scale>1.0</scale>
+		<spheres>data/objects/MRX22_Recon_Flyer/MRX22_Recon_Flyer.obj.spheres</spheres>
+		<scale>0.05</scale>
 	</object>
 	
 	<!-- ########################## Devices options ########################## -->
 	<devices>
 		<front>
-			<enable>off</enable>											<!-- on | off								-->
-			<id>0</id>																<!-- [int] | auto | manual	-->
-			<params>data/params/logitech.xml</params>
+			<enable>on</enable>											<!-- on | off								-->
+			<id>1</id>																<!-- [int] | auto | manual	-->
+			<params>data/params/c910.xml</params>
 		</front>
 		<back>
-			<enable>off</enable>											<!-- on | off								-->
-			<id>1</id>																<!-- [int] | auto | manual	-->
-			<params>data/params/c910-fisheye.xml</params>
+			<enable>on</enable>											<!-- on | off								-->
+			<id>2</id>																<!-- [int] | auto | manual	-->
+			<params>data/params/logitech.xml</params>
 		</back>
 	</devices>
 	
@@ -42,35 +43,35 @@
 	<!-- ############### General parameters of the application ############### -->
 	<generalParameters>
 	
-		<verbose>2</verbose>												<!-- [int] | off | low | high -->
+		<verbose>off</verbose>												<!-- [int] | off | low | high -->
 	
 		<defaultValues>
-			<brightness>128</brightness>							<!-- -1 for auto							-->
-			<gain>64</gain>														<!-- -1 for auto							-->
+			<brightness>-1</brightness>							<!-- -1 for auto							-->
+			<gain>-1</gain>														<!-- -1 for auto							-->
 			<persistency>10</persistency>
 		</defaultValues>
 		
 		<envmap>
-			<path>data/envmap/0/%03d.jpg</path>				<!-- [path] | empty for clean	-->
-			<build>off</build>												<!-- on | off									-->
+			<path></path>				<!-- [path, data/envmap/0/%03d.jpg] | empty for clean	-->
+			<build>on</build>												<!-- on | off									-->
 			<size>512 512</size>
 			<dual>off</dual>													<!-- on | off									-->
 		</envmap>
 		
 		<localisation>
-			<type>debug</type>												<!-- dynamic | debug					-->
+			<type>dynamic</type>												<!-- dynamic | debug					-->
 			<size>400.0</size>												<!-- [float] (0 for infinity) -->
 		</localisation>		
 		
 		<rendering>
-			<background>off</background>							<!-- on | off								-->
+			<background>on</background>							<!-- on | off								-->
 			<scene>on</scene>													<!-- on | off								-->
 			<view>off</view>													<!-- on | off								-->
 		</rendering>
 		
 		<modules>
 			<scanner>install/share/libscanner_zbar.so</scanner>
-			<video>install/share/libvideodevice_uvc.so</video>
+			<video>install/share/libvideodevice_opencv.so</video>
 		</modules>
 		
 	</generalParameters>
